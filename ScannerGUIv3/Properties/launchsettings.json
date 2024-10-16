@@ -1,0 +1,10 @@
+﻿{
+    "profiles": {
+      "ScannerGUIv3 (Package)": {
+        "commandName": "MsixPackage"
+      },
+      "ScannerGUIv3 (Unpackaged)": {
+        "commandName": "Project"
+      }
+    }
+}
