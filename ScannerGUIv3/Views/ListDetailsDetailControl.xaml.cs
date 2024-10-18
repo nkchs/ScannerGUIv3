@@ -17,6 +17,7 @@ public sealed partial class ListDetailsDetailControl : UserControl
 
     public ListDetailsDetailControl()
     {
+        Console.WriteLine("Initializing List Details.");
         InitializeComponent();
     }
 

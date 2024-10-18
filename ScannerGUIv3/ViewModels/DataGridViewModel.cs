@@ -24,12 +24,14 @@ public partial class DataGridViewModel : ObservableRecipient, INavigationAware
         Source.Clear();
 
         // TODO: Replace with real data.
+        Console.WriteLine("Break to inspect data.");
         var data = await _sampleDataService.GetGridDataAsync();
 
         foreach (var item in data)
         {
             Source.Add(item);
         }
+        Console.WriteLine("Investigate source and data.");
     }
 
     public void OnNavigatedFrom()

@@ -124,10 +124,10 @@
     <value>Personnel Tracker</value>
   </data>
   <data name="Shell_Main.Content" xml:space="preserve">
-    <value>Main</value>
+    <value>Sign In / Out</value>
   </data>
   <data name="Shell_Blank.Content" xml:space="preserve">
-    <value>Blank</value>
+    <value>Scanner Configuration</value>
   </data>
   <data name="ListDetails_NoSelection.Text" xml:space="preserve">
     <value>Select an item from the list.</value>
@@ -167,5 +167,18 @@
   </data>
   <data name="SettingsPage_PrivacyTermsLink.NavigateUri" xml:space="preserve">
     <value>https://YourPrivacyUrlGoesHere/</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="Spreadsheet_Resources" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
+  </data>
+  <data name="Spreadsheet_WeeklyRecord" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Settings_Spreadsheet.Text" xml:space="preserve">
+    <value>Spreadsheet Selection</value>
+  </data>
+  <data name="Settings_Spreadsheet.Text" xml:space="preserve">
+    <value>Spreadsheet Selection</value>
   </data>
 </root>

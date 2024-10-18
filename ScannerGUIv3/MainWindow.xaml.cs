@@ -1,6 +1,8 @@
 ﻿using ScannerGUIv3.Helpers;
 
 using Windows.UI.ViewManagement;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace ScannerGUIv3;
 
@@ -14,9 +16,12 @@ public sealed partial class MainWindow : WindowEx
 
     public MainWindow()
     {
+        Console.WriteLine("Initializing Main Window.");
+
         InitializeComponent();
 
         AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets/WindowIcon.ico"));
+        //AppWindow.SetIcon(Microsoft.UI.IconId.)
         Content = null;
         Title = "AppDisplayName".GetLocalized();
 
@@ -25,6 +30,9 @@ public sealed partial class MainWindow : WindowEx
         settings = new UISettings();
         settings.ColorValuesChanged += Settings_ColorValuesChanged; // cannot use FrameworkElement.ActualThemeChanged event
     }
+
+
+
 
     // this handles updating the caption button colors correctly when indows system theme is changed
     // while the app is open
