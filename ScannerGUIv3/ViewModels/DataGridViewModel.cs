@@ -21,11 +21,11 @@ public partial class DataGridViewModel : ObservableRecipient, INavigationAware
 
     public async void OnNavigatedTo(object parameter)
     {
-        Source.Clear();
+        Source.Clear(); // What is source?
 
         // TODO: Replace with real data.
         Console.WriteLine("Break to inspect data.");
-        var data = await _sampleDataService.GetGridDataAsync();
+        var data = await _sampleDataService.GetGridDataAsync(); // Type appears to be IEnumerable List
 
         foreach (var item in data)
         {

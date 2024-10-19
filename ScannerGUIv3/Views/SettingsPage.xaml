@@ -55,11 +55,32 @@
             
             
             <TextBlock x:Uid="Settings_Spreadsheet" Style="{ThemeResource SubtitleTextBlockStyle}" />
-            <StackPanel Margin="{StaticResource SmallTopBottomMargin}">
+            <StackPanel VerticalAlignment="Top" Orientation="Vertical" Margin="{StaticResource SmallTopBottomMargin}">
+                
+                <TextBlock x:Uid="Settings_Theme" />
+                <StackPanel VerticalAlignment="Top" Orientation="Horizontal" Margin="{StaticResource SmallTopBottomMargin}">
+                <!--<StackPanel VerticalAlignment="Top" Orientation="Horizontal" Margin="{StaticResource SmallTopBottomMargin}">-->
+                    <Button x:Name="PickFolderButton" Content="Open a folder"
+                            Click="PickFolderButton_Click" Margin="0,0,0,10"/>
+                    <TextBlock x:Name="PickFolderOutputTextBlock" TextWrapping="Wrap" Padding="20,5,0,0"/>
+                </StackPanel>
+
+                <TextBlock x:Uid="Settings_Theme" />
+                <StackPanel VerticalAlignment="Top" Orientation="Horizontal" Margin="{StaticResource SmallTopBottomMargin}">
+                    <Button x:Name="PickFolderButton2" Content="Open a folder"
+                            Click="PickFolderButton_Click" Margin="0,0,0,10"/>
+                    <TextBlock x:Name="PickFolderOutputTextBlock2" TextWrapping="Wrap" Padding="20,5,0,0"/>
+                </StackPanel>
+                
+            </StackPanel>
+
+            
+
+
+            <!--<StackPanel Margin="{StaticResource SmallTopBottomMargin}">
                 <TextBlock x:Uid="Settings_Theme" />
 
                 <StackPanel Margin="{StaticResource XSmallTopMargin}">
-                    
                     
                     <RadioButton
             x:Uid="Settings_Theme_Light"
@@ -98,13 +119,7 @@
                     
                     
                 </StackPanel>
-            </StackPanel>
-
-
-
-
-
-
+            </StackPanel>-->
 
 
 
