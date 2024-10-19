@@ -16,7 +16,7 @@ internal class ExcelHandling
             Visible = false,
             // Visible = true,
         };
-
+        Console.WriteLine("ExcelHandling.cs");
         Workbook excelWorkbook = excel.Workbooks.Open(@"C:\Users\ChaseN\ResourceOnSite_20240620043001.xlsx");
 
         Worksheet excelWorksheet = (Worksheet)excelWorkbook.Sheets[3];

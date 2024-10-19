@@ -13,10 +13,11 @@
     <Grid>
         <StackPanel
             x:Name="ContentArea">
+            
             <TextBlock x:Uid="Settings_Personalization" Style="{ThemeResource SubtitleTextBlockStyle}" />
+            
             <StackPanel Margin="{StaticResource SmallTopBottomMargin}">
                 <TextBlock x:Uid="Settings_Theme" />
-
                 <StackPanel Margin="{StaticResource XSmallTopMargin}">
                     <RadioButton
                         x:Uid="Settings_Theme_Light"
@@ -53,16 +54,13 @@
 
             
             
-            
-
-
-
-            
             <TextBlock x:Uid="Settings_Spreadsheet" Style="{ThemeResource SubtitleTextBlockStyle}" />
             <StackPanel Margin="{StaticResource SmallTopBottomMargin}">
                 <TextBlock x:Uid="Settings_Theme" />
 
                 <StackPanel Margin="{StaticResource XSmallTopMargin}">
+                    
+                    
                     <RadioButton
             x:Uid="Settings_Theme_Light"
             Command="{x:Bind ViewModel.SwitchThemeCommand}"
@@ -73,6 +71,8 @@
                             <xaml:ElementTheme>Light</xaml:ElementTheme>
                         </RadioButton.CommandParameter>
                     </RadioButton>
+                    
+                    
                     <RadioButton
             x:Uid="Settings_Theme_Dark"
             Command="{x:Bind ViewModel.SwitchThemeCommand}"
@@ -83,6 +83,8 @@
                             <xaml:ElementTheme>Dark</xaml:ElementTheme>
                         </RadioButton.CommandParameter>
                     </RadioButton>
+                    
+                    
                     <RadioButton
             x:Uid="Settings_Theme_Default"
             Command="{x:Bind ViewModel.SwitchThemeCommand}"
@@ -93,6 +95,8 @@
                             <xaml:ElementTheme>Default</xaml:ElementTheme>
                         </RadioButton.CommandParameter>
                     </RadioButton>
+                    
+                    
                 </StackPanel>
             </StackPanel>
 
@@ -105,7 +109,6 @@
 
 
             <TextBlock x:Uid="Settings_About" Style="{ThemeResource SubtitleTextBlockStyle}" />
-
             <StackPanel Margin="{StaticResource XSmallTopMargin}">
                 <TextBlock Text="{x:Bind ViewModel.VersionDescription, Mode=OneWay}" Style="{ThemeResource BodyTextBlockStyle}" />
 
