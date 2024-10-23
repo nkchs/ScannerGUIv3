@@ -12,7 +12,7 @@ public sealed partial class MainWindow : WindowEx
 
     private UISettings settings;
 
-    string PersonnelCode;
+    private string PersonnelCode;
 
     public MainWindow()
     {
@@ -30,9 +30,6 @@ public sealed partial class MainWindow : WindowEx
         settings = new UISettings();
         settings.ColorValuesChanged += Settings_ColorValuesChanged; // cannot use FrameworkElement.ActualThemeChanged event
     }
-
-
-
 
     // this handles updating the caption button colors correctly when windows system theme is changed
     // while the app is open

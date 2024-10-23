@@ -1,8 +1,8 @@
 ﻿<Page
     x:Class="ScannerGUIv3.Views.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
@@ -16,20 +16,17 @@
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="200" />
             <!-- First column takes twice the width of the second -->
-            <ColumnDefinition Width="200"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="200" />
+            <ColumnDefinition Width="*" />
             <!-- Second column takes the remaining space -->
         </Grid.ColumnDefinitions>
-
 
         <Button x:Name="signInButton" Click="signInButton_Click"  Style="{StaticResource AccentButtonStyle}" Grid.Row="0" Grid.Column="1">Sign In</Button>
 
         <Button x:Name="debugButton" Click="debugButton_Click"  Grid.Row="2" Grid.Column="1">Debug</Button>
 
-        <TextBox x:Name="PersonnelNumberTextBox" Header="" PlaceholderText="Personnel Number" Width="180" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1"/>
-
-
+        <TextBox x:Name="PersonnelNumberTextBox" Header="" PlaceholderText="Personnel Number" Width="180" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1" />
     </Grid>
 </Page>

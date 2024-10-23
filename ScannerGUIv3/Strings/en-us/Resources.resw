@@ -168,15 +168,11 @@
   <data name="SettingsPage_PrivacyTermsLink.NavigateUri" xml:space="preserve">
     <value>https://YourPrivacyUrlGoesHere/</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="Spreadsheet_Resources" type="System.Resources.ResXNullRef, System.Windows.Forms">
+  <data name="Spreadsheet_Resources.Text" xml:space="preserve">
     <value />
   </data>
-  <data name="Spreadsheet_WeeklyRecord" xml:space="preserve">
+  <data name="Spreadsheet_WeeklyRecord.Text" xml:space="preserve">
     <value />
-  </data>
-  <data name="Settings_Spreadsheet.Text" xml:space="preserve">
-    <value>Spreadsheet Selection</value>
   </data>
   <data name="Settings_Spreadsheet.Text" xml:space="preserve">
     <value>Spreadsheet Selection</value>

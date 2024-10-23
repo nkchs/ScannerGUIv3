@@ -9,14 +9,6 @@ internal class Reference
 {
 }
 
-
-
-
-
-
-
-
-
 <Page x:Class="CollectionsExperiment.Samples.AdvancedCollectionViewSample"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"

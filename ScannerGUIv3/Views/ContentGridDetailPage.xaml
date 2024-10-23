@@ -82,7 +82,6 @@
                             <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.Item.OrderTotal}" />
                         </StackPanel>
                     </StackPanel>
-
                 </RelativePanel>
 
                 <TextBlock

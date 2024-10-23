@@ -1,11 +1,11 @@
 ﻿<Page
     x:Class="ScannerGUIv3.Views.SettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:helpers="using:ScannerGUIv3.Helpers"
     xmlns:xaml="using:Microsoft.UI.Xaml"
+    xmlns:helpers="using:ScannerGUIv3.Helpers"
     mc:Ignorable="d">
     <Page.Resources>
         <helpers:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
@@ -13,9 +13,9 @@
     <Grid>
         <StackPanel
             x:Name="ContentArea">
-            
+
             <TextBlock x:Uid="Settings_Personalization" Style="{ThemeResource SubtitleTextBlockStyle}" />
-            
+
             <StackPanel Margin="{StaticResource SmallTopBottomMargin}">
                 <TextBlock x:Uid="Settings_Theme" />
                 <StackPanel Margin="{StaticResource XSmallTopMargin}">
@@ -52,36 +52,30 @@
                 </StackPanel>
             </StackPanel>
 
-            
-            
             <TextBlock x:Uid="Settings_Spreadsheet" Style="{ThemeResource SubtitleTextBlockStyle}" />
             <StackPanel VerticalAlignment="Top" Orientation="Vertical" Margin="{StaticResource SmallTopBottomMargin}">
-                
+
                 <TextBlock x:Uid="Settings_Theme" />
                 <StackPanel VerticalAlignment="Top" Orientation="Horizontal" Margin="{StaticResource SmallTopBottomMargin}">
-                <!--<StackPanel VerticalAlignment="Top" Orientation="Horizontal" Margin="{StaticResource SmallTopBottomMargin}">-->
+                    <!--<StackPanel VerticalAlignment="Top" Orientation="Horizontal" Margin="{StaticResource SmallTopBottomMargin}">-->
                     <Button x:Name="PickFolderButton" Content="Open a folder"
-                            Click="PickFolderButton_Click" Margin="0,0,0,10"/>
-                    <TextBlock x:Name="PickFolderOutputTextBlock" TextWrapping="Wrap" Padding="20,5,0,0"/>
+                            Click="PickFolderButton_Click" Margin="0,0,0,10" />
+                    <TextBlock x:Name="PickFolderOutputTextBlock" TextWrapping="Wrap" Padding="20,5,0,0" />
                 </StackPanel>
 
                 <TextBlock x:Uid="Settings_Theme" />
                 <StackPanel VerticalAlignment="Top" Orientation="Horizontal" Margin="{StaticResource SmallTopBottomMargin}">
                     <Button x:Name="PickFolderButton2" Content="Open a folder"
-                            Click="PickFolderButton_Click" Margin="0,0,0,10"/>
-                    <TextBlock x:Name="PickFolderOutputTextBlock2" TextWrapping="Wrap" Padding="20,5,0,0"/>
+                            Click="PickFolderButton_Click" Margin="0,0,0,10" />
+                    <TextBlock x:Name="PickFolderOutputTextBlock2" TextWrapping="Wrap" Padding="20,5,0,0" />
                 </StackPanel>
-                
             </StackPanel>
-
-            
-
 
             <!--<StackPanel Margin="{StaticResource SmallTopBottomMargin}">
                 <TextBlock x:Uid="Settings_Theme" />
 
                 <StackPanel Margin="{StaticResource XSmallTopMargin}">
-                    
+
                     <RadioButton
             x:Uid="Settings_Theme_Light"
             Command="{x:Bind ViewModel.SwitchThemeCommand}"
@@ -92,8 +86,7 @@
                             <xaml:ElementTheme>Light</xaml:ElementTheme>
                         </RadioButton.CommandParameter>
                     </RadioButton>
-                    
-                    
+
                     <RadioButton
             x:Uid="Settings_Theme_Dark"
             Command="{x:Bind ViewModel.SwitchThemeCommand}"
@@ -104,8 +97,7 @@
                             <xaml:ElementTheme>Dark</xaml:ElementTheme>
                         </RadioButton.CommandParameter>
                     </RadioButton>
-                    
-                    
+
                     <RadioButton
             x:Uid="Settings_Theme_Default"
             Command="{x:Bind ViewModel.SwitchThemeCommand}"
@@ -116,12 +108,8 @@
                             <xaml:ElementTheme>Default</xaml:ElementTheme>
                         </RadioButton.CommandParameter>
                     </RadioButton>
-                    
-                    
                 </StackPanel>
             </StackPanel>-->
-
-
 
             <TextBlock x:Uid="Settings_About" Style="{ThemeResource SubtitleTextBlockStyle}" />
             <StackPanel Margin="{StaticResource XSmallTopMargin}">

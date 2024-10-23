@@ -1,25 +1,21 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 
 using ScannerGUIv3.Activation;
 using ScannerGUIv3.Contracts.Services;
 using ScannerGUIv3.Core.Contracts.Services;
 using ScannerGUIv3.Core.Services;
-using ScannerGUIv3.Helpers;
 using ScannerGUIv3.Models;
 using ScannerGUIv3.Services;
 using ScannerGUIv3.ViewModels;
 using ScannerGUIv3.Views;
-using Windows.Services.Maps;
 
 namespace ScannerGUIv3;
 
 // To learn more about WinUI 3, see https://docs.microsoft.com/windows/apps/winui/winui3/.
 public partial class App : Application
 {
-
     // The .NET Generic Host provides dependency injection, configuration, logging, and other services.
     // https://docs.microsoft.com/dotnet/core/extensions/generic-host
     // https://docs.microsoft.com/dotnet/core/extensions/dependency-injection
@@ -52,7 +48,6 @@ public partial class App : Application
     {
         Console.WriteLine("Initializing App.");
         InitializeComponent();
-
 
         Host = Microsoft.Extensions.Hosting.Host.
         CreateDefaultBuilder().
@@ -109,7 +104,7 @@ public partial class App : Application
         // https://docs.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.application.unhandledexception.
     }
 
-    protected async override void OnLaunched(LaunchActivatedEventArgs args)
+    protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
         base.OnLaunched(args);
 

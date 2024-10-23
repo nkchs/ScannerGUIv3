@@ -1,29 +1,25 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-
 using ScannerGUIv3.ViewModels;
+using Windows.Storage;
 using Windows.Storage.AccessCache;
 using Windows.Storage.Pickers;
-using Windows.Storage;
 
 namespace ScannerGUIv3.Views;
 
 // TODO: Set the URL for your privacy policy by updating SettingsPage_PrivacyTermsLink.NavigateUri in Resources.resw.
 public sealed partial class SettingsPage : Page
 {
-
     public SettingsViewModel ViewModel
     {
         get;
     }
-
 
     public SettingsPage()
     {
         ViewModel = App.GetService<SettingsViewModel>();
         InitializeComponent();
     }
-
 
     private async void PickFolderButton_Click(object sender, RoutedEventArgs e)
     {
