@@ -3,9 +3,9 @@ using Range = Microsoft.Office.Interop.Excel.Range;
 
 namespace ScannerGUIv3.Helpers;
 
-internal class ExcelHandling
+public static class ExcelHandling
 {
-    public static void ExcelLoader()
+    public static void ExcelGetter()
     {
         var excel = new Application
         {

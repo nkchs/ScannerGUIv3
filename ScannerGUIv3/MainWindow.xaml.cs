@@ -1,5 +1,5 @@
 ﻿using ScannerGUIv3.Helpers;
-
+using Microsoft.UI.Windowing;
 using Windows.UI.ViewManagement;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -11,8 +11,6 @@ public sealed partial class MainWindow : WindowEx
     private Microsoft.UI.Dispatching.DispatcherQueue dispatcherQueue;
 
     private UISettings settings;
-
-    private string PersonnelCode;
 
     public MainWindow()
     {
@@ -29,7 +27,14 @@ public sealed partial class MainWindow : WindowEx
         dispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
         settings = new UISettings();
         settings.ColorValuesChanged += Settings_ColorValuesChanged; // cannot use FrameworkElement.ActualThemeChanged event
+
+        //var windowWidth = Bounds.Width;
+        //var windowHeight = Bounds.Height;
+
+        //Console.WriteLine("Window Width: " + windowWidth);
+        //Console.WriteLine("Window Height: " + windowHeight);
     }
+
 
     // this handles updating the caption button colors correctly when windows system theme is changed
     // while the app is open

@@ -29,6 +29,7 @@ public class ActivationService : IActivationService
         // Set the MainWindow Content.
         if (App.MainWindow.Content == null)
         {
+            Console.WriteLine("App.MainWindow.Content == null.");
             _shell = App.GetService<ShellPage>();
             App.MainWindow.Content = _shell ?? new Frame();
         }
@@ -36,8 +37,13 @@ public class ActivationService : IActivationService
         // Handle activation via ActivationHandlers.
         await HandleActivationAsync(activationArgs);
 
+
         // Activate the MainWindow.
         App.MainWindow.Activate();
+        Console.WriteLine("After MainWindow.Activate");
+
+        //App.MainWindow.MoveAndResize(App.MainWindow.Bounds.X, App.MainWindow.Bounds.Y, 700, 700);
+        App.MainWindow.MoveAndResize(2000, 700, 700, 700);
 
         // Execute tasks after activation.
         await StartupAsync();

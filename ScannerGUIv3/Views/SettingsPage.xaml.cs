@@ -53,5 +53,7 @@ public sealed partial class SettingsPage : Page
         {
             PickFolderOutputTextBlock.Text = "Operation cancelled.";
         }
+        Console.WriteLine(folder.Path);
+        Console.WriteLine("Debug.");
     }
 }

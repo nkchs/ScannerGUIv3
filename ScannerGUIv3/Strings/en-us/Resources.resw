@@ -168,10 +168,10 @@
   <data name="SettingsPage_PrivacyTermsLink.NavigateUri" xml:space="preserve">
     <value>https://YourPrivacyUrlGoesHere/</value>
   </data>
-  <data name="Spreadsheet_Resources.Text" xml:space="preserve">
+  <data name="SettingsPage_Spreadsheet_Resources.Text" xml:space="preserve">
     <value />
   </data>
-  <data name="Spreadsheet_WeeklyRecord.Text" xml:space="preserve">
+  <data name="SettingsPage_Spreadsheet_WeeklyRecord.Text" xml:space="preserve">
     <value />
   </data>
   <data name="Settings_Spreadsheet.Text" xml:space="preserve">

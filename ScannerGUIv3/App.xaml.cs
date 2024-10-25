@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Globalization;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
 
@@ -16,6 +18,10 @@ namespace ScannerGUIv3;
 // To learn more about WinUI 3, see https://docs.microsoft.com/windows/apps/winui/winui3/.
 public partial class App : Application
 {
+    public IConfiguration Configuration
+    {
+        get;
+    }
     // The .NET Generic Host provides dependency injection, configuration, logging, and other services.
     // https://docs.microsoft.com/dotnet/core/extensions/generic-host
     // https://docs.microsoft.com/dotnet/core/extensions/dependency-injection
@@ -37,16 +43,34 @@ public partial class App : Application
         return service;
     }
 
-    public static WindowEx MainWindow { get; } = new MainWindow();
+    public static WindowEx MainWindow { get; private set; } = new MainWindow();
 
     public static UIElement? AppTitlebar
     {
         get; set;
     }
 
+
+    // Variable Declarations
+
+    public static DateTime currentDate = DateTime.Now;
+    public static Calendar calendar = CultureInfo.CurrentCulture.Calendar;
+    public static int weekNumber = calendar.GetWeekOfYear(currentDate, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+
+    public static string excelWeeklyAddress = @"C:\Users\ChaseN" + @"\Week " + weekNumber + ".xlsx";
+    public static string excelResourceAddress = @"" + "ResourceOnSite_" + currentDate.ToString("yyyyMMdd") + ".xlsx";
+
+    // End Variable Declarations
+
+
     public App()
     {
+        var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+        Configuration = builder.Build();
+        
         Console.WriteLine("Initializing App.");
+        //Console.WriteLine("Current Week Number: " + weekNumber);
+
         InitializeComponent();
 
         Host = Microsoft.Extensions.Hosting.Host.

@@ -1,6 +1,10 @@
 ﻿using Microsoft.Office.Interop.Excel;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using ScannerGUIv3.ViewModels;
+using ScannerGUIv3.Helpers;
+using System.Runtime.InteropServices;
+using Application = Microsoft.UI.Xaml.Application;
 
 namespace ScannerGUIv3.Views;
 
@@ -15,6 +19,7 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
     {
         ViewModel = App.GetService<MainViewModel>();
         Console.WriteLine("Initializing Main Page.");
+
         InitializeComponent();
     }
 
@@ -40,10 +45,10 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         Console.WriteLine("Rows: " + maxRow);
         Console.WriteLine("Columns: " + maxCol);
 
-        //excelWorkbook.Close(false, null, null);
-        //excel_.Quit();
-        //Marshal.ReleaseComObject(excelWorkbook);
-        //Marshal.ReleaseComObject(excel_);
+        excelWorkbook.Close(false, null, null);
+        excel_.Quit();
+        Marshal.ReleaseComObject(excelWorkbook);
+        Marshal.ReleaseComObject(excel_);
     }
 
     private void signInButton_Click(object sender, RoutedEventArgs e)
@@ -59,6 +64,27 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
     private void debugButton_Click(object sender, RoutedEventArgs e)
     {
         Console.WriteLine("Debug");
+
+        Console.WriteLine(App.excelWeeklyAddress);
+        Console.WriteLine(App.excelResourceAddress);
+
+        Console.WriteLine("Recorded DateTime: " + App.currentDate);
+        Console.WriteLine("Current DateTime: " + DateTime.Now);
+
+
+        Console.WriteLine(App.currentDate.Day);
+
+        Console.WriteLine("Week Number: " + App.weekNumber);
+        App.weekNumber = 44;
+
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("Week Number: " + App.weekNumber);
+        Console.ResetColor();
+
+
         Console.WriteLine("");
+
+        // Old Code
+        //Console.WriteLine("Bounds:" + App.MainWindow.Bounds.ToString());
     }
 }

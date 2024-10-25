@@ -52,6 +52,7 @@
                 </StackPanel>
             </StackPanel>
 
+            
             <TextBlock x:Uid="Settings_Spreadsheet" Style="{ThemeResource SubtitleTextBlockStyle}" />
             <StackPanel VerticalAlignment="Top" Orientation="Vertical" Margin="{StaticResource SmallTopBottomMargin}">
 
