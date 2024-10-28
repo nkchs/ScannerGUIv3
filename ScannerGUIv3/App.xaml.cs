@@ -62,6 +62,9 @@ public partial class App : Application
 
     // End Variable Declarations
 
+    public DispatcherTimer _timer;
+
+    // End Timer Declarations
 
     public App()
     {
