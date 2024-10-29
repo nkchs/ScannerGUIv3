@@ -3,6 +3,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
+using System.Timers;
+using Timer = System.Timers.Timer;
+using Microsoft.UI.Dispatching;
 
 using ScannerGUIv3.Activation;
 using ScannerGUIv3.Contracts.Services;
@@ -12,6 +15,7 @@ using ScannerGUIv3.Models;
 using ScannerGUIv3.Services;
 using ScannerGUIv3.ViewModels;
 using ScannerGUIv3.Views;
+
 
 namespace ScannerGUIv3;
 
@@ -63,6 +67,15 @@ public partial class App : Application
     // End Variable Declarations
 
     public DispatcherTimer _timer;
+    public Timer timer;
+    public readonly TimeSpan[] scheduleTimes =
+    {
+        new TimeSpan(5,0,0),
+        new TimeSpan(17,0,0),
+        new TimeSpan(0,0,0),
+        new TimeSpan(21,46,0),
+        new TimeSpan(21,48,0),
+    };
 
     // End Timer Declarations
 
@@ -122,7 +135,50 @@ public partial class App : Application
         }).
         Build();
 
+        SetupDailyScheduler();
         UnhandledException += App_UnhandledException;
+    }
+
+    public void SetupDailyScheduler()
+    {
+        ScheduleNextTask();
+    }
+
+    private void ScheduleNextTask()
+    {
+        DateTime now = DateTime.Now;
+        TimeSpan timeUntilNextTask = GetNextScheduledTime(now);
+
+        // Set the timer to trigger at the calculated interval
+        timer = new Timer(timeUntilNextTask.TotalMilliseconds);
+        timer.Elapsed += (sender, e) =>
+        {
+            timer.Stop();  // Stop the timer temporarily
+
+            // Perform the scheduled operation
+            DispatcherQueue.GetForCurrentThread().TryEnqueue(() => PerformScheduledOperation());
+
+            // Reschedule the timer for the next time
+            ScheduleNextTask();
+        };
+        timer.Start();
+    }
+
+    private TimeSpan GetNextScheduledTime(DateTime now)
+    {
+        foreach (var time in scheduleTimes)
+        {
+            DateTime next = now.Date + time;
+            if (next > now) return next - now;
+        }
+        // If all times are in the past, the next scheduled time is tomorrow at the first time
+        return (now.Date.AddDays(1) + scheduleTimes[0]) - now;
+    }
+
+    private void PerformScheduledOperation()
+    {
+        // Your task code here, which runs at 5:00 AM, 5:00 PM, and midnight
+        Console.WriteLine("Scheduled operation executed at " + DateTime.Now);
     }
 
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
