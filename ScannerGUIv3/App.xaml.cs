@@ -21,16 +21,13 @@ using Microsoft.Office.Interop.Excel;
 using Range = Microsoft.Office.Interop.Excel.Range;
 using Application = Microsoft.UI.Xaml.Application;
 using System.Runtime.InteropServices;
-using Newtonsoft.Json.Linq;
-using System.Net.Http.Headers;
-using System.Text;
 
-using System;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
+//using Newtonsoft.Json.Linq;
+//using System.Net.Http.Headers;
+//using System.Text;
+//using System;
+//using System.Net.Http;
+//using System.Threading.Tasks;
 
 
 
@@ -154,12 +151,12 @@ public partial class App : Application
             services.AddTransient<SettingsPage>();
             services.AddTransient<DataGridViewModel>();
             services.AddTransient<DataGridPage>();
-            services.AddTransient<ContentGridDetailViewModel>();
-            services.AddTransient<ContentGridDetailPage>();
-            services.AddTransient<ContentGridViewModel>();
-            services.AddTransient<ContentGridPage>();
-            services.AddTransient<ListDetailsViewModel>();
-            services.AddTransient<ListDetailsPage>();
+            //services.AddTransient<ContentGridDetailViewModel>();
+            //services.AddTransient<ContentGridDetailPage>();
+            //services.AddTransient<ContentGridViewModel>();
+            //services.AddTransient<ContentGridPage>();
+            //services.AddTransient<ListDetailsViewModel>();
+            //services.AddTransient<ListDetailsPage>();
             services.AddTransient<BlankViewModel>();
             services.AddTransient<BlankPage>();
             services.AddTransient<MainViewModel>();
@@ -189,8 +186,8 @@ public partial class App : Application
     {
         var excel_ = new Microsoft.Office.Interop.Excel.Application
         {
-            //Visible = false,
-            Visible = true,
+            Visible = false,
+            //Visible = true,
         };
 
         var excelWorkbook = excel_.Workbooks.Open(excelPath, ReadOnly: true);
