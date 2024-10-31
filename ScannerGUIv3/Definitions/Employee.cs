@@ -45,4 +45,13 @@ public class Employee
         SignInTime = null;
         SignOutTime = null;
     }
+
+    // Method to sign in, setting the SignInTime to now
+    public void SignIn()
+    {
+        SignInTime = DateTime.Now;
+    }
+
+    // Property to get formatted SignInTime
+    public string FormattedSignInTime => SignInTime?.ToString("dd/MM/yyyy HH:mm") ?? "Not signed in";
 }

@@ -5,6 +5,7 @@ using ScannerGUIv3.ViewModels;
 using ScannerGUIv3.Helpers;
 using System.Runtime.InteropServices;
 using Application = Microsoft.UI.Xaml.Application;
+using ScannerGUIv3.Definitions;
 
 namespace ScannerGUIv3.Views;
 
@@ -67,9 +68,32 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
     {
 
         signInButton.Content = "Clicked";
-        ExcelLoader();
-        var PersonnelCode = PersonnelNumberTextBox.Text;
-        Console.WriteLine("Personnel Code: " + PersonnelCode);
+
+        if (int.TryParse(PersonnelNumberTextBox.Text, out var personnelCode))
+        {
+            Console.WriteLine("Personnel Code: " + personnelCode);
+
+            if (App.EmployeeDict.TryGetValue(personnelCode, out var employee))
+            {
+                Console.WriteLine(employee.Name);
+                employee.SignIn();
+            }
+        }
+        else
+        {
+            Console.WriteLine("Invalid Personnel Code.");
+        }
+
+        //ExcelLoader();
+        //var PersonnelCode = int.Parse(PersonnelNumberTextBox.Text);
+        //Console.WriteLine("Personnel Code: " + PersonnelCode);
+        //if ( App.EmployeeDict.TryGetValue(PersonnelCode, out var employee) )
+        //{
+        //    Console.Write(employee.Name);
+        //    employee.SignIn();
+        //}
+        //App.EmployeeDict<>;
+
         signInButton.Content = "Sign In";
         PersonnelNumberTextBox.Text = "";
     }
@@ -81,7 +105,7 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         Console.WriteLine("Debug");
 
         Console.WriteLine(App.excelWeeklyAddress);
-        Console.WriteLine(App.excelResourceAddress);
+        Console.WriteLine(App.excelResourcesOnSiteAddress);
 
         Console.WriteLine("Recorded DateTime: " + App.currentDate);
         Console.WriteLine("Current DateTime: " + DateTime.Now);

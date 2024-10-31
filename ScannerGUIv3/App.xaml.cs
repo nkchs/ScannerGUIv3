@@ -21,6 +21,18 @@ using Microsoft.Office.Interop.Excel;
 using Range = Microsoft.Office.Interop.Excel.Range;
 using Application = Microsoft.UI.Xaml.Application;
 using System.Runtime.InteropServices;
+using Newtonsoft.Json.Linq;
+using System.Net.Http.Headers;
+using System.Text;
+
+using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+
+
 
 
 namespace ScannerGUIv3;
@@ -66,8 +78,11 @@ public partial class App : Application
     public static Calendar calendar = CultureInfo.CurrentCulture.Calendar;
     public static int weekNumber = calendar.GetWeekOfYear(currentDate, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
 
-    public static string excelWeeklyAddress = @"C:\Users\ChaseN" + @"\Week " + weekNumber + ".xlsx";
-    public static string excelResourceAddress = @"" + "ResourceOnSite_" + currentDate.ToString("yyyyMMdd") + ".xlsx";
+    public static string sharepointBaseURL = @"https://newcrestmining.sharepoint.com/:f:/r/teams/TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/Development";
+    public static string excelWeeklyAddress = sharepointBaseURL + @"/Week " + weekNumber + ".xlsm";
+
+    //public static string excelWeeklyAddress = @"C:\Users\ChaseN" + @"\Week " + weekNumber + ".xlsx";
+    public static string excelResourcesOnSiteAddress = @"" + "ResourceOnSite_" + currentDate.ToString("yyyyMMdd") + ".xlsx";
 
     // ########## End Variable Declarations ########## //
 
@@ -82,35 +97,34 @@ public partial class App : Application
         new(15,57,0),
         new(15,58,0),
         new(15,59,0),
-
-        //TimeSpan.FromMinutes(1),
-        //TimeSpan.FromMinutes(2),
-        //TimeSpan.FromMinutes(3),
-        //TimeSpan.FromMinutes(4),
-        //TimeSpan.FromMinutes(5)
     };
     // ########## End Timer Declarations ########## //
 
+
     // ########## Dictionary Declarations ########## //
-    public Dictionary<int, Employee> employeeDict = new();
+    //public Dictionary<int, Employee> employeeDict = new();
+    public static Dictionary<int, Employee> EmployeeDict { get; } = new Dictionary<int, Employee>();
     // ########## Dictionary Declarations ########## //
 
     public App()
     {
+        //Console.WriteLine("Current Week Number: " + weekNumber);
+        // DICTIONARY STUFF
         //Dictionary<int, Employee> employeeDict = new Dictionary<int, Employee>();
-        var resourcesOneSiteExcelUrl = @"https://newcrestmining-my.sharepoint.com/personal/nic_chase_newcrest_com_au/Documents/Documents/Projects/Scanner/ResourceOnSite_20240620043001.xlsx";
+        //var resourcesOnSiteExcelUrl = @"https://newcrestmining-my.sharepoint.com/personal/nic_chase_newcrest_com_au/Documents/Documents/Projects/Scanner/ResourceOnSite_20240620043001.xlsx";
+        var resourcesOnSiteExcelUrl = @"https://newcrestmining.sharepoint.com/:x:/r/teams/TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/Development/ResourceOnSite_20241030043004.xlsx";
+        // END DICTIONARY STUFF
 
-        PopulateEmployeeDictionary(employeeDict, resourcesOneSiteExcelUrl);
 
         // CONFIG Setup START
         var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
         Configuration = builder.Build();
         // CONFIG Setup END
         
-        Console.WriteLine("Initializing App.");
-        //Console.WriteLine("Current Week Number: " + weekNumber);
 
+        Console.WriteLine("Initializing App.");      
         InitializeComponent();
+
 
         Host = Microsoft.Extensions.Hosting.Host.
         CreateDefaultBuilder().
@@ -159,8 +173,11 @@ public partial class App : Application
         Build();
 
 
+        // MORE DICTIONARY STUFF
+        PopulateEmployeeDictionary(EmployeeDict, resourcesOnSiteExcelUrl);
         // TIMER Setup
         SetupDailyScheduler();
+        // END TIMER
 
 
         UnhandledException += App_UnhandledException;
@@ -172,8 +189,8 @@ public partial class App : Application
     {
         var excel_ = new Microsoft.Office.Interop.Excel.Application
         {
-            Visible = false,
-            //Visible = true,
+            //Visible = false,
+            Visible = true,
         };
 
         var excelWorkbook = excel_.Workbooks.Open(excelPath, ReadOnly: true);
@@ -247,8 +264,8 @@ public partial class App : Application
             }
         }
 
-        Console.WriteLine("Debug");
 
+        Console.WriteLine("Debug");
         excelWorkbook.Close(false, null, null);
         excel_.Quit();
         Marshal.ReleaseComObject(excelWorkbook);

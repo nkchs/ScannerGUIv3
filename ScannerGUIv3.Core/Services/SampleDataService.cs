@@ -21,6 +21,7 @@ public class SampleDataService : ISampleDataService
     private static IEnumerable<SampleOrder> AllOrders()
     {
         // The following is order summary data
+        // companies is the variable name, AllCompanies() is a method that returns this.
         var companies = AllCompanies();
         return companies.SelectMany(c => c.Orders);
     }
