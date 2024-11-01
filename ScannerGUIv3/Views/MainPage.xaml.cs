@@ -37,7 +37,7 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
 
         var resourcesOneSiteExcelUrl = @"https://newcrestmining-my.sharepoint.com/personal/nic_chase_newcrest_com_au/Documents/Documents/Projects/Scanner/ResourceOnSite_20240620043001.xlsx";
         //string _excelURLOne = @"https://newcrestmining.sharepoint.com/:x:/r/teams/TelferEngineeringReliabilityGovernance/Shared%20Documents/General/Projects/Nic%20Chase/ResourceOnSite.xlsx";
-        //string _excelURLTwo = @"https://newcrestmining.sharepoint.com/:x:/r/teams/TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/2024/Week%2043.xlsm?d=wc07871ef3cd04c2293ada7bcff29cc6d&csf=1&web=1&e=DORZmS";
+        //string _excelURLTwo = @"https://newcrestmining.sharepoint.com/:x:/r/teams/TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/2024/Week%2043.xlsm";
         //string _excelURLTwo = @"https://newcrestmining.sharepoint.com/:x:/r/teams/TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/2024/Week%2043.xlsm";
         //_excelURLOne = @"C:\Users\ChaseN\ResourceOnSite_20240620043001.xlsx";
         //_excelURLOne = @"C:\Users\nicch\source\repos\nkchs\ScannerGUIv3\ResourceOnSite.xlsx";

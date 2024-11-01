@@ -17,17 +17,6 @@
   <ItemGroup>
     <Compile Remove="Helpers\ScheduledFuncs__.cs" />
     <Compile Remove="Reference.cs" />
-    <Compile Remove="ViewModels\ContentGridDetailViewModel.cs" />
-    <Compile Remove="ViewModels\ContentGridViewModel.cs" />
-    <Compile Remove="ViewModels\ListDetailsViewModel.cs" />
-    <Compile Remove="Views\ContentGridDetailPage.xaml.cs" />
-    <Compile Remove="Views\ContentGridPage.xaml.cs" />
-    <Compile Remove="Views\ListDetailsPage.xaml.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Page Remove="Views\ContentGridDetailPage.xaml" />
-    <Page Remove="Views\ContentGridPage.xaml" />
-    <Page Remove="Views\ListDetailsPage.xaml" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="Microsoft.Office.Interop.Excel">
@@ -48,12 +37,6 @@
   <ItemGroup>
     <None Include="Helpers\ScheduledFuncs__.cs" />
     <None Include="Reference.cs" />
-    <None Include="ViewModels\ContentGridDetailViewModel.cs" />
-    <None Include="ViewModels\ContentGridViewModel.cs" />
-    <None Include="ViewModels\ListDetailsViewModel.cs" />
-    <None Include="Views\ContentGridDetailPage.xaml.cs" />
-    <None Include="Views\ContentGridPage.xaml.cs" />
-    <None Include="Views\ListDetailsPage.xaml.cs" />
   </ItemGroup>
 
   <ItemGroup>
