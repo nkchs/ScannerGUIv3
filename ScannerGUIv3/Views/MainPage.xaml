@@ -27,6 +27,6 @@
 
         <Button x:Name="debugButton" Click="debugButton_Click"  Grid.Row="2" Grid.Column="1">Debug</Button>
 
-        <TextBox x:Name="PersonnelNumberTextBox" Header="" PlaceholderText="Personnel Number" Width="180" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1" />
+        <TextBox x:Name="PersonnelNumberTextBox" Header="" PlaceholderText="Personnel Number" KeyDown="PersonnelNumberTextBox_KeyDown" Width="180" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1" />
     </Grid>
 </Page>

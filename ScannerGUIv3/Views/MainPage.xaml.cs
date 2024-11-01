@@ -6,6 +6,8 @@ using ScannerGUIv3.Helpers;
 using System.Runtime.InteropServices;
 using Application = Microsoft.UI.Xaml.Application;
 using ScannerGUIv3.Definitions;
+using Microsoft.UI.Xaml.Input;
+using Windows.System;
 
 namespace ScannerGUIv3.Views;
 
@@ -25,6 +27,7 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
 
         InitializeComponent();
     }
+
 
 
     static void ExcelLoader()
@@ -126,4 +129,34 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         // Old Code
         //Console.WriteLine("Bounds:" + App.MainWindow.Bounds.ToString());
     }
+
+
+    private void PersonnelNumberTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        if (e.Key == VirtualKey.Enter)
+        {
+            Console.WriteLine("Struck Enter.");
+            if (int.TryParse(PersonnelNumberTextBox.Text, out var personnelCode))
+            {
+                Console.WriteLine("Personnel Number: " + personnelCode);
+
+                if (App.EmployeeDict.TryGetValue(personnelCode, out var employee))
+                {
+                    //Console.WriteLine(employee.Name);
+                    //employee.SignIn();
+                }
+            }
+            else
+            {
+                Console.WriteLine("Invalid Personnel Number.");
+            }
+            PersonnelNumberTextBox.Text = "";
+            // Call your function here
+            //Console.WriteLine(PersonnelNumberTextBox.Text);
+
+            // Optionally, prevent the default behavior of the Enter key
+            e.Handled = true;
+        }
+    }
+
 }

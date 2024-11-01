@@ -44,8 +44,6 @@ public class ActivationService : IActivationService
         // Handle activation via ActivationHandlers.
         await HandleActivationAsync(activationArgs);
 
-
-
         // Activate the MainWindow.
         App.MainWindow.Activate(); // Check if activation needs to occur here.
         Console.WriteLine("After MainWindow.Activate");

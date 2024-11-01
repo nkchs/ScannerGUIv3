@@ -46,6 +46,7 @@ public sealed partial class ShellPage : Page
     private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
     {
         App.AppTitlebar = AppTitleBarText as UIElement;
+        Console.WriteLine("ShellPage.xaml.cs MainWindow_Activated()");
     }
 
     private void NavigationViewControl_DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs args)

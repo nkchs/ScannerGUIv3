@@ -75,7 +75,9 @@ public partial class App : Application
     public static Calendar calendar = CultureInfo.CurrentCulture.Calendar;
     public static int weekNumber = calendar.GetWeekOfYear(currentDate, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
 
-    public static string sharepointBaseURL = @"https://newcrestmining.sharepoint.com/:f:/r/teams/TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/Development";
+    public static string sharepointBaseURL = @"https://newcrestmining.sharepoint.com/:f:/r/teams/
+                                               TelferMaint-Mill/Shared%20Documents/Attendance%20Register/
+                                               FPM%20Daily%20Sign%20On/Development";
     public static string excelWeeklyAddress = sharepointBaseURL + @"/Week " + weekNumber + ".xlsm";
 
     //public static string excelWeeklyAddress = @"C:\Users\ChaseN" + @"\Week " + weekNumber + ".xlsx";
@@ -108,8 +110,10 @@ public partial class App : Application
         //Console.WriteLine("Current Week Number: " + weekNumber);
         // DICTIONARY STUFF
         //Dictionary<int, Employee> employeeDict = new Dictionary<int, Employee>();
-        //var resourcesOnSiteExcelUrl = @"https://newcrestmining-my.sharepoint.com/personal/nic_chase_newcrest_com_au/Documents/Documents/Projects/Scanner/ResourceOnSite_20240620043001.xlsx";
-        //var resourcesOnSiteExcelUrl = @"https://newcrestmining.sharepoint.com/:x:/r/teams/TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/Development/ResourceOnSite_20241030043004.xlsx";
+        //var resourcesOnSiteExcelUrl = @"https://newcrestmining-my.sharepoint.com/personal/
+        //nic_chase_newcrest_com_au/Documents/Documents/Projects/Scanner/ResourceOnSite_20240620043001.xlsx";
+        //var resourcesOnSiteExcelUrl = @"https://newcrestmining.sharepoint.com/:x:/r/teams/
+        //TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/Development/ResourceOnSite_20241030043004.xlsx";
         // END DICTIONARY STUFF
 
 
@@ -243,9 +247,9 @@ public partial class App : Application
             }
             else if (_personName == "Name")
             {
-                Console.Write("i: " + i + " " + _personName + " ");
-                Console.Write(excelRange[i, personNumberColumnNumber].Value2 + " ");
-                Console.Write(excelRange[i, shiftStatusColumnNumber].Value2 + Environment.NewLine);
+                //Console.Write("i: " + i + " " + _personName + " ");
+                //Console.Write(excelRange[i, personNumberColumnNumber].Value2 + " ");
+                //Console.Write(excelRange[i, shiftStatusColumnNumber].Value2 + Environment.NewLine);
             }
             else
             {
@@ -253,9 +257,10 @@ public partial class App : Application
                 // Could change the above to int.TryParse;
                 string _shiftType = excelRange[i, shiftStatusColumnNumber].Value2;
 
-                Console.Write("i: " + i + " " + _personName + " ");
-                Console.Write(excelRange[i, personNumberColumnNumber].Value2 + " ");
-                Console.Write(excelRange[i, shiftStatusColumnNumber].Value2 + Environment.NewLine);
+                string message = "i: " + i + " " + _personName + " " +
+                    excelRange[i, personNumberColumnNumber].Value2 + " " +
+                    excelRange[i, shiftStatusColumnNumber].Value2;
+                //Console.WriteLine(message);
 
                 employeeDict.Add(_personNumber, new Employee(_personNumber, _personName,_shiftType));
             }
@@ -338,7 +343,7 @@ public partial class App : Application
         // https://docs.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.application.unhandledexception.
     }
 
-    protected override async void OnLaunched(LaunchActivatedEventArgs args)
+    protected async override void OnLaunched(LaunchActivatedEventArgs args)
     {
         base.OnLaunched(args);
 
