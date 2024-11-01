@@ -62,7 +62,7 @@ public partial class App : Application
         return service;
     }
 
-    public static WindowEx MainWindow { get; private set; } = new MainWindow();
+    public static WindowEx MainWindow { get; set; } = new MainWindow();
 
     public static UIElement? AppTitlebar
     {
@@ -109,15 +109,15 @@ public partial class App : Application
         // DICTIONARY STUFF
         //Dictionary<int, Employee> employeeDict = new Dictionary<int, Employee>();
         //var resourcesOnSiteExcelUrl = @"https://newcrestmining-my.sharepoint.com/personal/nic_chase_newcrest_com_au/Documents/Documents/Projects/Scanner/ResourceOnSite_20240620043001.xlsx";
-        var resourcesOnSiteExcelUrl = @"https://newcrestmining.sharepoint.com/:x:/r/teams/TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/Development/ResourceOnSite_20241030043004.xlsx";
+        //var resourcesOnSiteExcelUrl = @"https://newcrestmining.sharepoint.com/:x:/r/teams/TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/Development/ResourceOnSite_20241030043004.xlsx";
         // END DICTIONARY STUFF
 
 
         // CONFIG Setup START
-        var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-        Configuration = builder.Build();
+        //var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+        //Configuration = builder.Build();
         // CONFIG Setup END
-        
+
 
         Console.WriteLine("Initializing App.");      
         InitializeComponent();
@@ -171,11 +171,11 @@ public partial class App : Application
 
 
         // MORE DICTIONARY STUFF
+        var resourcesOnSiteExcelUrl = @"https://newcrestmining.sharepoint.com/:x:/r/teams/TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/Development/ResourceOnSite_20241030043004.xlsx";
         PopulateEmployeeDictionary(EmployeeDict, resourcesOnSiteExcelUrl);
         // TIMER Setup
-        SetupDailyScheduler();
+        //SetupDailyScheduler();
         // END TIMER
-
 
         UnhandledException += App_UnhandledException;
     }
@@ -262,7 +262,7 @@ public partial class App : Application
         }
 
 
-        Console.WriteLine("Debug");
+        //Console.WriteLine("Debug");
         excelWorkbook.Close(false, null, null);
         excel_.Quit();
         Marshal.ReleaseComObject(excelWorkbook);
