@@ -36,6 +36,7 @@
             ExpandedModeThresholdWidth="700"
             DisplayModeChanged="NavigationViewControl_DisplayModeChanged"
             Header="{x:Bind ((ContentControl)ViewModel.Selected).Content, Mode=OneWay}">
+            
             <NavigationView.MenuItems>
                 <!--
                 TODO: Update item titles by updating <x:Uid>.Content entries in Strings/en-us/Resources.resw.
@@ -50,22 +51,12 @@
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe748;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                
                 <NavigationViewItem x:Uid="Shell_Blank" helpers:NavigationHelper.NavigateTo="ScannerGUIv3.ViewModels.BlankViewModel">
                     <NavigationViewItem.Icon>
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xec5a;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-
-                <!--<NavigationViewItem x:Uid="Shell_ListDetails" helpers:NavigationHelper.NavigateTo="ScannerGUIv3.ViewModels.ListDetailsViewModel">
-                    <NavigationViewItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xea37;" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem x:Uid="Shell_ContentGrid" helpers:NavigationHelper.NavigateTo="ScannerGUIv3.ViewModels.ContentGridViewModel">
-                    <NavigationViewItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xf0e2;" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>-->
 
                 <NavigationViewItem x:Uid="Shell_DataGrid" helpers:NavigationHelper.NavigateTo="ScannerGUIv3.ViewModels.DataGridViewModel">
                     <NavigationViewItem.Icon>
@@ -73,9 +64,9 @@
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
+            
             <NavigationView.HeaderTemplate>
                 <DataTemplate>
-
                     <Grid>
                         <TextBlock
                             Text="{Binding}"
@@ -83,6 +74,7 @@
                     </Grid>
                 </DataTemplate>
             </NavigationView.HeaderTemplate>
+            
             <i:Interaction.Behaviors>
                 <behaviors:NavigationViewHeaderBehavior
                     DefaultHeader="{x:Bind ((ContentControl)ViewModel.Selected).Content, Mode=OneWay}">

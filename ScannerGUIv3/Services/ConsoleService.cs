@@ -5,26 +5,25 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml.Controls;
 
-namespace ScannerGUIv3.Services
+namespace ScannerGUIv3.Services;
+
+public static class ConsoleService
 {
-    public static class ConsoleService
+    private static TextBox? _consoleOutput;
+
+    public static void Initialize(TextBox consoleOutput)
     {
-        private static TextBox? _consoleOutput;
+        _consoleOutput = consoleOutput;
+    }
 
-        public static void Initialize(TextBox consoleOutput)
+    public static void WriteLine(string text)
+    {
+        if (_consoleOutput != null)
         {
-            _consoleOutput = consoleOutput;
-        }
-
-        public static void WriteLine(string text)
-        {
-            if (_consoleOutput != null)
-            {
-                //_consoleOutput.Text += text + Environment.NewLine;
-                _consoleOutput.Text = text + Environment.NewLine + _consoleOutput.Text;
-                _consoleOutput.SelectionStart = _consoleOutput.Text.Length;
-                _consoleOutput.SelectionLength = 0;
-            }
+            //_consoleOutput.Text += text + Environment.NewLine;
+            _consoleOutput.Text = text + Environment.NewLine + _consoleOutput.Text;
+            _consoleOutput.SelectionStart = _consoleOutput.Text.Length;
+            _consoleOutput.SelectionLength = 0;
         }
     }
 }

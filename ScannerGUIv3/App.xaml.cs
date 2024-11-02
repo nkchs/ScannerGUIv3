@@ -22,15 +22,6 @@ using Range = Microsoft.Office.Interop.Excel.Range;
 using Application = Microsoft.UI.Xaml.Application;
 using System.Runtime.InteropServices;
 
-//using Newtonsoft.Json.Linq;
-//using System.Net.Http.Headers;
-//using System.Text;
-//using System;
-//using System.Net.Http;
-//using System.Threading.Tasks;
-
-
-
 
 namespace ScannerGUIv3;
 
@@ -125,7 +116,7 @@ public partial class App : Application
         // CONFIG Setup END
 
 
-        Console.WriteLine("Initializing App.");      
+        //Console.WriteLine("Initializing App.");      
         InitializeComponent();
 
 
@@ -178,12 +169,21 @@ public partial class App : Application
 
         // MORE DICTIONARY STUFF
         var resourcesOnSiteExcelUrl = @"https://newcrestmining.sharepoint.com/:x:/r/teams/TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/Development/ResourceOnSite_20241030043004.xlsx";
-        PopulateEmployeeDictionary(EmployeeDict, resourcesOnSiteExcelUrl);
+        //PopulateEmployeeDictionary(EmployeeDict, resourcesOnSiteExcelUrl);
+        _ = InitializeEmployeeDictionaryAsync(EmployeeDict, resourcesOnSiteExcelUrl);
+
         // TIMER Setup
         //SetupDailyScheduler();
         // END TIMER
 
         UnhandledException += App_UnhandledException;
+    }
+
+
+    // Call this during startup
+    private async Task InitializeEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, string resourcesOnSiteExcelUrl)
+    {
+        await Task.Run(() => PopulateEmployeeDictionary(employeeDict, resourcesOnSiteExcelUrl));
     }
 
 
@@ -201,7 +201,8 @@ public partial class App : Application
         var excelRange = excelWorksheet.UsedRange;
 
         var maxRow = excelRange.Rows.Count;
-        var maxCol = excelRange.Columns.Count;
+        //var maxCol = excelRange.Columns.Count;
+
         //Console.WriteLine("Rows: " + maxRow);
         //Console.WriteLine("Columns: " + maxCol);
 
@@ -262,6 +263,7 @@ public partial class App : Application
                 string message = "i: " + i + " " + _personName + " " +
                     excelRange[i, personNumberColumnNumber].Value2 + " " +
                     excelRange[i, shiftStatusColumnNumber].Value2;
+                //ConsoleService.WriteLine(message);
                 //Console.WriteLine(message);
 
                 employeeDict.Add(_personNumber, new Employee(_personNumber, _personName,_shiftType));

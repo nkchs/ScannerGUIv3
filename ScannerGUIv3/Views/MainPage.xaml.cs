@@ -25,7 +25,7 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
     {
         ViewModel = App.GetService<MainViewModel>();
 
-        Console.WriteLine("Initializing Main Page.");
+        //Console.WriteLine("Initializing Main Page.");
 
         InitializeComponent();
         ConsoleService.Initialize(ConsoleOutput); // Initialize with the console TextBox
@@ -127,86 +127,7 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
 
         Console.WriteLine("");
     }
-
-    //private void PersonnelNumberTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
-    //{
-    //    if (e.Key == VirtualKey.Enter)
-    //    {
-    //        if (int.TryParse(PersonnelNumberTextBox.Text, out var personnelCode))
-    //        {
-    //            // Got a valid int.
-    //            if (App.EmployeeDict.TryGetValue(personnelCode, out var _employee))
-    //            {
-    //                // Got a valid employee.
-
-    //                ConsoleService.WriteLine( _employee.SignIn() );
-    //            }
-    //            else { ConsoleService.WriteLine("Invalid Personnel Number."); }
-    //        }
-    //        else
-    //        {
-    //            // Didn't get a valid int.
-    //            ConsoleService.WriteLine("Invalid Personnel Number.");
-    //        }
-    //        PersonnelNumberTextBox.Text = "";
-
-    //        e.Handled = true; // Optionally, prevent the default behavior of the Enter key
-    //    }
-    //}
-
-    //private void PersonnelNumberTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
-    //{
-    //    if (e.Key == VirtualKey.Enter)
-    //    {
-    //        if (int.TryParse(PersonnelNumberTextBox.Text, out var personnelCode))
-    //        {
-    //            // Got a valid int.
-    //            if (App.EmployeeDict.TryGetValue(personnelCode, out var employee))
-    //            {
-    //                DateTime now = DateTime.Now;
-    //                string message;
-
-    //                // Determine if it’s a valid sign-in time for the employee's shift
-    //                bool isValidDayShiftSignIn = employee.ShiftType == "DS" && now.Hour >= 4 && now.Hour < 16;
-    //                bool isValidNightShiftSignIn = employee.ShiftType == "NS" && (now.Hour >= 16 || now.Hour < 4);
-
-    //                if (employee.SignInTime.HasValue && !employee.SignOutTime.HasValue)
-    //                {
-    //                    // Already signed in and it's not a valid sign-in time, so sign out
-    //                    message = employee.SignOut();
-    //                }
-    //                else if (isValidDayShiftSignIn || isValidNightShiftSignIn)
-    //                {
-    //                    // Valid sign-in time for shift, so sign in
-    //                    message = employee.SignIn();
-    //                }
-    //                else
-    //                {
-    //                    // Invalid sign-in time
-    //                    message = "Invalid sign-in time for shift. Please try again during the appropriate hours.";
-    //                }
-
-    //                ConsoleService.WriteLine(message);
-    //            }
-    //            else
-    //            {
-    //                ConsoleService.WriteLine("Invalid Personnel Number.");
-    //            }
-    //        }
-    //        else
-    //        {
-    //            // Didn't get a valid int.
-    //            ConsoleService.WriteLine("Invalid Personnel Number.");
-    //        }
-
-    //        // Clear the input
-    //        PersonnelNumberTextBox.Text = "";
-
-    //        // Optionally, prevent the default behavior of the Enter key
-    //        e.Handled = true;
-    //    }
-    //}
-
+      
     private void PersonnelNumberTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
     {
         if (e.Key == VirtualKey.Enter)
