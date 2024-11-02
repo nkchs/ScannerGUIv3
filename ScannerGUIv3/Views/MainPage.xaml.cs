@@ -8,6 +8,8 @@ using Application = Microsoft.UI.Xaml.Application;
 using ScannerGUIv3.Definitions;
 using Microsoft.UI.Xaml.Input;
 using Windows.System;
+using ScannerGUIv3.Services;
+using Microsoft.UI.Xaml.Controls;
 
 namespace ScannerGUIv3.Views;
 
@@ -26,9 +28,14 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         Console.WriteLine("Initializing Main Page.");
 
         InitializeComponent();
+        ConsoleService.Initialize(ConsoleOutput); // Initialize with the console TextBox
+        Loaded += OnLoaded;
     }
 
-
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        PersonnelNumberTextBox.Focus(FocusState.Programmatic);
+    }
 
     static void ExcelLoader()
     {
@@ -66,41 +73,37 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         Marshal.ReleaseComObject(excel_);
     }
 
-
     private void signInButton_Click(object sender, RoutedEventArgs e)
     {
-
-        signInButton.Content = "Clicked";
-
         if (int.TryParse(PersonnelNumberTextBox.Text, out var personnelCode))
         {
-            Console.WriteLine("Personnel Code: " + personnelCode);
-
             if (App.EmployeeDict.TryGetValue(personnelCode, out var employee))
             {
-                Console.WriteLine(employee.Name);
-                employee.SignIn();
+                ConsoleService.WriteLine( employee.SignIn() );
             }
         }
         else
         {
-            Console.WriteLine("Invalid Personnel Code.");
+            ConsoleService.WriteLine("Invalid Personnel Code.");
         }
-
-        //ExcelLoader();
-        //var PersonnelCode = int.Parse(PersonnelNumberTextBox.Text);
-        //Console.WriteLine("Personnel Code: " + PersonnelCode);
-        //if ( App.EmployeeDict.TryGetValue(PersonnelCode, out var employee) )
-        //{
-        //    Console.Write(employee.Name);
-        //    employee.SignIn();
-        //}
-        //App.EmployeeDict<>;
-
-        signInButton.Content = "Sign In";
         PersonnelNumberTextBox.Text = "";
     }
 
+    private void signOutButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (int.TryParse(PersonnelNumberTextBox.Text, out var personnelCode))
+        {
+            if (App.EmployeeDict.TryGetValue(personnelCode, out var employee))
+            {
+                ConsoleService.WriteLine( employee.SignOut() );
+            }
+        }
+        else
+        {
+            ConsoleService.WriteLine("Invalid Personnel Code.");
+        }
+        PersonnelNumberTextBox.Text = "";
+    }
 
     private void debugButton_Click(object sender, RoutedEventArgs e)
     {
@@ -113,7 +116,6 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         Console.WriteLine("Recorded DateTime: " + App.currentDate);
         Console.WriteLine("Current DateTime: " + DateTime.Now);
 
-
         Console.WriteLine(App.currentDate.Day);
 
         Console.WriteLine("Week Number: " + App.weekNumber);
@@ -123,40 +125,152 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         Console.WriteLine("Week Number: " + App.weekNumber);
         Console.ResetColor();
 
-
         Console.WriteLine("");
-
-        // Old Code
-        //Console.WriteLine("Bounds:" + App.MainWindow.Bounds.ToString());
     }
 
+    //private void PersonnelNumberTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
+    //{
+    //    if (e.Key == VirtualKey.Enter)
+    //    {
+    //        if (int.TryParse(PersonnelNumberTextBox.Text, out var personnelCode))
+    //        {
+    //            // Got a valid int.
+    //            if (App.EmployeeDict.TryGetValue(personnelCode, out var _employee))
+    //            {
+    //                // Got a valid employee.
+
+    //                ConsoleService.WriteLine( _employee.SignIn() );
+    //            }
+    //            else { ConsoleService.WriteLine("Invalid Personnel Number."); }
+    //        }
+    //        else
+    //        {
+    //            // Didn't get a valid int.
+    //            ConsoleService.WriteLine("Invalid Personnel Number.");
+    //        }
+    //        PersonnelNumberTextBox.Text = "";
+
+    //        e.Handled = true; // Optionally, prevent the default behavior of the Enter key
+    //    }
+    //}
+
+    //private void PersonnelNumberTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
+    //{
+    //    if (e.Key == VirtualKey.Enter)
+    //    {
+    //        if (int.TryParse(PersonnelNumberTextBox.Text, out var personnelCode))
+    //        {
+    //            // Got a valid int.
+    //            if (App.EmployeeDict.TryGetValue(personnelCode, out var employee))
+    //            {
+    //                DateTime now = DateTime.Now;
+    //                string message;
+
+    //                // Determine if it’s a valid sign-in time for the employee's shift
+    //                bool isValidDayShiftSignIn = employee.ShiftType == "DS" && now.Hour >= 4 && now.Hour < 16;
+    //                bool isValidNightShiftSignIn = employee.ShiftType == "NS" && (now.Hour >= 16 || now.Hour < 4);
+
+    //                if (employee.SignInTime.HasValue && !employee.SignOutTime.HasValue)
+    //                {
+    //                    // Already signed in and it's not a valid sign-in time, so sign out
+    //                    message = employee.SignOut();
+    //                }
+    //                else if (isValidDayShiftSignIn || isValidNightShiftSignIn)
+    //                {
+    //                    // Valid sign-in time for shift, so sign in
+    //                    message = employee.SignIn();
+    //                }
+    //                else
+    //                {
+    //                    // Invalid sign-in time
+    //                    message = "Invalid sign-in time for shift. Please try again during the appropriate hours.";
+    //                }
+
+    //                ConsoleService.WriteLine(message);
+    //            }
+    //            else
+    //            {
+    //                ConsoleService.WriteLine("Invalid Personnel Number.");
+    //            }
+    //        }
+    //        else
+    //        {
+    //            // Didn't get a valid int.
+    //            ConsoleService.WriteLine("Invalid Personnel Number.");
+    //        }
+
+    //        // Clear the input
+    //        PersonnelNumberTextBox.Text = "";
+
+    //        // Optionally, prevent the default behavior of the Enter key
+    //        e.Handled = true;
+    //    }
+    //}
 
     private void PersonnelNumberTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
     {
         if (e.Key == VirtualKey.Enter)
         {
-            Console.WriteLine("Struck Enter.");
             if (int.TryParse(PersonnelNumberTextBox.Text, out var personnelCode))
             {
-                Console.WriteLine("Personnel Number: " + personnelCode);
-
+                // Got a valid int.
                 if (App.EmployeeDict.TryGetValue(personnelCode, out var employee))
                 {
-                    //Console.WriteLine(employee.Name);
-                    //employee.SignIn();
+                    DateTime now = DateTime.Now;
+                    string message;
+
+                    // Define a cooldown period of 10 seconds for individual employees
+                    TimeSpan cooldownPeriod = TimeSpan.FromSeconds(10);
+
+                    // Check if the last action for this specific employee was within the cooldown period
+                    bool isWithinCooldownPeriod = (employee.SignInTime.HasValue && (now - employee.SignInTime.Value) < cooldownPeriod)
+                                                  || (employee.SignOutTime.HasValue && (now - employee.SignOutTime.Value) < cooldownPeriod);
+
+                    if (isWithinCooldownPeriod)
+                    {
+                        message = $"{employee.Name} attempted action too soon. Please wait a few seconds before trying again.";
+                    }
+                    else
+                    {
+                        // Determine if it’s a valid sign-in time for the employee's shift
+                        bool isValidDayShiftSignIn = employee.ShiftType == "DS" && now.Hour >= 4 && now.Hour < 16;
+                        bool isValidNightShiftSignIn = employee.ShiftType == "NS" && (now.Hour >= 16 || now.Hour < 4);
+
+                        if (employee.SignInTime.HasValue && !employee.SignOutTime.HasValue)
+                        {
+                            // Already signed in and it's not a valid sign-in time, so sign out
+                            message = employee.SignOut();
+                        }
+                        else if (isValidDayShiftSignIn || isValidNightShiftSignIn)
+                        {
+                            // Valid sign-in time for shift, so sign in
+                            message = employee.SignIn();
+                        }
+                        else
+                        {
+                            // Invalid sign-in time
+                            message = "Invalid sign-in time for shift. Please try again during the appropriate hours.";
+                        }
+                    }
+
+                    ConsoleService.WriteLine(message);
+                }
+                else
+                {
+                    ConsoleService.WriteLine("Invalid Personnel Number.");
                 }
             }
             else
             {
-                Console.WriteLine("Invalid Personnel Number.");
+                // Didn't get a valid int.
+                ConsoleService.WriteLine("Invalid Personnel Number.");
             }
+
+            // Clear the input
             PersonnelNumberTextBox.Text = "";
-            // Call your function here
-            //Console.WriteLine(PersonnelNumberTextBox.Text);
 
             // Optionally, prevent the default behavior of the Enter key
             e.Handled = true;
         }
     }
-
 }

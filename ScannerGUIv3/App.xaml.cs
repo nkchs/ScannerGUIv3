@@ -105,7 +105,9 @@ public partial class App : Application
     public static Dictionary<int, Employee> EmployeeDict { get; } = new Dictionary<int, Employee>();
     // ########## Dictionary Declarations ########## //
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     public App()
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     {
         //Console.WriteLine("Current Week Number: " + weekNumber);
         // DICTIONARY STUFF
