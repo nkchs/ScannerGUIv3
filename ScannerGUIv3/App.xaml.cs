@@ -25,7 +25,7 @@ using System.Runtime.InteropServices;
 
 namespace ScannerGUIv3;
 
-// To learn more about WinUI 3, see https://docs.microsoft.com/windows/apps/winui/winui3/.
+// To learn more about WinUI 3, see https://docs.microsoft.com/windows/apps/winui/winui3/
 public partial class App : Application
 {
     public IConfiguration Configuration
@@ -62,15 +62,25 @@ public partial class App : Application
 
 
     // ########## Variable Declarations ########## //
+    // Time variables //
     public static DateTime currentDate = DateTime.Now;
     public static Calendar calendar = CultureInfo.CurrentCulture.Calendar;
     public static int weekNumber = calendar.GetWeekOfYear(currentDate, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+    
+    public static DateTime today = DateTime.Today;
+    // Define start and end times for day and night shifts
+    public static DateTime dayShiftStart = today.AddHours(6);   // 6am on the same day
+    public static DateTime dayShiftEnd = today.AddHours(18);    // 6pm on the same day
 
+    public static DateTime nightShiftStart = today.AddHours(18); // 6pm on the same day
+    public static DateTime nightShiftEnd = today.AddDays(1).AddHours(6); // 6am on the following day
+
+
+    // URLs and Strings //
     public static string sharepointBaseURL = @"https://newcrestmining.sharepoint.com/:f:/r/teams/
                                                TelferMaint-Mill/Shared%20Documents/Attendance%20Register/
                                                FPM%20Daily%20Sign%20On/Development";
     public static string excelWeeklyAddress = sharepointBaseURL + @"/Week " + weekNumber + ".xlsm";
-
     //public static string excelWeeklyAddress = @"C:\Users\ChaseN" + @"\Week " + weekNumber + ".xlsx";
     public static string excelResourcesOnSiteAddress = @"" + "ResourceOnSite_" + currentDate.ToString("yyyyMMdd") + ".xlsx";
 
@@ -92,7 +102,6 @@ public partial class App : Application
 
 
     // ########## Dictionary Declarations ########## //
-    //public Dictionary<int, Employee> employeeDict = new();
     public static Dictionary<int, Employee> EmployeeDict { get; } = new Dictionary<int, Employee>();
     // ########## Dictionary Declarations ########## //
 
@@ -148,12 +157,6 @@ public partial class App : Application
             services.AddTransient<SettingsPage>();
             services.AddTransient<DataGridViewModel>();
             services.AddTransient<DataGridPage>();
-            //services.AddTransient<ContentGridDetailViewModel>();
-            //services.AddTransient<ContentGridDetailPage>();
-            //services.AddTransient<ContentGridViewModel>();
-            //services.AddTransient<ContentGridPage>();
-            //services.AddTransient<ListDetailsViewModel>();
-            //services.AddTransient<ListDetailsPage>();
             services.AddTransient<BlankViewModel>();
             services.AddTransient<BlankPage>();
             services.AddTransient<MainViewModel>();
@@ -166,21 +169,21 @@ public partial class App : Application
         }).
         Build();
 
-
-        // MORE DICTIONARY STUFF
+        // Define the url for the excel spreadsheet.
+        // TODO: This logic needs to be updated to find the excel.
+        // Async function to fill the dictionary with employee values.
         var resourcesOnSiteExcelUrl = @"https://newcrestmining.sharepoint.com/:x:/r/teams/TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/Development/ResourceOnSite_20241030043004.xlsx";
-        //PopulateEmployeeDictionary(EmployeeDict, resourcesOnSiteExcelUrl);
         _ = InitializeEmployeeDictionaryAsync(EmployeeDict, resourcesOnSiteExcelUrl);
 
-        // TIMER Setup
-        //SetupDailyScheduler();
-        // END TIMER
+        // TIMER Setup. Enable the daily scheduler. This is the basis of the timers.
+        SetupDailyScheduler();
+        // END TIMER Setup
 
-        UnhandledException += App_UnhandledException;
+        UnhandledException += App_UnhandledException; // From the default generator.
     }
 
 
-    // Call this during startup
+    // Async function to populate the employee dictionary while 
     private async Task InitializeEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, string resourcesOnSiteExcelUrl)
     {
         await Task.Run(() => PopulateEmployeeDictionary(employeeDict, resourcesOnSiteExcelUrl));
@@ -269,8 +272,6 @@ public partial class App : Application
                 employeeDict.Add(_personNumber, new Employee(_personNumber, _personName,_shiftType));
             }
         }
-
-
         //Console.WriteLine("Debug");
         excelWorkbook.Close(false, null, null);
         excel_.Quit();
@@ -282,7 +283,6 @@ public partial class App : Application
 
 
     // ########## TIMER FUNCS ########## //
-    // ################################# //
     public void SetupDailyScheduler()
     {
         ScheduleNextTask();
@@ -291,7 +291,6 @@ public partial class App : Application
 
     private void ScheduleNextTask()
     {
-        // 
         var now = DateTime.Now;
         var timeUntilNextTask = GetNextScheduledTime(now);
         // Set the timer to trigger at the calculated interval
@@ -335,12 +334,11 @@ public partial class App : Application
     private void PerformScheduledOperation()
     {
         // Your task code here, which runs at 5:00 AM, 5:00 PM, and midnight
-        Console.WriteLine("Scheduled operation executed at " + DateTime.Now);
+        ConsoleService.WriteLine("Scheduled operation executed at " + DateTime.Now);
     }
 
 
     // ########## Management FUNCS ########## //
-    // ################################# //
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
         // TODO: Log and handle exceptions as appropriate.
