@@ -279,6 +279,10 @@ public partial class App : Application
         Marshal.ReleaseComObject(excel_);
     }
 
+    public void PopulateEmployeeDictionaryUsingXML(Dictionary<int, Employee> employeeDict, string excelPath)
+    {
+    }
+
     // ########## Dictionary ########## //
 
 

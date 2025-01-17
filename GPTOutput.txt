@@ -1,0 +1,110 @@
+
+
+https://newcrestmining.sharepoint.com/sites/TelferPerformanceTeam/PBiRoster/Shared%20Documents/SRF175%20Roster%20to%20Excel%20LastMonth_Today_plus90.xlsx
+
+
+
+string sharePointUrl = "https://yoursharepointsite.sharepoint.com/sites/yoursite";
+string filePathOnSharePoint = "/Shared Documents/YourFolder/YourFile.xlsx";
+
+string sharePointUrl = "https://newcrestmining.sharepoint.com/sites/TelferPerformanceTeam";
+string filePathOnSharePoint = "/PBiRoster/Shared%20Documents/SRF175%20Roster%20to%20Excel%20LastMonth_Today_plus90.xlsx";
+
+string sharePointUrl = "https://newcrestmining.sharepoint.com/sites/TelferPerformanceTeam/PBiRoster";
+string filePathOnSharePoint = "/Shared%20Documents/SRF175%20Roster%20to%20Excel%20LastMonth_Today_plus90.xlsx";
+
+
+
+using System;
+using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
+
+class Program
+{
+    static async System.Threading.Tasks.Task Main(string[] args)
+    {
+        string sharePointUrl = "https://yoursharepointsite.sharepoint.com/sites/yoursite";
+        string filePathOnSharePoint = "/Shared Documents/YourFolder/YourFile.xlsx";
+        string localFilePath = @"C:\temp\DownloadedFile.xlsx";
+        string username = "yourusername@yourdomain.com";
+        string password = "yourpassword";
+
+        // Download the file
+        bool success = await DownloadFileFromSharePoint(sharePointUrl, filePathOnSharePoint, localFilePath, username, password);
+        if (!success)
+        {
+            Console.WriteLine("Failed to download file from SharePoint.");
+            return;
+        }
+
+        // Open the downloaded Excel file using OpenXML
+        using (SpreadsheetDocument spreadsheetDocument = SpreadsheetDocument.Open(localFilePath, false))
+        {
+            WorkbookPart workbookPart = spreadsheetDocument.WorkbookPart;
+            Sheet sheet = workbookPart.Workbook.Sheets.Elements<Sheet>().FirstOrDefault();
+            if (sheet == null)
+            {
+                Console.WriteLine("No sheets found in the Excel file.");
+                return;
+            }
+
+            WorksheetPart worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
+            SheetData sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
+            foreach (Row row in sheetData.Elements<Row>())
+            {
+                foreach (Cell cell in row.Elements<Cell>())
+                {
+                    string cellValue = GetCellValue(cell, workbookPart);
+                    Console.Write($"{cellValue}\t");
+                }
+                Console.WriteLine();
+            }
+        }
+    }
+
+    static async System.Threading.Tasks.Task<bool> DownloadFileFromSharePoint(string siteUrl, string fileUrl, string localFilePath, string username, string password)
+    {
+        try
+        {
+            using (var handler = new HttpClientHandler { Credentials = new System.Net.NetworkCredential(username, password) })
+            using (var client = new HttpClient(handler))
+            {
+                string fullUrl = $"{siteUrl}/_api/web/getfilebyserverrelativeurl('{fileUrl}')/$value";
+                HttpResponseMessage response = await client.GetAsync(fullUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    byte[] fileBytes = await response.Content.ReadAsByteArrayAsync();
+                    File.WriteAllBytes(localFilePath, fileBytes);
+                    return true;
+                }
+                else
+                {
+                    Console.WriteLine($"Error: {response.StatusCode} - {response.ReasonPhrase}");
+                    return false;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception: {ex.Message}");
+            return false;
+        }
+    }
+
+    static string GetCellValue(Cell cell, WorkbookPart workbookPart)
+    {
+        if (cell.CellValue == null) return string.Empty;
+
+        string value = cell.CellValue.Text;
+        if (cell.DataType != null && cell.DataType.Value == CellValues.SharedString)
+        {
+            SharedStringTablePart sharedStringTablePart = workbookPart.SharedStringTablePart;
+            return sharedStringTablePart.SharedStringTable.Elements<SharedStringItem>().ElementAt(int.Parse(value)).InnerText;
+        }
+        return value;
+    }
+}

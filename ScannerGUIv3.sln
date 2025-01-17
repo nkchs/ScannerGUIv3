@@ -7,6 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScannerGUIv3", "ScannerGUIv
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScannerGUIv3.Core", "ScannerGUIv3.Core\ScannerGUIv3.Core.csproj", "{26401993-5DD9-42E3-862E-D5285D41C723}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A5AA0959-1B47-465C-B48C-B7C75A1C39AF}"
+	ProjectSection(SolutionItems) = preProject
+		GPTOutput.txt = GPTOutput.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
