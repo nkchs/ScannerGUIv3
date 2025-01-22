@@ -243,35 +243,36 @@ public partial class App : Application
         //////////////////////////////////////////////////////////////////////////////////
 
 
-        for (var i = 1; i < maxRow; i++)
-        {
-            //var _personName = reducedNameRange.Cells[i, 1].Value2;
-            var _personName = excelRange[i, nameColumnNumber].Value2;
-            if (_personName == null)
-            {
-                //Console.WriteLine("i: " + i + " null");
-            }
-            else if (_personName == "Name")
-            {
-                //Console.Write("i: " + i + " " + _personName + " ");
-                //Console.Write(excelRange[i, personNumberColumnNumber].Value2 + " ");
-                //Console.Write(excelRange[i, shiftStatusColumnNumber].Value2 + Environment.NewLine);
-            }
-            else
-            {
-                int _personNumber = int.Parse( excelRange[i, personNumberColumnNumber].Value2 );
-                // Could change the above to int.TryParse;
-                string _shiftType = excelRange[i, shiftStatusColumnNumber].Value2;
+        //for (var i = 1; i < maxRow; i++)
+        //{
+        //    //var _personName = reducedNameRange.Cells[i, 1].Value2;
+        //    var _personName = excelRange[i, nameColumnNumber].Value2;
+        //    if (_personName == null)
+        //    {
+        //        //Console.WriteLine("i: " + i + " null");
+        //    }
+        //    else if (_personName == "Name")
+        //    {
+        //        //Console.Write("i: " + i + " " + _personName + " ");
+        //        //Console.Write(excelRange[i, personNumberColumnNumber].Value2 + " ");
+        //        //Console.Write(excelRange[i, shiftStatusColumnNumber].Value2 + Environment.NewLine);
+        //    }
+        //    else
+        //    {
+        //        int _personNumber = int.Parse( excelRange[i, personNumberColumnNumber].Value2 );
+        //        // Could change the above to int.TryParse;
+        //        string _shiftType = excelRange[i, shiftStatusColumnNumber].Value2;
 
-                string message = "i: " + i + " " + _personName + " " +
-                    excelRange[i, personNumberColumnNumber].Value2 + " " +
-                    excelRange[i, shiftStatusColumnNumber].Value2;
-                //ConsoleService.WriteLine(message);
-                //Console.WriteLine(message);
+        //        string message = "i: " + i + " " + _personName + " " +
+        //            excelRange[i, personNumberColumnNumber].Value2 + " " +
+        //            excelRange[i, shiftStatusColumnNumber].Value2;
+        //        //ConsoleService.WriteLine(message);
+        //        //Console.WriteLine(message);
 
-                employeeDict.Add(_personNumber, new Employee(_personNumber, _personName,_shiftType));
-            }
-        }
+        //        employeeDict.Add(_personNumber, new Employee(_personNumber, _personName,_shiftType));
+        //    }
+        //}
+
         //Console.WriteLine("Debug");
         excelWorkbook.Close(false, null, null);
         excel_.Quit();
@@ -324,14 +325,17 @@ public partial class App : Application
         {
             //DateTime next = now.Date + now.TimeOfDay + time;
             var next = now.Date + time;
-            if (next > now) return next - now;
+            if (next > now)
+            {
+                return next - now;
+            }
         }
         // If all times are in the past, the next scheduled time is tomorrow at the first time
         return (now.Date.AddDays(1) + scheduleTimes[0]) - now;
     }
 
 
-    private void PerformScheduledOperation()
+    private static void PerformScheduledOperation()
     {
         // Your task code here, which runs at 5:00 AM, 5:00 PM, and midnight
         ConsoleService.WriteLine("Scheduled operation executed at " + DateTime.Now);
