@@ -243,35 +243,35 @@ public partial class App : Application
         //////////////////////////////////////////////////////////////////////////////////
 
 
-        //for (var i = 1; i < maxRow; i++)
-        //{
-        //    //var _personName = reducedNameRange.Cells[i, 1].Value2;
-        //    var _personName = excelRange[i, nameColumnNumber].Value2;
-        //    if (_personName == null)
-        //    {
-        //        //Console.WriteLine("i: " + i + " null");
-        //    }
-        //    else if (_personName == "Name")
-        //    {
-        //        //Console.Write("i: " + i + " " + _personName + " ");
-        //        //Console.Write(excelRange[i, personNumberColumnNumber].Value2 + " ");
-        //        //Console.Write(excelRange[i, shiftStatusColumnNumber].Value2 + Environment.NewLine);
-        //    }
-        //    else
-        //    {
-        //        int _personNumber = int.Parse( excelRange[i, personNumberColumnNumber].Value2 );
-        //        // Could change the above to int.TryParse;
-        //        string _shiftType = excelRange[i, shiftStatusColumnNumber].Value2;
+        for (var i = 1; i < maxRow; i++)
+        {
+            //var _personName = reducedNameRange.Cells[i, 1].Value2;
+            var _personName = excelRange[i, nameColumnNumber].Value2;
+            if (_personName == null)
+            {
+                //Console.WriteLine("i: " + i + " null");
+            }
+            else if (_personName == "Name")
+            {
+                //Console.Write("i: " + i + " " + _personName + " ");
+                //Console.Write(excelRange[i, personNumberColumnNumber].Value2 + " ");
+                //Console.Write(excelRange[i, shiftStatusColumnNumber].Value2 + Environment.NewLine);
+            }
+            else
+            {
+                var _personNumber = int.Parse(excelRange[i, personNumberColumnNumber].Value2);
+                // Could change the above to int.TryParse;
+                string _shiftType = excelRange[i, shiftStatusColumnNumber].Value2;
 
-        //        string message = "i: " + i + " " + _personName + " " +
-        //            excelRange[i, personNumberColumnNumber].Value2 + " " +
-        //            excelRange[i, shiftStatusColumnNumber].Value2;
-        //        //ConsoleService.WriteLine(message);
-        //        //Console.WriteLine(message);
+                string message = "i: " + i + " " + _personName + " " +
+                    excelRange[i, personNumberColumnNumber].Value2 + " " +
+                    excelRange[i, shiftStatusColumnNumber].Value2;
+                //ConsoleService.WriteLine(message);
+                //Console.WriteLine(message);
 
-        //        employeeDict.Add(_personNumber, new Employee(_personNumber, _personName,_shiftType));
-        //    }
-        //}
+                employeeDict.Add(_personNumber, new Employee(_personNumber, _personName, _shiftType));
+            }
+        }
 
         //Console.WriteLine("Debug");
         excelWorkbook.Close(false, null, null);
