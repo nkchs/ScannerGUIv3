@@ -77,12 +77,12 @@ public partial class App : Application
 
 
     // URLs and Strings //
-    public static string sharepointBaseURL = @"https://newcrestmining.sharepoint.com/:f:/r/teams/
-                                               TelferMaint-Mill/Shared%20Documents/Attendance%20Register/
-                                               FPM%20Daily%20Sign%20On/Development";
-    public static string excelWeeklyAddress = sharepointBaseURL + @"/Week " + weekNumber + ".xlsm";
+    //public static string sharepointBaseURL = @"https://newcrestmining.sharepoint.com/:f:/r/teams/
+                                               //TelferMaint-Mill/Shared%20Documents/Attendance%20Register/
+                                               //FPM%20Daily%20Sign%20On/Development";
+    //public static string excelWeeklyAddress = sharepointBaseURL + @"/Week " + weekNumber + ".xlsm";
     //public static string excelWeeklyAddress = @"C:\Users\ChaseN" + @"\Week " + weekNumber + ".xlsx";
-    public static string excelResourcesOnSiteAddress = @"" + "ResourceOnSite_" + currentDate.ToString("yyyyMMdd") + ".xlsx";
+    //public static string excelResourcesOnSiteAddress = @"" + "ResourceOnSite_" + currentDate.ToString("yyyyMMdd") + ".xlsx";
 
     // ########## End Variable Declarations ########## //
 
@@ -111,11 +111,7 @@ public partial class App : Application
     {
         //Console.WriteLine("Current Week Number: " + weekNumber);
         // DICTIONARY STUFF
-        //Dictionary<int, Employee> employeeDict = new Dictionary<int, Employee>();
-        //var resourcesOnSiteExcelUrl = @"https://newcrestmining-my.sharepoint.com/personal/
-        //nic_chase_newcrest_com_au/Documents/Documents/Projects/Scanner/ResourceOnSite_20240620043001.xlsx";
-        //var resourcesOnSiteExcelUrl = @"https://newcrestmining.sharepoint.com/:x:/r/teams/
-        //TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/Development/ResourceOnSite_20241030043004.xlsx";
+
         // END DICTIONARY STUFF
 
 
@@ -172,7 +168,8 @@ public partial class App : Application
         // Define the url for the excel spreadsheet.
         // TODO: This logic needs to be updated to find the excel.
         // Async function to fill the dictionary with employee values.
-        var resourcesOnSiteExcelUrl = @"https://newcrestmining.sharepoint.com/:x:/r/teams/TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/Development/ResourceOnSite_20241030043004.xlsx";
+        // var resourcesOnSiteExcelUrl = @"https://newcrestmining.sharepoint.com/:x:/r/teams/TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/Development/ResourceOnSite_20241030043004.xlsx";
+        var resourcesOnSiteExcelUrl = @"C:\\Users\\nicch\\source\\repos\\nkchs\\ScannerGUIv3\\Resources\\SRF175 Roster to Excel Today_90days.xlsx";
         _ = InitializeEmployeeDictionaryAsync(EmployeeDict, resourcesOnSiteExcelUrl);
 
         // TIMER Setup. Enable the daily scheduler. This is the basis of the timers.
