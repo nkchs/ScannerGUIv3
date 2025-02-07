@@ -32,7 +32,7 @@ public class Employee
             {
                 shiftType = "NS";  // Night Shift
             }
-            else if (value.Equals("RO", StringComparison.OrdinalIgnoreCase))
+            else if (value.Equals("RR", StringComparison.OrdinalIgnoreCase))
             {
                 shiftType = "RO";  // Rostered Offsite
             }

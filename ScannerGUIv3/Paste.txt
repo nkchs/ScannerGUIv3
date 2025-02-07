@@ -1,0 +1,72 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
+
+public static class ExcelProcessor
+{
+    public static Dictionary<int, Employee> EmployeeDict { get; } = new Dictionary<int, Employee>();
+
+    public static void PopulateEmployeeDictionary(string filePath)
+    {
+        using (SpreadsheetDocument doc = SpreadsheetDocument.Open(filePath, false))
+        {
+            WorkbookPart workbookPart = doc.WorkbookPart;
+            Sheet sheet = workbookPart.Workbook.Descendants<Sheet>().FirstOrDefault();
+            if (sheet == null) return;
+            
+            WorksheetPart worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
+            SheetData sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
+            if (sheetData == null) return;
+            
+            Dictionary<int, DateTime> dateHeaders = new Dictionary<int, DateTime>();
+            
+            // Read Date Headers from D9 to CP9
+            Row headerRow = sheetData.Elements<Row>().FirstOrDefault(r => r.RowIndex == 9);
+            if (headerRow != null)
+            {
+                foreach (Cell cell in headerRow.Elements<Cell>())
+                {
+                    string cellValue = GetCellValue(cell, workbookPart);
+                    if (DateTime.TryParse(cellValue, out DateTime date))
+                    {
+                        dateHeaders[cell.CellReference.Value[0] - 'D'] = date;
+                    }
+                }
+            }
+            
+            // Read employee data from A9 onwards
+            foreach (Row row in sheetData.Elements<Row>().Where(r => r.RowIndex >= 10))
+            {
+                string firstName = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(0), workbookPart);
+                string surname = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(1), workbookPart);
+                string personnelCodeStr = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(2), workbookPart);
+                
+                if (int.TryParse(personnelCodeStr, out int personnelCode))
+                {
+                    Employee employee = new Employee(personnelCode, firstName + " " + surname, "");
+                    
+                    foreach (var entry in dateHeaders)
+                    {
+                        string shiftValue = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(entry.Key + 3), workbookPart);
+                        employee.ShiftType = shiftValue;
+                    }
+                    
+                    EmployeeDict[personnelCode] = employee;
+                }
+            }
+        }
+    }
+    
+    private static string GetCellValue(Cell cell, WorkbookPart workbookPart)
+    {
+        if (cell == null || cell.CellValue == null) return string.Empty;
+        string value = cell.CellValue.InnerText;
+        if (cell.DataType != null && cell.DataType.Value == CellValues.SharedString)
+        {
+            return workbookPart.SharedStringTablePart.SharedStringTable.Elements<SharedStringItem>().ElementAt(int.Parse(value)).InnerText;
+        }
+        return value;
+    }
+}

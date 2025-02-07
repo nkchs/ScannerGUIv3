@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
-using System.Timers;
+//using System.Timers;
 using Timer = System.Timers.Timer;
 using Microsoft.UI.Dispatching;
 
@@ -18,9 +18,12 @@ using ScannerGUIv3.Views;
 using ScannerGUIv3.Helpers;
 using ScannerGUIv3.Definitions;
 using Microsoft.Office.Interop.Excel;
-using Range = Microsoft.Office.Interop.Excel.Range;
+//using Range = Microsoft.Office.Interop.Excel.Range;
 using Application = Microsoft.UI.Xaml.Application;
 using System.Runtime.InteropServices;
+
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 
 namespace ScannerGUIv3;
@@ -65,7 +68,7 @@ public partial class App : Application
     // Time variables //
     public static DateTime currentDate = DateTime.Now;
     public static Calendar calendar = CultureInfo.CurrentCulture.Calendar;
-    public static int weekNumber = calendar.GetWeekOfYear(currentDate, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+    //public static int weekNumber = calendar.GetWeekOfYear(currentDate, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
     
     public static DateTime today = DateTime.Today;
     // Define start and end times for day and night shifts
@@ -77,12 +80,7 @@ public partial class App : Application
 
 
     // URLs and Strings //
-    //public static string sharepointBaseURL = @"https://newcrestmining.sharepoint.com/:f:/r/teams/
-                                               //TelferMaint-Mill/Shared%20Documents/Attendance%20Register/
-                                               //FPM%20Daily%20Sign%20On/Development";
-    //public static string excelWeeklyAddress = sharepointBaseURL + @"/Week " + weekNumber + ".xlsm";
-    //public static string excelWeeklyAddress = @"C:\Users\ChaseN" + @"\Week " + weekNumber + ".xlsx";
-    //public static string excelResourcesOnSiteAddress = @"" + "ResourceOnSite_" + currentDate.ToString("yyyyMMdd") + ".xlsx";
+
 
     // ########## End Variable Declarations ########## //
 
@@ -114,16 +112,13 @@ public partial class App : Application
 
         // END DICTIONARY STUFF
 
-
         // CONFIG Setup START
         //var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
         //Configuration = builder.Build();
         // CONFIG Setup END
 
-
         //Console.WriteLine("Initializing App.");      
         InitializeComponent();
-
 
         Host = Microsoft.Extensions.Hosting.Host.
         CreateDefaultBuilder().
@@ -168,7 +163,6 @@ public partial class App : Application
         // Define the url for the excel spreadsheet.
         // TODO: This logic needs to be updated to find the excel.
         // Async function to fill the dictionary with employee values.
-        // var resourcesOnSiteExcelUrl = @"https://newcrestmining.sharepoint.com/:x:/r/teams/TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/Development/ResourceOnSite_20241030043004.xlsx";
         var resourcesOnSiteExcelUrl = @"C:\\Users\\nicch\\source\\repos\\nkchs\\ScannerGUIv3\\Resources\\SRF175 Roster to Excel Today_90days.xlsx";
         _ = InitializeEmployeeDictionaryAsync(EmployeeDict, resourcesOnSiteExcelUrl);
 
@@ -192,12 +186,12 @@ public partial class App : Application
     {
         var excel_ = new Microsoft.Office.Interop.Excel.Application
         {
-            Visible = false,
-            //Visible = true,
+            //Visible = false,
+            Visible = true,
         };
 
         var excelWorkbook = excel_.Workbooks.Open(excelPath, ReadOnly: true);
-        var excelWorksheet = (Worksheet)excelWorkbook.Sheets[3];
+        var excelWorksheet = (Microsoft.Office.Interop.Excel.Worksheet)excelWorkbook.Sheets[3];
         var excelRange = excelWorksheet.UsedRange;
 
         var maxRow = excelRange.Rows.Count;
@@ -278,9 +272,69 @@ public partial class App : Application
 
     public void PopulateEmployeeDictionaryUsingXML(Dictionary<int, Employee> employeeDict, string excelPath)
     {
+        using (SpreadsheetDocument doc = SpreadsheetDocument.Open(excelPath, false))
+        {
+            WorkbookPart workbookPart = doc.WorkbookPart;
+            Sheet sheet = workbookPart.Workbook.Descendants<Sheet>().FirstOrDefault();
+            if (sheet == null) return;
+
+            WorksheetPart worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
+            SheetData sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
+            if (sheetData == null) return;
+
+            Dictionary<int, DateTime> dateHeaders = new Dictionary<int, DateTime>();
+
+            // Read Date Headers from D9 to CP9
+            Row headerRow = sheetData.Elements<Row>().FirstOrDefault(r => r.RowIndex == 9);
+            if (headerRow != null)
+            {
+                foreach (Cell cell in headerRow.Elements<Cell>())
+                {
+                    string cellValue = GetCellValue(cell, workbookPart);
+                    if (DateTime.TryParse(cellValue, out DateTime date))
+                    {
+                        dateHeaders[cell.CellReference.Value[0] - 'D'] = date;
+                    }
+                }
+            }
+
+            // Read employee data from A9 onwards
+            foreach (Row row in sheetData.Elements<Row>().Where(r => r.RowIndex >= 10))
+            {
+                string firstName = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(0), workbookPart);
+                string surname = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(1), workbookPart);
+                string personnelCodeStr = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(2), workbookPart);
+
+                if (int.TryParse(personnelCodeStr, out int personnelCode))
+                {
+                    Employee employee = new Employee(personnelCode, firstName + " " + surname, "");
+
+                    foreach (var entry in dateHeaders)
+                    {
+                        string shiftValue = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(entry.Key + 3), workbookPart);
+                        employee.ShiftType = shiftValue;
+                    }
+
+                    EmployeeDict[personnelCode] = employee;
+                }
+            }
+        }
     }
 
     // ########## Dictionary ########## //
+
+
+    // ########## OpenXML ########## //
+    private static string GetCellValue(Cell cell, WorkbookPart workbookPart)
+    {
+        if (cell == null || cell.CellValue == null) return string.Empty;
+        string value = cell.CellValue.InnerText;
+        if (cell.DataType != null && cell.DataType.Value == CellValues.SharedString)
+        {
+            return workbookPart.SharedStringTablePart.SharedStringTable.Elements<SharedStringItem>().ElementAt(int.Parse(value)).InnerText;
+        }
+        return value;
+    }
 
 
     // ########## TIMER FUNCS ########## //
