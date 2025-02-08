@@ -1,4 +1,4 @@
-﻿using Microsoft.Office.Interop.Excel;
+﻿//using Microsoft.Office.Interop.Excel;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using ScannerGUIv3.ViewModels;
@@ -39,11 +39,11 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
 
     static void ExcelLoader()
     {
-        var excel_ = new Microsoft.Office.Interop.Excel.Application
-        {
-            //Visible = false,
-            Visible = true,
-        };
+        //var excel_ = new Microsoft.Office.Interop.Excel.Application
+        //{
+        //    //Visible = false,
+        //    Visible = true,
+        //};
 
         //var resourcesOneSiteExcelUrl = @"https://newcrestmining-my.sharepoint.com/personal/nic_chase_newcrest_com_au/Documents/Documents/Projects/Scanner/ResourceOnSite_20240620043001.xlsx";
         //string _excelURLOne = @"https://newcrestmining.sharepoint.com/:x:/r/teams/TelferEngineeringReliabilityGovernance/Shared%20Documents/General/Projects/Nic%20Chase/ResourceOnSite.xlsx";

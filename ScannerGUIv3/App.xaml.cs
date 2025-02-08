@@ -17,7 +17,7 @@ using ScannerGUIv3.ViewModels;
 using ScannerGUIv3.Views;
 using ScannerGUIv3.Helpers;
 using ScannerGUIv3.Definitions;
-using Microsoft.Office.Interop.Excel;
+//using Microsoft.Office.Interop.Excel;
 //using Range = Microsoft.Office.Interop.Excel.Range;
 using Application = Microsoft.UI.Xaml.Application;
 using System.Runtime.InteropServices;
@@ -184,17 +184,17 @@ public partial class App : Application
     // ########## Dictionary FUNCS ########## //
     public void PopulateEmployeeDictionary(Dictionary<int, Employee> employeeDict, string excelPath)
     {
-        var excel_ = new Microsoft.Office.Interop.Excel.Application
-        {
-            //Visible = false,
-            Visible = true,
-        };
+        //var excel_ = new Microsoft.Office.Interop.Excel.Application
+        //{
+        //    //Visible = false,
+        //    Visible = true,
+        //};
 
-        var excelWorkbook = excel_.Workbooks.Open(excelPath, ReadOnly: true);
-        var excelWorksheet = (Microsoft.Office.Interop.Excel.Worksheet)excelWorkbook.Sheets[3];
-        var excelRange = excelWorksheet.UsedRange;
+        //var excelWorkbook = excel_.Workbooks.Open(excelPath, ReadOnly: true);
+        //var excelWorksheet = (Microsoft.Office.Interop.Excel.Worksheet)excelWorkbook.Sheets[3];
+        //var excelRange = excelWorksheet.UsedRange;
 
-        var maxRow = excelRange.Rows.Count;
+        //var maxRow = excelRange.Rows.Count;
         //var maxCol = excelRange.Columns.Count;
 
         //Console.WriteLine("Rows: " + maxRow);
@@ -202,11 +202,11 @@ public partial class App : Application
 
         //////////////////////////////////////////////////////////////////////////////////
         // Find the cell containing "Name", this is the first row in the "Name" column.
-        var foundNameCell = excelRange.Find("Name", Type.Missing,
-                XlFindLookIn.xlValues, XlLookAt.xlPart,
-                XlSearchOrder.xlByRows, XlSearchDirection.xlNext,
-                false, Type.Missing, Type.Missing);
-        var nameColumnNumber = foundNameCell.Column;
+        //var foundNameCell = excelRange.Find("Name", Type.Missing,
+        //        XlFindLookIn.xlValues, XlLookAt.xlPart,
+        //        XlSearchOrder.xlByRows, XlSearchDirection.xlNext,
+        //        false, Type.Missing, Type.Missing);
+        //var nameColumnNumber = foundNameCell.Column;
         //Console.WriteLine("Names are in Column: " + foundNameCell.Column);
         //Console.WriteLine("Headers are in Row: " + foundNameCell.Row);
         //////////////////////////////////////////////////////////////////////////////////
@@ -214,60 +214,60 @@ public partial class App : Application
 
         //////////////////////////////////////////////////////////////////////////////////
         // Find the cell containing "Name", this is the first row in the "Name" column.
-        var foundShiftStatusCell = excelRange.Find("Shift Status", Type.Missing,
-            XlFindLookIn.xlValues, XlLookAt.xlPart,
-            XlSearchOrder.xlByRows, XlSearchDirection.xlNext,
-            false, Type.Missing, Type.Missing);
-        var shiftStatusColumnNumber = foundShiftStatusCell.Column;
+        //var foundShiftStatusCell = excelRange.Find("Shift Status", Type.Missing,
+        //    XlFindLookIn.xlValues, XlLookAt.xlPart,
+        //    XlSearchOrder.xlByRows, XlSearchDirection.xlNext,
+        //    false, Type.Missing, Type.Missing);
+        //var shiftStatusColumnNumber = foundShiftStatusCell.Column;
         //Console.WriteLine("Shift Status is in Column: " + foundShiftStatusCell.Column);
         //////////////////////////////////////////////////////////////////////////////////
 
 
         //////////////////////////////////////////////////////////////////////////////////
         // Find the cell containing "Person #", this is the first row in the "Person #" column.
-        var foundPersonNumberCell = excelRange.Find("Person #", Type.Missing,
-                XlFindLookIn.xlValues, XlLookAt.xlPart,
-                XlSearchOrder.xlByRows, XlSearchDirection.xlNext,
-                false, Type.Missing, Type.Missing);
-        var personNumberColumnNumber = foundPersonNumberCell.Column;
+        //var foundPersonNumberCell = excelRange.Find("Person #", Type.Missing,
+        //        XlFindLookIn.xlValues, XlLookAt.xlPart,
+        //        XlSearchOrder.xlByRows, XlSearchDirection.xlNext,
+        //        false, Type.Missing, Type.Missing);
+        //var personNumberColumnNumber = foundPersonNumberCell.Column;
         //Console.WriteLine("Numbers are in Column: " + personNumberColumnNumber);
         //////////////////////////////////////////////////////////////////////////////////
 
 
-        for (var i = 1; i < maxRow; i++)
-        {
-            //var _personName = reducedNameRange.Cells[i, 1].Value2;
-            var _personName = excelRange[i, nameColumnNumber].Value2;
-            if (_personName == null)
-            {
-                //Console.WriteLine("i: " + i + " null");
-            }
-            else if (_personName == "Name")
-            {
-                //Console.Write("i: " + i + " " + _personName + " ");
-                //Console.Write(excelRange[i, personNumberColumnNumber].Value2 + " ");
-                //Console.Write(excelRange[i, shiftStatusColumnNumber].Value2 + Environment.NewLine);
-            }
-            else
-            {
-                int _personNumber = int.Parse( excelRange[i, personNumberColumnNumber].Value2 );
-                // Could change the above to int.TryParse;
-                string _shiftType = excelRange[i, shiftStatusColumnNumber].Value2;
+        //for (var i = 1; i < maxRow; i++)
+        //{
+        //    //var _personName = reducedNameRange.Cells[i, 1].Value2;
+        //    var _personName = excelRange[i, nameColumnNumber].Value2;
+        //    if (_personName == null)
+        //    {
+        //        //Console.WriteLine("i: " + i + " null");
+        //    }
+        //    else if (_personName == "Name")
+        //    {
+        //        //Console.Write("i: " + i + " " + _personName + " ");
+        //        //Console.Write(excelRange[i, personNumberColumnNumber].Value2 + " ");
+        //        //Console.Write(excelRange[i, shiftStatusColumnNumber].Value2 + Environment.NewLine);
+        //    }
+        //    else
+        //    {
+        //        int _personNumber = int.Parse( excelRange[i, personNumberColumnNumber].Value2 );
+        //        // Could change the above to int.TryParse;
+        //        string _shiftType = excelRange[i, shiftStatusColumnNumber].Value2;
 
-                string message = "i: " + i + " " + _personName + " " +
-                    excelRange[i, personNumberColumnNumber].Value2 + " " +
-                    excelRange[i, shiftStatusColumnNumber].Value2;
-                //ConsoleService.WriteLine(message);
-                //Console.WriteLine(message);
+        //        string message = "i: " + i + " " + _personName + " " +
+        //            excelRange[i, personNumberColumnNumber].Value2 + " " +
+        //            excelRange[i, shiftStatusColumnNumber].Value2;
+        //        //ConsoleService.WriteLine(message);
+        //        //Console.WriteLine(message);
 
-                employeeDict.Add(_personNumber, new Employee(_personNumber, _personName,_shiftType));
-            }
-        }
-        //Console.WriteLine("Debug");
-        excelWorkbook.Close(false, null, null);
-        excel_.Quit();
-        Marshal.ReleaseComObject(excelWorkbook);
-        Marshal.ReleaseComObject(excel_);
+        //        employeeDict.Add(_personNumber, new Employee(_personNumber, _personName,_shiftType));
+        //    }
+        //}
+        ////Console.WriteLine("Debug");
+        //excelWorkbook.Close(false, null, null);
+        //excel_.Quit();
+        //Marshal.ReleaseComObject(excelWorkbook);
+        //Marshal.ReleaseComObject(excel_);
     }
 
     public void PopulateEmployeeDictionaryUsingXML(Dictionary<int, Employee> employeeDict, string excelPath)
