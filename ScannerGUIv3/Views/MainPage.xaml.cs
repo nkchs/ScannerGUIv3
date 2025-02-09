@@ -26,7 +26,6 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         ViewModel = App.GetService<MainViewModel>();
 
         //Console.WriteLine("Initializing Main Page.");
-
         InitializeComponent();
         ConsoleService.Initialize(ConsoleOutput); // Initialize with the console TextBox
         Loaded += OnLoaded;
