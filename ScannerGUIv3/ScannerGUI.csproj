@@ -58,7 +58,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ScannerGUIv3.Core\ScannerGUIv3.Core.csproj" />
+    <ProjectReference Include="..\ScannerGUIv3.Core\ScannerGUI.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="appsettings.json">

@@ -110,19 +110,19 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         //var diccccc = App.employeeDict;
         Console.WriteLine("Debug");
 
-        Console.WriteLine(App.excelWeeklyAddress);
-        Console.WriteLine(App.excelResourcesOnSiteAddress);
+        //Console.WriteLine(App.excelWeeklyAddress);
+        //Console.WriteLine(App.excelResourcesOnSiteAddress);
 
         Console.WriteLine("Recorded DateTime: " + App.currentDate);
         Console.WriteLine("Current DateTime: " + DateTime.Now);
 
         Console.WriteLine(App.currentDate.Day);
 
-        Console.WriteLine("Week Number: " + App.weekNumber);
-        App.weekNumber = 44;
+        //Console.WriteLine("Week Number: " + App.weekNumber);
+        //App.weekNumber = 44;
 
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine("Week Number: " + App.weekNumber);
+        //Console.WriteLine("Week Number: " + App.weekNumber);
         Console.ResetColor();
 
         Console.WriteLine("");

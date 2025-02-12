@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
-using System.Timers;
+//using System.Timers;
 using Timer = System.Timers.Timer;
 using Microsoft.UI.Dispatching;
 
@@ -17,10 +17,10 @@ using ScannerGUIv3.ViewModels;
 using ScannerGUIv3.Views;
 using ScannerGUIv3.Helpers;
 using ScannerGUIv3.Definitions;
-using Microsoft.Office.Interop.Excel;
-using Range = Microsoft.Office.Interop.Excel.Range;
+//using Microsoft.Office.Interop.Excel;
+//using Range = Microsoft.Office.Interop.Excel.Range;
 using Application = Microsoft.UI.Xaml.Application;
-using System.Runtime.InteropServices;
+//using System.Runtime.InteropServices;
 
 
 namespace ScannerGUIv3;
@@ -65,7 +65,7 @@ public partial class App : Application
     // Time variables //
     public static DateTime currentDate = DateTime.Now;
     public static Calendar calendar = CultureInfo.CurrentCulture.Calendar;
-    public static int weekNumber = calendar.GetWeekOfYear(currentDate, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+    //public static int weekNumber = calendar.GetWeekOfYear(currentDate, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
     
     public static DateTime today = DateTime.Today;
     // Define start and end times for day and night shifts
@@ -77,12 +77,12 @@ public partial class App : Application
 
 
     // URLs and Strings //
-    public static string sharepointBaseURL = @"https://newcrestmining.sharepoint.com/:f:/r/teams/
-                                               TelferMaint-Mill/Shared%20Documents/Attendance%20Register/
-                                               FPM%20Daily%20Sign%20On/Development";
-    public static string excelWeeklyAddress = sharepointBaseURL + @"/Week " + weekNumber + ".xlsm";
+    //public static string sharepointBaseURL = @"https://newcrestmining.sharepoint.com/:f:/r/teams/
+    //                                           TelferMaint-Mill/Shared%20Documents/Attendance%20Register/
+    //                                           FPM%20Daily%20Sign%20On/Development";
+    //public static string excelWeeklyAddress = sharepointBaseURL + @"/Week " + weekNumber + ".xlsm";
     //public static string excelWeeklyAddress = @"C:\Users\ChaseN" + @"\Week " + weekNumber + ".xlsx";
-    public static string excelResourcesOnSiteAddress = @"" + "ResourceOnSite_" + currentDate.ToString("yyyyMMdd") + ".xlsx";
+    //public static string excelResourcesOnSiteAddress = @"" + "ResourceOnSite_" + currentDate.ToString("yyyyMMdd") + ".xlsx";
 
     // ########## End Variable Declarations ########## //
 
@@ -193,91 +193,91 @@ public partial class App : Application
     // ########## Dictionary FUNCS ########## //
     public void PopulateEmployeeDictionary(Dictionary<int, Employee> employeeDict, string excelPath)
     {
-        var excel_ = new Microsoft.Office.Interop.Excel.Application
-        {
-            Visible = false,
-            //Visible = true,
-        };
+        //var excel_ = new Microsoft.Office.Interop.Excel.Application
+        //{
+        //    Visible = false,
+        //    //Visible = true,
+        //};
 
-        var excelWorkbook = excel_.Workbooks.Open(excelPath, ReadOnly: true);
-        var excelWorksheet = (Worksheet)excelWorkbook.Sheets[3];
-        var excelRange = excelWorksheet.UsedRange;
+        //var excelWorkbook = excel_.Workbooks.Open(excelPath, ReadOnly: true);
+        //var excelWorksheet = (Worksheet)excelWorkbook.Sheets[3];
+        //var excelRange = excelWorksheet.UsedRange;
 
-        var maxRow = excelRange.Rows.Count;
-        //var maxCol = excelRange.Columns.Count;
+        //var maxRow = excelRange.Rows.Count;
+        ////var maxCol = excelRange.Columns.Count;
 
-        //Console.WriteLine("Rows: " + maxRow);
-        //Console.WriteLine("Columns: " + maxCol);
+        ////Console.WriteLine("Rows: " + maxRow);
+        ////Console.WriteLine("Columns: " + maxCol);
 
-        //////////////////////////////////////////////////////////////////////////////////
-        // Find the cell containing "Name", this is the first row in the "Name" column.
-        var foundNameCell = excelRange.Find("Name", Type.Missing,
-                XlFindLookIn.xlValues, XlLookAt.xlPart,
-                XlSearchOrder.xlByRows, XlSearchDirection.xlNext,
-                false, Type.Missing, Type.Missing);
-        var nameColumnNumber = foundNameCell.Column;
-        //Console.WriteLine("Names are in Column: " + foundNameCell.Column);
-        //Console.WriteLine("Headers are in Row: " + foundNameCell.Row);
-        //////////////////////////////////////////////////////////////////////////////////
-
-
-        //////////////////////////////////////////////////////////////////////////////////
-        // Find the cell containing "Name", this is the first row in the "Name" column.
-        var foundShiftStatusCell = excelRange.Find("Shift Status", Type.Missing,
-            XlFindLookIn.xlValues, XlLookAt.xlPart,
-            XlSearchOrder.xlByRows, XlSearchDirection.xlNext,
-            false, Type.Missing, Type.Missing);
-        var shiftStatusColumnNumber = foundShiftStatusCell.Column;
-        //Console.WriteLine("Shift Status is in Column: " + foundShiftStatusCell.Column);
-        //////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////
+        //// Find the cell containing "Name", this is the first row in the "Name" column.
+        //var foundNameCell = excelRange.Find("Name", Type.Missing,
+        //        XlFindLookIn.xlValues, XlLookAt.xlPart,
+        //        XlSearchOrder.xlByRows, XlSearchDirection.xlNext,
+        //        false, Type.Missing, Type.Missing);
+        //var nameColumnNumber = foundNameCell.Column;
+        ////Console.WriteLine("Names are in Column: " + foundNameCell.Column);
+        ////Console.WriteLine("Headers are in Row: " + foundNameCell.Row);
+        ////////////////////////////////////////////////////////////////////////////////////
 
 
-        //////////////////////////////////////////////////////////////////////////////////
-        // Find the cell containing "Person #", this is the first row in the "Person #" column.
-        var foundPersonNumberCell = excelRange.Find("Person #", Type.Missing,
-                XlFindLookIn.xlValues, XlLookAt.xlPart,
-                XlSearchOrder.xlByRows, XlSearchDirection.xlNext,
-                false, Type.Missing, Type.Missing);
-        var personNumberColumnNumber = foundPersonNumberCell.Column;
-        //Console.WriteLine("Numbers are in Column: " + personNumberColumnNumber);
-        //////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////
+        //// Find the cell containing "Name", this is the first row in the "Name" column.
+        //var foundShiftStatusCell = excelRange.Find("Shift Status", Type.Missing,
+        //    XlFindLookIn.xlValues, XlLookAt.xlPart,
+        //    XlSearchOrder.xlByRows, XlSearchDirection.xlNext,
+        //    false, Type.Missing, Type.Missing);
+        //var shiftStatusColumnNumber = foundShiftStatusCell.Column;
+        ////Console.WriteLine("Shift Status is in Column: " + foundShiftStatusCell.Column);
+        ////////////////////////////////////////////////////////////////////////////////////
 
 
-        for (var i = 1; i < maxRow; i++)
-        {
-            //var _personName = reducedNameRange.Cells[i, 1].Value2;
-            var _personName = excelRange[i, nameColumnNumber].Value2;
-            if (_personName == null)
-            {
-                //Console.WriteLine("i: " + i + " null");
-            }
-            else if (_personName == "Name")
-            {
-                //Console.Write("i: " + i + " " + _personName + " ");
-                //Console.Write(excelRange[i, personNumberColumnNumber].Value2 + " ");
-                //Console.Write(excelRange[i, shiftStatusColumnNumber].Value2 + Environment.NewLine);
-            }
-            else
-            {
-                var _personNumber = int.Parse(excelRange[i, personNumberColumnNumber].Value2);
-                // Could change the above to int.TryParse;
-                string _shiftType = excelRange[i, shiftStatusColumnNumber].Value2;
+        ////////////////////////////////////////////////////////////////////////////////////
+        //// Find the cell containing "Person #", this is the first row in the "Person #" column.
+        //var foundPersonNumberCell = excelRange.Find("Person #", Type.Missing,
+        //        XlFindLookIn.xlValues, XlLookAt.xlPart,
+        //        XlSearchOrder.xlByRows, XlSearchDirection.xlNext,
+        //        false, Type.Missing, Type.Missing);
+        //var personNumberColumnNumber = foundPersonNumberCell.Column;
+        ////Console.WriteLine("Numbers are in Column: " + personNumberColumnNumber);
+        ////////////////////////////////////////////////////////////////////////////////////
 
-                string message = "i: " + i + " " + _personName + " " +
-                    excelRange[i, personNumberColumnNumber].Value2 + " " +
-                    excelRange[i, shiftStatusColumnNumber].Value2;
-                //ConsoleService.WriteLine(message);
-                //Console.WriteLine(message);
 
-                employeeDict.Add(_personNumber, new Employee(_personNumber, _personName, _shiftType));
-            }
-        }
+        //for (var i = 1; i < maxRow; i++)
+        //{
+        //    //var _personName = reducedNameRange.Cells[i, 1].Value2;
+        //    var _personName = excelRange[i, nameColumnNumber].Value2;
+        //    if (_personName == null)
+        //    {
+        //        //Console.WriteLine("i: " + i + " null");
+        //    }
+        //    else if (_personName == "Name")
+        //    {
+        //        //Console.Write("i: " + i + " " + _personName + " ");
+        //        //Console.Write(excelRange[i, personNumberColumnNumber].Value2 + " ");
+        //        //Console.Write(excelRange[i, shiftStatusColumnNumber].Value2 + Environment.NewLine);
+        //    }
+        //    else
+        //    {
+        //        var _personNumber = int.Parse(excelRange[i, personNumberColumnNumber].Value2);
+        //        // Could change the above to int.TryParse;
+        //        string _shiftType = excelRange[i, shiftStatusColumnNumber].Value2;
 
-        //Console.WriteLine("Debug");
-        excelWorkbook.Close(false, null, null);
-        excel_.Quit();
-        Marshal.ReleaseComObject(excelWorkbook);
-        Marshal.ReleaseComObject(excel_);
+        //        string message = "i: " + i + " " + _personName + " " +
+        //            excelRange[i, personNumberColumnNumber].Value2 + " " +
+        //            excelRange[i, shiftStatusColumnNumber].Value2;
+        //        //ConsoleService.WriteLine(message);
+        //        //Console.WriteLine(message);
+
+        //        employeeDict.Add(_personNumber, new Employee(_personNumber, _personName, _shiftType));
+        //    }
+        //}
+
+        ////Console.WriteLine("Debug");
+        //excelWorkbook.Close(false, null, null);
+        //excel_.Quit();
+        //Marshal.ReleaseComObject(excelWorkbook);
+        //Marshal.ReleaseComObject(excel_);
     }
 
     // ########## Dictionary ########## //
