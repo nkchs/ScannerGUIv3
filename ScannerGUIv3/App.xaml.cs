@@ -15,13 +15,15 @@ using ScannerGUIv3.Models;
 using ScannerGUIv3.Services;
 using ScannerGUIv3.ViewModels;
 using ScannerGUIv3.Views;
-using ScannerGUIv3.Helpers;
+//using ScannerGUIv3.Helpers;
 using ScannerGUIv3.Definitions;
 //using Microsoft.Office.Interop.Excel;
 //using Range = Microsoft.Office.Interop.Excel.Range;
 using Application = Microsoft.UI.Xaml.Application;
+using Microsoft.Office.Interop.Excel;
 //using System.Runtime.InteropServices;
-
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace ScannerGUIv3;
 
@@ -109,25 +111,17 @@ public partial class App : Application
     public App()
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     {
-        //Console.WriteLine("Current Week Number: " + weekNumber);
         // DICTIONARY STUFF
-        //Dictionary<int, Employee> employeeDict = new Dictionary<int, Employee>();
-        //var resourcesOnSiteExcelUrl = @"https://newcrestmining-my.sharepoint.com/personal/
-        //nic_chase_newcrest_com_au/Documents/Documents/Projects/Scanner/ResourceOnSite_20240620043001.xlsx";
-        //var resourcesOnSiteExcelUrl = @"https://newcrestmining.sharepoint.com/:x:/r/teams/
-        //TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/Development/ResourceOnSite_20241030043004.xlsx";
+        Dictionary<int, Employee> employeeDict = new Dictionary<int, Employee>();
         // END DICTIONARY STUFF
 
-
         // CONFIG Setup START
-        //var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-        //Configuration = builder.Build();
+        var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+        Configuration = builder.Build();
         // CONFIG Setup END
-
 
         //Console.WriteLine("Initializing App.");      
         InitializeComponent();
-
 
         Host = Microsoft.Extensions.Hosting.Host.
         CreateDefaultBuilder().
@@ -149,7 +143,7 @@ public partial class App : Application
             services.AddSingleton<INavigationService, NavigationService>();
 
             // Core Services
-            services.AddSingleton<ISampleDataService, SampleDataService>();
+            //services.AddSingleton<ISampleDataService, SampleDataService>();
             services.AddSingleton<IFileService, FileService>();
 
             // Views and ViewModels
@@ -169,10 +163,10 @@ public partial class App : Application
         }).
         Build();
 
-        // Define the url for the excel spreadsheet.
         // TODO: This logic needs to be updated to find the excel.
         // Async function to fill the dictionary with employee values.
-        var resourcesOnSiteExcelUrl = @"https://newcrestmining.sharepoint.com/:x:/r/teams/TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/Development/ResourceOnSite_20241030043004.xlsx";
+        //var resourcesOnSiteExcelUrl = @"https://newcrestmining.sharepoint.com/:x:/r/teams/TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/Development/ResourceOnSite_20241030043004.xlsx";
+        var resourcesOnSiteExcelUrl = @"C:\Users\ChaseN\source\ScannerGUIRepair\Resources\SRF175 Roster to Excel Today_90days.xlsx";
         _ = InitializeEmployeeDictionaryAsync(EmployeeDict, resourcesOnSiteExcelUrl);
 
         // TIMER Setup. Enable the daily scheduler. This is the basis of the timers.
@@ -186,100 +180,162 @@ public partial class App : Application
     // Async function to populate the employee dictionary while 
     private async Task InitializeEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, string resourcesOnSiteExcelUrl)
     {
-        await Task.Run(() => PopulateEmployeeDictionary(employeeDict, resourcesOnSiteExcelUrl));
+        //await Task.Run(() => PopulateEmployeeDictionary(employeeDict, resourcesOnSiteExcelUrl));
+        await Task.Run(() => PopulateEmployeeDictionaryUsingXML(employeeDict, resourcesOnSiteExcelUrl));
     }
 
+    //// ########## Dictionary FUNCS ########## //
+    //public void PopulateEmployeeDictionary(Dictionary<int, Employee> employeeDict, string excelPath)
+    //{
+    //    //var excel_ = new Microsoft.Office.Interop.Excel.Application
+    //    //{
+    //    //    Visible = false,
+    //    //    //Visible = true,
+    //    //};
 
-    // ########## Dictionary FUNCS ########## //
-    public void PopulateEmployeeDictionary(Dictionary<int, Employee> employeeDict, string excelPath)
+    //    //var excelWorkbook = excel_.Workbooks.Open(excelPath, ReadOnly: true);
+    //    //var excelWorksheet = (Worksheet)excelWorkbook.Sheets[3];
+    //    //var excelRange = excelWorksheet.UsedRange;
+
+    //    //var maxRow = excelRange.Rows.Count;
+    //    ////var maxCol = excelRange.Columns.Count;
+
+    //    ////Console.WriteLine("Rows: " + maxRow);
+    //    ////Console.WriteLine("Columns: " + maxCol);
+
+    //    ////////////////////////////////////////////////////////////////////////////////////
+    //    //// Find the cell containing "Name", this is the first row in the "Name" column.
+    //    //var foundNameCell = excelRange.Find("Name", Type.Missing,
+    //    //        XlFindLookIn.xlValues, XlLookAt.xlPart,
+    //    //        XlSearchOrder.xlByRows, XlSearchDirection.xlNext,
+    //    //        false, Type.Missing, Type.Missing);
+    //    //var nameColumnNumber = foundNameCell.Column;
+    //    ////Console.WriteLine("Names are in Column: " + foundNameCell.Column);
+    //    ////Console.WriteLine("Headers are in Row: " + foundNameCell.Row);
+    //    ////////////////////////////////////////////////////////////////////////////////////
+
+
+    //    ////////////////////////////////////////////////////////////////////////////////////
+    //    //// Find the cell containing "Name", this is the first row in the "Name" column.
+    //    //var foundShiftStatusCell = excelRange.Find("Shift Status", Type.Missing,
+    //    //    XlFindLookIn.xlValues, XlLookAt.xlPart,
+    //    //    XlSearchOrder.xlByRows, XlSearchDirection.xlNext,
+    //    //    false, Type.Missing, Type.Missing);
+    //    //var shiftStatusColumnNumber = foundShiftStatusCell.Column;
+    //    ////Console.WriteLine("Shift Status is in Column: " + foundShiftStatusCell.Column);
+    //    ////////////////////////////////////////////////////////////////////////////////////
+
+
+    //    ////////////////////////////////////////////////////////////////////////////////////
+    //    //// Find the cell containing "Person #", this is the first row in the "Person #" column.
+    //    //var foundPersonNumberCell = excelRange.Find("Person #", Type.Missing,
+    //    //        XlFindLookIn.xlValues, XlLookAt.xlPart,
+    //    //        XlSearchOrder.xlByRows, XlSearchDirection.xlNext,
+    //    //        false, Type.Missing, Type.Missing);
+    //    //var personNumberColumnNumber = foundPersonNumberCell.Column;
+    //    ////Console.WriteLine("Numbers are in Column: " + personNumberColumnNumber);
+    //    ////////////////////////////////////////////////////////////////////////////////////
+
+
+    //    //for (var i = 1; i < maxRow; i++)
+    //    //{
+    //    //    //var _personName = reducedNameRange.Cells[i, 1].Value2;
+    //    //    var _personName = excelRange[i, nameColumnNumber].Value2;
+    //    //    if (_personName == null)
+    //    //    {
+    //    //        //Console.WriteLine("i: " + i + " null");
+    //    //    }
+    //    //    else if (_personName == "Name")
+    //    //    {
+    //    //        //Console.Write("i: " + i + " " + _personName + " ");
+    //    //        //Console.Write(excelRange[i, personNumberColumnNumber].Value2 + " ");
+    //    //        //Console.Write(excelRange[i, shiftStatusColumnNumber].Value2 + Environment.NewLine);
+    //    //    }
+    //    //    else
+    //    //    {
+    //    //        var _personNumber = int.Parse(excelRange[i, personNumberColumnNumber].Value2);
+    //    //        // Could change the above to int.TryParse;
+    //    //        string _shiftType = excelRange[i, shiftStatusColumnNumber].Value2;
+
+    //    //        string message = "i: " + i + " " + _personName + " " +
+    //    //            excelRange[i, personNumberColumnNumber].Value2 + " " +
+    //    //            excelRange[i, shiftStatusColumnNumber].Value2;
+    //    //        //ConsoleService.WriteLine(message);
+    //    //        //Console.WriteLine(message);
+
+    //    //        employeeDict.Add(_personNumber, new Employee(_personNumber, _personName, _shiftType));
+    //    //    }
+    //    //}
+
+    //    ////Console.WriteLine("Debug");
+    //    //excelWorkbook.Close(false, null, null);
+    //    //excel_.Quit();
+    //    //Marshal.ReleaseComObject(excelWorkbook);
+    //    //Marshal.ReleaseComObject(excel_);
+    //}
+
+    public void PopulateEmployeeDictionaryUsingXML(Dictionary<int, Employee> employeeDict, string excelPath)
     {
-        //var excel_ = new Microsoft.Office.Interop.Excel.Application
-        //{
-        //    Visible = false,
-        //    //Visible = true,
-        //};
+        using (SpreadsheetDocument doc = SpreadsheetDocument.Open(excelPath, false))
+        {
+            WorkbookPart workbookPart = doc.WorkbookPart;
+            Sheet sheet = workbookPart.Workbook.Descendants<Sheet>().FirstOrDefault();
+            if (sheet == null) return;
 
-        //var excelWorkbook = excel_.Workbooks.Open(excelPath, ReadOnly: true);
-        //var excelWorksheet = (Worksheet)excelWorkbook.Sheets[3];
-        //var excelRange = excelWorksheet.UsedRange;
+            WorksheetPart worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
+            SheetData sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
+            if (sheetData == null) return;
 
-        //var maxRow = excelRange.Rows.Count;
-        ////var maxCol = excelRange.Columns.Count;
+            Dictionary<int, DateTime> dateHeaders = new Dictionary<int, DateTime>();
 
-        ////Console.WriteLine("Rows: " + maxRow);
-        ////Console.WriteLine("Columns: " + maxCol);
+            // Read Date Headers from D9 to CP9
+            Row headerRow = sheetData.Elements<Row>().FirstOrDefault(r => r.RowIndex == 9);
+            if (headerRow != null)
+            {
+                foreach (Cell cell in headerRow.Elements<Cell>())
+                {
+                    string cellValue = GetCellValue(cell, workbookPart);
+                    if (DateTime.TryParse(cellValue, out DateTime date))
+                    {
+                        dateHeaders[cell.CellReference.Value[0] - 'D'] = date;
+                    }
+                }
+            }
 
-        ////////////////////////////////////////////////////////////////////////////////////
-        //// Find the cell containing "Name", this is the first row in the "Name" column.
-        //var foundNameCell = excelRange.Find("Name", Type.Missing,
-        //        XlFindLookIn.xlValues, XlLookAt.xlPart,
-        //        XlSearchOrder.xlByRows, XlSearchDirection.xlNext,
-        //        false, Type.Missing, Type.Missing);
-        //var nameColumnNumber = foundNameCell.Column;
-        ////Console.WriteLine("Names are in Column: " + foundNameCell.Column);
-        ////Console.WriteLine("Headers are in Row: " + foundNameCell.Row);
-        ////////////////////////////////////////////////////////////////////////////////////
+            // Read employee data from A9 onwards
+            foreach (Row row in sheetData.Elements<Row>().Where(r => r.RowIndex >= 10))
+            {
+                string firstName = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(0), workbookPart);
+                string surname = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(1), workbookPart);
+                string personnelCodeStr = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(2), workbookPart);
 
+                if (int.TryParse(personnelCodeStr, out int personnelCode))
+                {
+                    Employee employee = new Employee(personnelCode, firstName + " " + surname, "");
 
-        ////////////////////////////////////////////////////////////////////////////////////
-        //// Find the cell containing "Name", this is the first row in the "Name" column.
-        //var foundShiftStatusCell = excelRange.Find("Shift Status", Type.Missing,
-        //    XlFindLookIn.xlValues, XlLookAt.xlPart,
-        //    XlSearchOrder.xlByRows, XlSearchDirection.xlNext,
-        //    false, Type.Missing, Type.Missing);
-        //var shiftStatusColumnNumber = foundShiftStatusCell.Column;
-        ////Console.WriteLine("Shift Status is in Column: " + foundShiftStatusCell.Column);
-        ////////////////////////////////////////////////////////////////////////////////////
+                    foreach (var entry in dateHeaders)
+                    {
+                        string shiftValue = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(entry.Key + 3), workbookPart);
+                        employee.ShiftType = shiftValue;
+                    }
 
-
-        ////////////////////////////////////////////////////////////////////////////////////
-        //// Find the cell containing "Person #", this is the first row in the "Person #" column.
-        //var foundPersonNumberCell = excelRange.Find("Person #", Type.Missing,
-        //        XlFindLookIn.xlValues, XlLookAt.xlPart,
-        //        XlSearchOrder.xlByRows, XlSearchDirection.xlNext,
-        //        false, Type.Missing, Type.Missing);
-        //var personNumberColumnNumber = foundPersonNumberCell.Column;
-        ////Console.WriteLine("Numbers are in Column: " + personNumberColumnNumber);
-        ////////////////////////////////////////////////////////////////////////////////////
-
-
-        //for (var i = 1; i < maxRow; i++)
-        //{
-        //    //var _personName = reducedNameRange.Cells[i, 1].Value2;
-        //    var _personName = excelRange[i, nameColumnNumber].Value2;
-        //    if (_personName == null)
-        //    {
-        //        //Console.WriteLine("i: " + i + " null");
-        //    }
-        //    else if (_personName == "Name")
-        //    {
-        //        //Console.Write("i: " + i + " " + _personName + " ");
-        //        //Console.Write(excelRange[i, personNumberColumnNumber].Value2 + " ");
-        //        //Console.Write(excelRange[i, shiftStatusColumnNumber].Value2 + Environment.NewLine);
-        //    }
-        //    else
-        //    {
-        //        var _personNumber = int.Parse(excelRange[i, personNumberColumnNumber].Value2);
-        //        // Could change the above to int.TryParse;
-        //        string _shiftType = excelRange[i, shiftStatusColumnNumber].Value2;
-
-        //        string message = "i: " + i + " " + _personName + " " +
-        //            excelRange[i, personNumberColumnNumber].Value2 + " " +
-        //            excelRange[i, shiftStatusColumnNumber].Value2;
-        //        //ConsoleService.WriteLine(message);
-        //        //Console.WriteLine(message);
-
-        //        employeeDict.Add(_personNumber, new Employee(_personNumber, _personName, _shiftType));
-        //    }
-        //}
-
-        ////Console.WriteLine("Debug");
-        //excelWorkbook.Close(false, null, null);
-        //excel_.Quit();
-        //Marshal.ReleaseComObject(excelWorkbook);
-        //Marshal.ReleaseComObject(excel_);
+                    EmployeeDict[personnelCode] = employee;
+                }
+            }
+        }
     }
 
+
+    private static string GetCellValue(Cell cell, WorkbookPart workbookPart)
+    {
+        if (cell == null || cell.CellValue == null) return string.Empty;
+        string value = cell.CellValue.InnerText;
+        if (cell.DataType != null && cell.DataType.Value == CellValues.SharedString)
+        {
+            return workbookPart.SharedStringTablePart.SharedStringTable.Elements<SharedStringItem>().ElementAt(int.Parse(value)).InnerText;
+        }
+        return value;
+    }
     // ########## Dictionary ########## //
 
 
