@@ -227,6 +227,7 @@ public partial class App : Application
                 {
                     Employee employee = new Employee(personnelCode, firstName + " " + surname, "");
 
+
                     foreach (var entry in dateHeaders)
                     {
                         string shiftValue = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(entry.Key + 3), workbookPart);
