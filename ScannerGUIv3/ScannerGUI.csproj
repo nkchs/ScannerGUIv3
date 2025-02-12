@@ -19,6 +19,7 @@
   <ItemGroup>
     <Compile Remove="Helpers\ScheduledFuncs__.cs" />
     <Compile Remove="Reference.cs" />
+    <Compile Remove="Views\BlankPage.xaml.cs" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="Microsoft.Office.Interop.Excel">
@@ -39,6 +40,7 @@
   <ItemGroup>
     <None Include="Helpers\ScheduledFuncs__.cs" />
     <None Include="Reference.cs" />
+    <None Include="Views\BlankPage.xaml.cs" />
   </ItemGroup>
 
   <ItemGroup>
