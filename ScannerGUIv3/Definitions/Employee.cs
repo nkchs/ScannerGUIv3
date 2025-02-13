@@ -1,11 +1,4 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
-//using Windows.Networking;
-
-namespace ScannerGUIv3.Definitions;
+﻿namespace ScannerGUIv3.Definitions;
 public class Employee
 {
     public int EmployeeNumber { get; set; }
@@ -15,32 +8,71 @@ public class Employee
     //public string? ShiftType { get; set; }
     private string? shiftType;
 
+    //public string? ShiftType
+    //{
+    //    get => shiftType;
+    //    set
+    //    {
+    //        if (string.IsNullOrEmpty(value))
+    //        {
+    //            shiftType = null;
+    //        }
+    //        else if (value.StartsWith("D", StringComparison.OrdinalIgnoreCase))
+    //        {
+    //            shiftType = "DS";  // Day Shift
+    //        }
+    //        else if (value.StartsWith("N", StringComparison.OrdinalIgnoreCase))
+    //        {
+    //            shiftType = "NS";  // Night Shift
+    //        }
+    //        else if (value.Equals("RR", StringComparison.OrdinalIgnoreCase))
+    //        {
+    //            shiftType = "RR";  // Rostered Offsite
+    //        }
+    //        else
+    //        {
+    //            shiftType = null;  // Invalid shift type, set to null
+    //        }
+    //    }
+    //}
+
     public string? ShiftType
     {
-        get => shiftType;
+        get
+        {
+            // Try to get today's shift from the ShiftSchedule dictionary
+            if (ShiftSchedule.TryGetValue(DateTime.Today, out string? shift))
+            {
+                return NormalizeShiftType(shift);
+            }
+            return null;
+        }
         set
         {
-            if (string.IsNullOrEmpty(value))
-            {
-                shiftType = null;
-            }
-            else if (value.StartsWith("D", StringComparison.OrdinalIgnoreCase))
-            {
-                shiftType = "DS";  // Day Shift
-            }
-            else if (value.StartsWith("N", StringComparison.OrdinalIgnoreCase))
-            {
-                shiftType = "NS";  // Night Shift
-            }
-            else if (value.Equals("RO", StringComparison.OrdinalIgnoreCase))
-            {
-                shiftType = "RO";  // Rostered Offsite
-            }
-            else
-            {
-                shiftType = null;  // Invalid shift type, set to null
-            }
+            shiftType = NormalizeShiftType(value);
         }
+    }
+
+    // Helper function to normalize shift values
+    private string? NormalizeShiftType(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return null;
+        }
+        else if (value.StartsWith("D", StringComparison.OrdinalIgnoreCase))
+        {
+            return "DS";  // Day Shift
+        }
+        else if (value.StartsWith("N", StringComparison.OrdinalIgnoreCase))
+        {
+            return "NS";  // Night Shift
+        }
+        else if (value.Equals("RR", StringComparison.OrdinalIgnoreCase))
+        {
+            return "RR";  // Rostered Offsite
+        }
+        return null;  // Invalid shift type, set to null
     }
 
     public Dictionary<DateTime, string> ShiftSchedule { get; set; } = new Dictionary<DateTime, string>();

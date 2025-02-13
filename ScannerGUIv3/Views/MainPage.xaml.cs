@@ -118,6 +118,8 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
 
         Console.WriteLine("Current DateTime (Day): " + App.currentDate.Day);
 
+        Console.WriteLine();
+
         Console.ResetColor();
 
         foreach (var code in this.personnelCodes)
