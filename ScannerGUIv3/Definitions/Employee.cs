@@ -43,17 +43,25 @@ public class Employee
         }
     }
 
+    public Dictionary<DateTime, string> ShiftSchedule { get; set; } = new Dictionary<DateTime, string>();
+
     public DateTime? SignInTime { get; set; }
 
     public DateTime? SignOutTime { get; set; }
 
-    public DateTime? ArrivalDate { get; set; }
+    //public DateTime? ArrivalDate { get; set; }
 
-    public DateTime? DepartureDate { get; set; }
+    //public DateTime? DepartureDate { get; set; }
 
     // Default constructor
     public Employee()
     {
+    }
+
+    public Employee(int employeeNumber, string name)
+    {
+        EmployeeNumber = employeeNumber;
+        Name = name;
     }
 
     // Parameterized constructor
@@ -96,7 +104,6 @@ public class Employee
     //    }
 
     //    DateTime now = DateTime.Now;
-
     //    // Check valid sign-in times
     //    if (ShiftType == "DS" && (now.Hour < 4 || now.Hour >= 16))
     //    {
@@ -106,7 +113,6 @@ public class Employee
     //    {
     //        return "Invalid sign-in time for Night Shift. Valid hours are 4 PM to 4 AM.";
     //    }
-
     //    SignInTime = now;
     //    return EmployeeNumber + " " + Name + " Signed In @ " + FormattedSignInTime;
     //}

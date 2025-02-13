@@ -169,13 +169,13 @@
     <value>https://YourPrivacyUrlGoesHere/</value>
   </data>
   <data name="SettingsPage_Spreadsheet_Resources.Text" xml:space="preserve">
-    <value />
+    <value>C:\Users\ChaseN\source\ScannerGUIRepair\Resources</value>
   </data>
   <data name="SettingsPage_Spreadsheet_Master.Text" xml:space="preserve">
-    <value />
+    <value>C:\Users\ChaseN\source\ScannerGUIRepair\Resources</value>
   </data>
   <data name="SettingsPage_Spreadsheet_WeeklyRecord.Text" xml:space="preserve">
-    <value />
+    <value>C:\Users\ChaseN\source\ScannerGUIRepair\Resources</value>
   </data>
   <data name="Settings_Spreadsheet.Text" xml:space="preserve">
     <value>Spreadsheet Selection</value>

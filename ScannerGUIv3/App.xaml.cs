@@ -142,8 +142,8 @@ public partial class App : Application
             services.AddTransient<SettingsPage>();
             services.AddTransient<DataGridViewModel>();
             services.AddTransient<DataGridPage>();
-            services.AddTransient<BlankViewModel>();
-            services.AddTransient<BlankPage>();
+            //services.AddTransient<BlankViewModel>();
+            //services.AddTransient<BlankPage>();
             services.AddTransient<MainViewModel>();
             services.AddTransient<MainPage>();
             services.AddTransient<ShellPage>();
@@ -202,18 +202,10 @@ public partial class App : Application
 
             Dictionary<int, DateTime> dateHeaders = new Dictionary<int, DateTime>();
 
-            // Read Date Headers from D9 to CP9
-            Row headerRow = sheetData.Elements<Row>().FirstOrDefault(r => r.RowIndex == 9);
-            if (headerRow != null)
+            // Store the next 8 days starting from rosterStartDate
+            for (int i = 0; i < 8; i++)
             {
-                foreach (Cell cell in headerRow.Elements<Cell>())
-                {
-                    string cellValue = GetCellValue(cell, workbookPart);
-                    if (DateTime.TryParse(cellValue, out DateTime date))
-                    {
-                        dateHeaders[cell.CellReference.Value[0] - 'D'] = date;
-                    }
-                }
+                dateHeaders[i] = rosterStartDate.AddDays(i);
             }
 
             // Read employee data from A9 onwards
@@ -225,15 +217,14 @@ public partial class App : Application
 
                 if (int.TryParse(personnelCodeStr, out int personnelCode))
                 {
-                    Employee employee = new Employee(personnelCode, firstName + " " + surname, "");
+                    Employee employee = new Employee(personnelCode, firstName + " " + surname);
 
-
-                    foreach (var entry in dateHeaders)
+                    // Store shift types for the next 8 days
+                    for (int i = 0; i < 8; i++)
                     {
-                        string shiftValue = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(entry.Key + 3), workbookPart);
-                        employee.ShiftType = shiftValue;
+                        string shiftValue = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(i + 3), workbookPart);
+                        employee.ShiftSchedule[dateHeaders[i]] = shiftValue;
                     }
-
                     employeeDict[personnelCode] = employee;
                 }
             }
