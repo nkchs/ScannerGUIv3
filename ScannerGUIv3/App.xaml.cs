@@ -70,6 +70,9 @@ public partial class App : Application
     public static DateTime nightShiftStart = today.AddHours(18); // 6pm on the same day
     public static DateTime nightShiftEnd = today.AddDays(1).AddHours(6); // 6am on the following day
 
+    public Dictionary<int, Employee> employeeDict = new Dictionary<int, Employee>();
+    public List<string> personnelCodes = new List<string>();
+
     // URLs and Strings //
     //public static string sharepointBaseURL = @"https://newcrestmining.sharepoint.com/:f:/r/teams/
     //                                           TelferMaint-Mill/Shared%20Documents/Attendance%20Register/
@@ -103,7 +106,10 @@ public partial class App : Application
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     {
         // DICTIONARY STUFF
-        Dictionary<int, Employee> employeeDict = new Dictionary<int, Employee>();
+        //Dictionary<int, Employee> employeeDict = new Dictionary<int, Employee>();
+        //List<string> personnelCodes = new List<string>();
+        //var employeeDict = ((App)Application.Current).employeeDict;
+        //var personnelCodes = ((App)Application.Current).personnelCodes;
         // END DICTIONARY STUFF
 
         // CONFIG Setup START
@@ -160,6 +166,8 @@ public partial class App : Application
         var resourcesOnSiteExcel = @"C:\Users\ChaseN\source\ScannerGUIRepair\Resources\SRF175 Roster to Excel Today_90days.xlsx";
         var resourcesMasterExcel = @"C:\Users\ChaseN\source\ScannerGUIRepair\Resources\SRF195 Profile Master.xlsx";
         _ = InitializeEmployeeDictionaryAsync(EmployeeDict, resourcesOnSiteExcel);
+        _ = InitializeEmployeeCodesAsync(personnelCodes, resourcesMasterExcel);
+        //_ = InitializeEmployeeDictionaryAsync(EmployeeDict, resourcesOnSiteExcel);
 
         // TIMER Setup. Enable the daily scheduler. This is the basis of the timers.
         SetupDailyScheduler();
@@ -173,6 +181,51 @@ public partial class App : Application
     {
         //await Task.Run(() => PopulateEmployeeDictionary(employeeDict, resourcesOnSiteExcel));
         await Task.Run(() => PopulateEmployeeDictionaryUsingXML(employeeDict, resourcesOnSiteExcel));
+    }
+
+
+    private async Task InitializeEmployeeCodesAsync(List<string> personnelCodes, string resourcesMasterExcel)
+    {
+        //await Task.Run(() => PopulateEmployeeDictionary(employeeDict, resourcesOnSiteExcel));
+        await Task.Run(() => PopulateEmployeeCodesUsingXML(personnelCodes, resourcesMasterExcel));
+    }
+
+    public static async Task PopulateEmployeeCodesUsingXML(List<string> personnelCodes, string filePath)
+    {
+        //await Task.Run(() =>
+        //{
+            // Open the spreadsheet document
+            using (SpreadsheetDocument doc = SpreadsheetDocument.Open(filePath, false))
+            {
+                WorkbookPart workbookPart = doc.WorkbookPart;
+                Sheet sheet = workbookPart.Workbook.Descendants<Sheet>().FirstOrDefault();
+                if (sheet == null) return;
+
+                // Get the sheet data from the first sheet
+                WorksheetPart worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
+                SheetData sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
+                if (sheetData == null) return;
+
+                // Iterate through each row starting from row 10 (index 10)
+                foreach (Row row in sheetData.Elements<Row>().Where(r => r.RowIndex >= 10))
+                {
+                    // Extract column values: Personnel Code (B), Department (G), and Active Status (O)
+                    string personnelCode = GetCellValue(row, 2, workbookPart); // Column B
+                    string department = GetCellValue(row, 5, workbookPart); // Column G
+                    string activeStatus = GetCellValue(row, 13, workbookPart); // Column O
+
+                    // Check conditions: Department starts with "MT" and Active Status is "Yes"
+                    if (!string.IsNullOrEmpty(department) && department.StartsWith("MT", StringComparison.OrdinalIgnoreCase)
+                        && activeStatus.Equals("Yes", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Console.WriteLine(personnelCode);
+                        personnelCodes.Add(personnelCode); // Add personnel code to the list
+                    }
+
+                }
+                Console.WriteLine("Employee Codes Complete");
+            }
+        //});
     }
 
     ////// ########## Dictionary FUNCS ########## //
@@ -269,6 +322,29 @@ public partial class App : Application
             return workbookPart.SharedStringTablePart.SharedStringTable.Elements<SharedStringItem>().ElementAt(int.Parse(value)).InnerText;
         }
         return value;
+    }
+
+
+    private static string GetCellValue(Row row, int columnIndex, WorkbookPart workbookPart)
+    {
+        Cell cell = row.Elements<Cell>().ElementAtOrDefault(columnIndex - 1); // Get the correct cell by index
+        if (cell == null || cell.CellValue == null) return string.Empty;
+
+        string value = cell.CellValue.InnerText;
+
+        // If the cell is a shared string, resolve its value
+        if (cell.DataType != null && cell.DataType.Value == CellValues.SharedString)
+        {
+            var sharedStringTable = workbookPart.SharedStringTablePart?.SharedStringTable;
+            if (sharedStringTable == null) return value;
+
+            if (int.TryParse(value, out int index) && index >= 0 && index < sharedStringTable.ChildElements.Count)
+            {
+                return sharedStringTable.Elements<SharedStringItem>().ElementAt(index).InnerText;
+            }
+        }
+
+        return value; // Return the value if not a shared string
     }
     // ########## Dictionary ########## //
 

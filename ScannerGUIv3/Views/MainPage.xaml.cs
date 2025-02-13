@@ -15,6 +15,9 @@ namespace ScannerGUIv3.Views;
 
 public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
 {
+    List<string> personnelCodes = ((App)Application.Current).personnelCodes;
+
+
     public MainViewModel ViewModel
     {
         get;
@@ -116,6 +119,11 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         Console.WriteLine("Current DateTime (Day): " + App.currentDate.Day);
 
         Console.ResetColor();
+
+        foreach (var code in this.personnelCodes)
+        {
+            Console.WriteLine(code);
+        }
         //Console.WriteLine("");
     }
       
