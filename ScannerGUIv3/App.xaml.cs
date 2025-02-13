@@ -18,6 +18,7 @@ using Application = Microsoft.UI.Xaml.Application;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Text.RegularExpressions;
+using ScannerGUIv3.Core;
 
 namespace ScannerGUIv3;
 
@@ -33,11 +34,6 @@ public partial class App : Application
     // https://docs.microsoft.com/dotnet/core/extensions/dependency-injection
     // https://docs.microsoft.com/dotnet/core/extensions/configuration
     // https://docs.microsoft.com/dotnet/core/extensions/logging
-    public IHost Host
-    {
-        get;
-    }
-
     public static T GetService<T>()
         where T : class
     {
@@ -48,6 +44,11 @@ public partial class App : Application
 
         return service;
     }
+    public IHost Host
+    {
+        get;
+    }
+
 
     public static WindowEx MainWindow { get; set; } = new MainWindow();
 
@@ -56,32 +57,11 @@ public partial class App : Application
         get; set;
     }
 
-
-    // ########## Variable Declarations ########## //
-    // Time variables //
-    public static DateTime currentDate = DateTime.Now;
-    public static Calendar calendar = CultureInfo.CurrentCulture.Calendar;
-    //public static int weekNumber = calendar.GetWeekOfYear(currentDate, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
     
-    public static DateTime today = DateTime.Today;
-    // Define start and end times for day and night shifts
-    public static DateTime dayShiftStart = today.AddHours(6);   // 6am on the same day
-    public static DateTime dayShiftEnd = today.AddHours(18);    // 6pm on the same day
-
-    public static DateTime nightShiftStart = today.AddHours(18); // 6pm on the same day
-    public static DateTime nightShiftEnd = today.AddDays(1).AddHours(6); // 6am on the following day
-
-    public Dictionary<int, Employee> employeeDict = new Dictionary<int, Employee>();
     public List<string> personnelCodes = new List<string>();
-
-    // URLs and Strings //
-    //public static string sharepointBaseURL = @"https://newcrestmining.sharepoint.com/:f:/r/teams/
-    //                                           TelferMaint-Mill/Shared%20Documents/Attendance%20Register/
-    //                                           FPM%20Daily%20Sign%20On/Development";
-    //public static string excelWeeklyAddress = sharepointBaseURL + @"/Week " + weekNumber + ".xlsm";
-    //public static string excelWeeklyAddress = @"C:\Users\ChaseN" + @"\Week " + weekNumber + ".xlsx";
-    //public static string excelResourcesOnSiteAddress = @"" + "ResourceOnSite_" + currentDate.ToString("yyyyMMdd") + ".xlsx";
-    // ########## End Variable Declarations ########## //
+    public static Dictionary<int, Employee> EmployeeDict { get; } = new Dictionary<int, Employee>();
+    //AppState.PersonnelCodesLoaded = false;
+    //AppState;
 
     // ########## Start Timer Declarations ########## //
     //public DispatcherTimer _timer;
@@ -97,24 +77,15 @@ public partial class App : Application
     };
     // ########## End Timer Declarations ########## //
 
-
-    // ########## Dictionary Declarations ########## //
-    public static Dictionary<int, Employee> EmployeeDict { get; } = new Dictionary<int, Employee>();
-    // ########## Dictionary Declarations ########## //
-
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+    
+    
+    
     public App()
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     {
-        // DICTIONARY STUFF
-        //var employeeDict = ((App)Application.Current).employeeDict;
-        //var personnelCodes = ((App)Application.Current).personnelCodes;
-        // END DICTIONARY STUFF
-
-        // CONFIG Setup START
         var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-        Configuration = builder.Build();
-        // CONFIG Setup END
+        Configuration = builder.Build();    // CONFIG Setup END
 
         Console.WriteLine("Initializing App.");
         InitializeComponent();
@@ -162,30 +133,29 @@ public partial class App : Application
         // TODO: This logic needs to be updated to find the excel.
         // Async function to fill the dictionary with employee values.
         var resourcesOnSiteExcel = @"C:\Users\ChaseN\source\ScannerGUIRepair\Resources\SRF175 Roster to Excel Today_90days.xlsx";
-        //SettingsPage.
         //var resourcesMasterExcel = @"C:\Users\ChaseN\source\ScannerGUIRepair\Resources\SRF195 Profile Master Trimmed.xlsx";
         var resourcesMasterExcel = @"C:\Users\ChaseN\source\ScannerGUIRepair\Resources\SRF195 Profile Master.xlsx";
         _ = InitializeEmployeeDictionaryAsync(EmployeeDict, resourcesOnSiteExcel);
         _ = InitializeEmployeeCodesAsync(personnelCodes, resourcesMasterExcel);
 
-        // TIMER Setup. Enable the daily scheduler. This is the basis of the timers.
-        SetupDailyScheduler();
-        // END TIMER Setup
+        SetupDailyScheduler();  // TIMER Setup. Enable the daily scheduler. This is the basis of the timers.
 
         UnhandledException += App_UnhandledException; // From the default generator.
+        //AppState.currentDate;
+        //AppState.someState = false;
+        AppState.PersonnelCodesLoaded = false;
+        AppState.EmployeeDictionaryLoaded = false;
     }
 
     // Async function to populate the employee dictionary while 
     private async Task InitializeEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, string resourcesOnSiteExcel)
     {
-        //await Task.Run(() => PopulateEmployeeDictionary(employeeDict, resourcesOnSiteExcel));
         await Task.Run(() => PopulateEmployeeDictionaryUsingXML(employeeDict, resourcesOnSiteExcel));
     }
 
 
     private async Task InitializeEmployeeCodesAsync(List<string> personnelCodes, string resourcesMasterExcel)
     {
-        //await Task.Run(() => PopulateEmployeeDictionary(employeeDict, resourcesOnSiteExcel));
         await Task.Run(() => PopulateEmployeeCodesUsingXML(personnelCodes, resourcesMasterExcel));
     }
 
@@ -214,13 +184,12 @@ public partial class App : Application
                 if (!string.IsNullOrEmpty(department) && department.StartsWith("MT", StringComparison.OrdinalIgnoreCase)
                     && activeStatus.Equals("Yes", StringComparison.OrdinalIgnoreCase))
                 {
-                    Console.WriteLine(personnelCode);
+                    //Console.WriteLine(personnelCode);
                     personnelCodes.Add(personnelCode); // Add personnel code to the list
                 }
-
             }
-            Console.WriteLine("Employee Codes Complete");
-            Console.WriteLine(personnelCodes);
+            //Console.WriteLine("Employee Codes Complete");
+            AppState.PersonnelCodesLoaded = true;
         }
     }
 
@@ -277,6 +246,7 @@ public partial class App : Application
                     employeeDict[personnelCode] = employee;
                 }
             }
+            AppState.EmployeeDictionaryLoaded = true;
         }
     }
 
@@ -321,27 +291,27 @@ public partial class App : Application
     }
 
 
-    private static string GetCellValue(Row row, int columnIndex, WorkbookPart workbookPart)
-    {
-        Cell cell = row.Elements<Cell>().ElementAtOrDefault(columnIndex - 1); // Get the correct cell by index
-        if (cell == null || cell.CellValue == null) return string.Empty;
+    //private static string GetCellValue(Row row, int columnIndex, WorkbookPart workbookPart)
+    //{
+    //    Cell cell = row.Elements<Cell>().ElementAtOrDefault(columnIndex - 1); // Get the correct cell by index
+    //    if (cell == null || cell.CellValue == null) return string.Empty;
 
-        string value = cell.CellValue.InnerText;
+    //    string value = cell.CellValue.InnerText;
 
-        // If the cell is a shared string, resolve its value
-        if (cell.DataType != null && cell.DataType.Value == CellValues.SharedString)
-        {
-            var sharedStringTable = workbookPart.SharedStringTablePart?.SharedStringTable;
-            if (sharedStringTable == null) return value;
+    //    // If the cell is a shared string, resolve its value
+    //    if (cell.DataType != null && cell.DataType.Value == CellValues.SharedString)
+    //    {
+    //        var sharedStringTable = workbookPart.SharedStringTablePart?.SharedStringTable;
+    //        if (sharedStringTable == null) return value;
 
-            if (int.TryParse(value, out int index) && index >= 0 && index < sharedStringTable.ChildElements.Count)
-            {
-                return sharedStringTable.Elements<SharedStringItem>().ElementAt(index).InnerText;
-            }
-        }
+    //        if (int.TryParse(value, out int index) && index >= 0 && index < sharedStringTable.ChildElements.Count)
+    //        {
+    //            return sharedStringTable.Elements<SharedStringItem>().ElementAt(index).InnerText;
+    //        }
+    //    }
 
-        return value; // Return the value if not a shared string
-    }
+    //    return value; // Return the value if not a shared string
+    //}
 
 
     private static string GetCellValue(Row row, string columnLetter, WorkbookPart workbookPart)
@@ -372,9 +342,6 @@ public partial class App : Application
     {
         return Regex.Match(cellReference, "[A-Za-z]+").Value; // Extracts letters (column) from cell reference
     }
-
-
-    // ########## Dictionary ########## //
 
 
     // ########## TIMER FUNCS ########## //

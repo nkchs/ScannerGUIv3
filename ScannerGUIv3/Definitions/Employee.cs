@@ -58,7 +58,7 @@ public class Employee
     {
         if (string.IsNullOrEmpty(value))
         {
-            return null;
+            return "OS";
         }
         else if (value.StartsWith("D", StringComparison.OrdinalIgnoreCase))
         {
@@ -70,9 +70,9 @@ public class Employee
         }
         else if (value.Equals("RR", StringComparison.OrdinalIgnoreCase))
         {
-            return "RR";  // Rostered Offsite
+            return "OS";  // Rostered Offsite
         }
-        return null;  // Invalid shift type, set to null
+        return "OS";  // Invalid shift type, set to "OS Offsite"
     }
 
     public Dictionary<DateTime, string> ShiftSchedule { get; set; } = new Dictionary<DateTime, string>();

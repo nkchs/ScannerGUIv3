@@ -10,13 +10,13 @@ using Microsoft.UI.Xaml.Input;
 using Windows.System;
 using ScannerGUIv3.Services;
 using Microsoft.UI.Xaml.Controls;
+using ScannerGUIv3.Core;
 
 namespace ScannerGUIv3.Views;
 
 public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
 {
     List<string> personnelCodes = ((App)Application.Current).personnelCodes;
-
 
     public MainViewModel ViewModel
     {
@@ -110,13 +110,14 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine("\nDebug");
 
-        //Console.WriteLine(App.excelWeeklyAddress);
-        //Console.WriteLine(App.excelResourcesOnSiteAddress);
+        Console.WriteLine(AppState.currentDate);
+        Console.WriteLine(AppState.today);
 
-        Console.WriteLine("Recorded DateTime: " + App.currentDate); // Check definition of 
-        Console.WriteLine("Current DateTime: " + DateTime.Now);
+        Console.WriteLine(AppState.dayShiftStart);
+        Console.WriteLine(AppState.dayShiftEnd);
 
-        Console.WriteLine("Current DateTime (Day): " + App.currentDate.Day);
+        Console.WriteLine(AppState.nightShiftStart);
+        Console.WriteLine(AppState.nightShiftEnd);
 
         Console.WriteLine();
 
