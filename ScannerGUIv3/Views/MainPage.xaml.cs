@@ -139,14 +139,14 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
                 // Got a valid int.
                 if (App.EmployeeDict.TryGetValue(personnelCode, out var employee))
                 {
-                    DateTime now = DateTime.Now;
+                    var now = DateTime.Now;
                     string message;
 
                     // Define a cooldown period of 10 seconds for individual employees
-                    TimeSpan cooldownPeriod = TimeSpan.FromSeconds(10);
+                    var cooldownPeriod = TimeSpan.FromSeconds(10);
 
                     // Check if the last action for this specific employee was within the cooldown period
-                    bool isWithinCooldownPeriod = (employee.SignInTime.HasValue && (now - employee.SignInTime.Value) < cooldownPeriod)
+                    var isWithinCooldownPeriod = (employee.SignInTime.HasValue && (now - employee.SignInTime.Value) < cooldownPeriod)
                                                   || (employee.SignOutTime.HasValue && (now - employee.SignOutTime.Value) < cooldownPeriod);
 
                     if (isWithinCooldownPeriod)
@@ -156,8 +156,8 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
                     else
                     {
                         // Determine if it’s a valid sign-in time for the employee's shift
-                        bool isValidDayShiftSignIn = employee.ShiftType == "DS" && now.Hour >= 4 && now.Hour < 16;
-                        bool isValidNightShiftSignIn = employee.ShiftType == "NS" && (now.Hour >= 16 || now.Hour < 4);
+                        var isValidDayShiftSignIn = employee.ShiftType == "DS" && now.Hour >= 4 && now.Hour < 16;
+                        var isValidNightShiftSignIn = employee.ShiftType == "NS" && (now.Hour >= 16 || now.Hour < 4);
 
                         if (employee.SignInTime.HasValue && !employee.SignOutTime.HasValue)
                         {

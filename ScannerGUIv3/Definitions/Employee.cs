@@ -41,7 +41,7 @@ public class Employee
         get
         {
             // Try to get today's shift from the ShiftSchedule dictionary
-            if (ShiftSchedule.TryGetValue(DateTime.Today, out string? shift))
+            if (ShiftSchedule.TryGetValue(DateTime.Today, out var shift))
             {
                 return NormalizeShiftType(shift);
             }

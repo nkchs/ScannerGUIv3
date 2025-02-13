@@ -1,10 +1,4 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
-
-namespace ScannerGUIv3.Core;
+﻿namespace ScannerGUIv3.Core;
 
 public class AppState
 {
@@ -23,8 +17,6 @@ public class AppState
 
     public static DateTime nightShiftStart = today.AddHours(18); // 6pm on the same day
     public static DateTime nightShiftEnd = today.AddDays(1).AddHours(6); // 6am on the following day
-
-    public static bool someState = true;
 
     public static bool PersonnelCodesLoaded
     {
@@ -48,21 +40,6 @@ public class AppState
     }
     private static bool _employeeDictionaryLoaded;
 
-    // Example global variables
-    //public string? CurrentUser
-    //{
-    //    get; set;
-    //}
-
-    //public string? CurrentShift
-    //{
-    //    get; set;
-    //}
-
-    //public int ActiveScanners
-    //{
-    //    get; set;
-    //}
 
     // Private constructor to prevent instantiation
     private AppState()

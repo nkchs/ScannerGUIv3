@@ -27,7 +27,7 @@ public sealed partial class SettingsPage : Page
         PickFolderOutputTextBlock.Text = "";
 
         // Create a folder picker
-        FolderPicker openPicker = new Windows.Storage.Pickers.FolderPicker();
+        var openPicker = new Windows.Storage.Pickers.FolderPicker();
 
         // See the sample code below for how to make the window accessible from the App class.
         var window = App.MainWindow;
@@ -43,7 +43,7 @@ public sealed partial class SettingsPage : Page
         openPicker.FileTypeFilter.Add("*");
 
         // Open the picker for the user to pick a folder
-        StorageFolder folder = await openPicker.PickSingleFolderAsync();
+        var folder = await openPicker.PickSingleFolderAsync();
         if (folder != null)
         {
             StorageApplicationPermissions.FutureAccessList.AddOrReplace("PickedFolderToken", folder);

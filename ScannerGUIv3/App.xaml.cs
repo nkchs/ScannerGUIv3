@@ -58,7 +58,7 @@ public partial class App : Application
     }
 
     
-    public List<string> personnelCodes = new List<string>();
+    public List<string> personnelCodes = new();
     public static Dictionary<int, Employee> EmployeeDict { get; } = new Dictionary<int, Employee>();
     //AppState.PersonnelCodesLoaded = false;
     //AppState;
@@ -141,8 +141,7 @@ public partial class App : Application
         SetupDailyScheduler();  // TIMER Setup. Enable the daily scheduler. This is the basis of the timers.
 
         UnhandledException += App_UnhandledException; // From the default generator.
-        //AppState.currentDate;
-        //AppState.someState = false;
+
         AppState.PersonnelCodesLoaded = false;
         AppState.EmployeeDictionaryLoaded = false;
     }
@@ -161,100 +160,95 @@ public partial class App : Application
 
     public static async Task PopulateEmployeeCodesUsingXML(List<string> personnelCodes, string filePath)
     {
-        using (SpreadsheetDocument doc = SpreadsheetDocument.Open(filePath, false))
+        using var doc = SpreadsheetDocument.Open(filePath, false);
+        var workbookPart = doc.WorkbookPart;
+        var sheet = workbookPart.Workbook.Descendants<Sheet>().FirstOrDefault();
+        if (sheet == null) return;
+
+        // Get the sheet data from the first sheet
+        var worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
+        var sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
+        if (sheetData == null) return;
+
+        // Iterate through each row starting from row 10 (index 10)
+        foreach (var row in sheetData.Elements<Row>().Where(r => r.RowIndex >= 10))
         {
-            WorkbookPart workbookPart = doc.WorkbookPart;
-            Sheet sheet = workbookPart.Workbook.Descendants<Sheet>().FirstOrDefault();
-            if (sheet == null) return;
+            // Extract column values: Personnel Code (B), Department (G), and Active Status (O)
+            var personnelCode = GetCellValue(row, "B", workbookPart); // Column B
+            var department = GetCellValue(row, "G", workbookPart);   // Column G
+            var activeStatus = GetCellValue(row, "O", workbookPart); // Column O
 
-            // Get the sheet data from the first sheet
-            WorksheetPart worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
-            SheetData sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
-            if (sheetData == null) return;
-
-            // Iterate through each row starting from row 10 (index 10)
-            foreach (Row row in sheetData.Elements<Row>().Where(r => r.RowIndex >= 10))
+            // Check conditions: Department starts with "MT" and Active Status is "Yes"
+            if (!string.IsNullOrEmpty(department) && department.StartsWith("MT", StringComparison.OrdinalIgnoreCase)
+                && activeStatus.Equals("Yes", StringComparison.OrdinalIgnoreCase))
             {
-                // Extract column values: Personnel Code (B), Department (G), and Active Status (O)
-                string personnelCode = GetCellValue(row, "B", workbookPart); // Column B
-                string department = GetCellValue(row, "G", workbookPart);   // Column G
-                string activeStatus = GetCellValue(row, "O", workbookPart); // Column O
-
-                // Check conditions: Department starts with "MT" and Active Status is "Yes"
-                if (!string.IsNullOrEmpty(department) && department.StartsWith("MT", StringComparison.OrdinalIgnoreCase)
-                    && activeStatus.Equals("Yes", StringComparison.OrdinalIgnoreCase))
-                {
-                    //Console.WriteLine(personnelCode);
-                    personnelCodes.Add(personnelCode); // Add personnel code to the list
-                }
+                //Console.WriteLine(personnelCode);
+                personnelCodes.Add(personnelCode); // Add personnel code to the list
             }
-            //Console.WriteLine("Employee Codes Complete");
-            AppState.PersonnelCodesLoaded = true;
         }
+        AppState.PersonnelCodesLoaded = true;
     }
 
     ////// ########## Dictionary FUNCS ########## //
 
     public void PopulateEmployeeDictionaryUsingXML(Dictionary<int, Employee> employeeDict, string excelPath)
     {
-        using (SpreadsheetDocument doc = SpreadsheetDocument.Open(excelPath, false))
+        using var doc = SpreadsheetDocument.Open(excelPath, false);
+        var workbookPart = doc.WorkbookPart;
+        if (workbookPart == null) return;
+
+        // Find the sheet named "Report"
+        var sheet = workbookPart.Workbook.Descendants<Sheet>().FirstOrDefault(s => s.Name == "Report");
+        if (sheet == null)
         {
-            WorkbookPart workbookPart = doc.WorkbookPart;
-
-            // Find the sheet named "Report"
-            Sheet sheet = workbookPart.Workbook.Descendants<Sheet>().FirstOrDefault(s => s.Name == "Report");
-
-            if (sheet == null)
-            {
-                Console.WriteLine("Sheet 'Report' not found.");
-                return;
-            }
-
-            WorksheetPart worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
-            SheetData sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
-            if (sheetData == null) return;
-
-            // Get Roster Start Date from D1 using GetRosterStartDate function
-            DateTime rosterStartDate = GetRosterStartDate(worksheetPart);
-            Console.WriteLine("Roster Start Date: " + (rosterStartDate != DateTime.MinValue ? rosterStartDate.ToString("dd/MM/yyyy") : "Invalid Date"));
-
-            Dictionary<int, DateTime> dateHeaders = new Dictionary<int, DateTime>();
-
-            // Store the next 8 days starting from rosterStartDate
-            for (int i = 0; i < 8; i++)
-            {
-                dateHeaders[i] = rosterStartDate.AddDays(i);
-            }
-
-            // Read employee data from A9 onwards
-            foreach (Row row in sheetData.Elements<Row>().Where(r => r.RowIndex >= 10))
-            {
-                string firstName = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(0), workbookPart);
-                string surname = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(1), workbookPart);
-                string personnelCodeStr = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(2), workbookPart);
-
-                if (int.TryParse(personnelCodeStr, out int personnelCode))
-                {
-                    Employee employee = new Employee(personnelCode, firstName + " " + surname);
-
-                    // Store shift types for the next 8 days
-                    for (int i = 0; i < 8; i++)
-                    {
-                        string shiftValue = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(i + 3), workbookPart);
-                        employee.ShiftSchedule[dateHeaders[i]] = shiftValue;
-                    }
-                    employeeDict[personnelCode] = employee;
-                }
-            }
-            AppState.EmployeeDictionaryLoaded = true;
+            Console.WriteLine("Sheet 'Report' not found.");
+            return;
         }
+
+        var worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
+        var sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
+        if (sheetData == null) return;
+
+        // Get Roster Start Date from D1 using GetRosterStartDate function
+        var rosterStartDate = GetRosterStartDate(worksheetPart);
+        Console.WriteLine("Roster Start Date: " + (rosterStartDate != DateTime.MinValue ? rosterStartDate.ToString("dd/MM/yyyy") : "Invalid Date"));
+
+        var dateHeaders = new Dictionary<int, DateTime>();
+
+        // Store the next 8 days starting from rosterStartDate
+        for (var i = 0; i < 8; i++)
+        {
+            dateHeaders[i] = rosterStartDate.AddDays(i);
+        }
+
+        // Read employee data from A9 onwards
+        foreach (var row in sheetData.Elements<Row>().Where(r => r.RowIndex >= 10))
+        {
+            var firstName = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(0), workbookPart);
+            var surname = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(1), workbookPart);
+            var personnelCodeStr = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(2), workbookPart);
+
+            if (int.TryParse(personnelCodeStr, out var personnelCode))
+            {
+                var employee = new Employee(personnelCode, firstName + " " + surname);
+
+                // Store shift types for the next 8 days
+                for (var i = 0; i < 8; i++)
+                {
+                    var shiftValue = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(i + 3), workbookPart);
+                    employee.ShiftSchedule[dateHeaders[i]] = shiftValue;
+                }
+                employeeDict[personnelCode] = employee;
+            }
+        }
+        AppState.EmployeeDictionaryLoaded = true;
     }
 
 
     private static DateTime GetRosterStartDate(WorksheetPart worksheetPart)
         {
             // Get the cell D1
-            Cell cell = worksheetPart.Worksheet.Descendants<Cell>().FirstOrDefault(c => c.CellReference == "D1");
+            var cell = worksheetPart.Worksheet.Descendants<Cell>().FirstOrDefault(c => c.CellReference == "D1");
 
             if (cell == null || cell.CellValue == null)
             {
@@ -262,14 +256,14 @@ public partial class App : Application
                 return DateTime.MinValue;
             }
 
-            string rawValue = cell.CellValue.InnerText;
+            var rawValue = cell.CellValue.InnerText;
             //Console.WriteLine("D1 Raw Value: " + rawValue);
 
-            if (double.TryParse(rawValue, out double oaDate))
+            if (double.TryParse(rawValue, out var oaDate))
             {
                 return DateTime.FromOADate(oaDate);
             }
-            else if (DateTime.TryParseExact(rawValue, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate))
+            else if (DateTime.TryParseExact(rawValue, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate))
             {
                 return parsedDate;
             }
@@ -282,7 +276,7 @@ public partial class App : Application
     private static string GetCellValue(Cell cell, WorkbookPart workbookPart)
     {
         if (cell == null || cell.CellValue == null) return string.Empty;
-        string value = cell.CellValue.InnerText;
+        var value = cell.CellValue.InnerText;
         if (cell.DataType != null && cell.DataType.Value == CellValues.SharedString)
         {
             return workbookPart.SharedStringTablePart.SharedStringTable.Elements<SharedStringItem>().ElementAt(int.Parse(value)).InnerText;
@@ -317,10 +311,10 @@ public partial class App : Application
     private static string GetCellValue(Row row, string columnLetter, WorkbookPart workbookPart)
     {
         // Find the cell in the row that matches the given column (e.g., "B10")
-        Cell cell = row.Elements<Cell>().FirstOrDefault(c => GetColumnLetter(c.CellReference) == columnLetter);
+        var cell = row.Elements<Cell>().FirstOrDefault(c => GetColumnLetter(c.CellReference) == columnLetter);
         if (cell == null || cell.CellValue == null) return string.Empty;
 
-        string value = cell.CellValue.InnerText;
+        var value = cell.CellValue.InnerText;
 
         // Handle shared string values
         if (cell.DataType != null && cell.DataType.Value == CellValues.SharedString)
@@ -328,7 +322,7 @@ public partial class App : Application
             var sharedStringTable = workbookPart.SharedStringTablePart?.SharedStringTable;
             if (sharedStringTable == null) return value;
 
-            if (int.TryParse(value, out int index) && index >= 0 && index < sharedStringTable.ChildElements.Count)
+            if (int.TryParse(value, out var index) && index >= 0 && index < sharedStringTable.ChildElements.Count)
             {
                 return sharedStringTable.Elements<SharedStringItem>().ElementAt(index).InnerText;
             }

@@ -15,13 +15,13 @@ public static class ExcelHandling
             // Visible = true,
         };
         Console.WriteLine("ExcelHandling.cs");
-        Workbook excelWorkbook = excel.Workbooks.Open(@"C:\Users\ChaseN\ResourceOnSite_20240620043001.xlsx");
+        var excelWorkbook = excel.Workbooks.Open(@"C:\Users\ChaseN\ResourceOnSite_20240620043001.xlsx");
 
-        Worksheet excelWorksheet = (Worksheet)excelWorkbook.Sheets[3];
-        Range excelRange = excelWorksheet.UsedRange;
+        var excelWorksheet = (Worksheet)excelWorkbook.Sheets[3];
+        var excelRange = excelWorksheet.UsedRange;
 
-        int maxRow = excelRange.Rows.Count;
-        int maxCol = excelRange.Columns.Count;
+        var maxRow = excelRange.Rows.Count;
+        var maxCol = excelRange.Columns.Count;
         Console.WriteLine("Rows: " + maxRow);
         Console.WriteLine("Columns: " + maxCol);
     }
