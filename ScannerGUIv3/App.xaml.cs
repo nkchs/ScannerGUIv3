@@ -155,8 +155,36 @@ public partial class App : Application
 
     private async Task InitializeEmployeeCodesAsync(List<string> personnelCodes, string resourcesMasterExcel)
     {
-        await Task.Run(() => PopulateEmployeeCodesUsingXML(personnelCodes, resourcesMasterExcel));
+        try
+        {
+            using var httpClient = new HttpClient();
+            var response = await httpClient.GetStringAsync("https://prod-18.australiasoutheast.logic.azure.com:443/workflows/7d90dc45ba274d86992b23406da6a420/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=fbi68AVQta0kznlTwHvggUqjoSuLZar2MME9iTklucY&action=SEND_MT_CODES");
+
+            var responseDate = response.Substring(0, 10); // Extract the date from the start of the response
+            if (!string.IsNullOrEmpty(response) && response.Contains("Code") && response.EndsWith("Code_End"))
+            //if (!string.IsNullOrEmpty(response) && response.StartsWith(DateTime.Now.ToString("yyyy-MM-dd")) && response.Contains("Code") && response.EndsWith("Code_End"))
+            {
+                var codes = response.Split(new[] { "Code", "Code_End" }, StringSplitOptions.RemoveEmptyEntries)[1].Trim().Split('\n');
+                foreach (var code in codes)
+                {
+                    if (int.TryParse(code, out var personnelCode))
+                    {
+                        personnelCodes.Add(code.Trim());
+                    }
+                }
+                AppState.PersonnelCodesLoaded = true;
+            }
+            else
+            {
+                throw new Exception("Invalid response format");
+            }
+        }
+        catch
+        {
+            await Task.Run(() => PopulateEmployeeCodesUsingXML(personnelCodes, resourcesMasterExcel));
+        }
     }
+
 
     public static async Task PopulateEmployeeCodesUsingXML(List<string> personnelCodes, string filePath)
     {

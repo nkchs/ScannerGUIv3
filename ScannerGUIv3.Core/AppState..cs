@@ -40,6 +40,27 @@ public class AppState
     }
     private static bool _employeeDictionaryLoaded;
 
+    public static bool EmployeeDictionaryTrimmed
+    {
+        get => _employeeDictionaryTrimmed;
+        set
+        {
+            _employeeDictionaryTrimmed = value;
+            Console.WriteLine($"EmployeeDictionaryTrimmed set to: {value}");
+        }
+    }
+    private static bool _employeeDictionaryTrimmed;
+
+    public static bool EmployeeDictionaryRefreshed
+    {
+        get => _employeeDictionaryRefreshed;
+        set
+        {
+            _employeeDictionaryRefreshed = value;
+            Console.WriteLine($"EmployeeDictionaryRefreshed set to: {value}");
+        }
+    }
+    private static bool _employeeDictionaryRefreshed;
 
     // Private constructor to prevent instantiation
     private AppState()
