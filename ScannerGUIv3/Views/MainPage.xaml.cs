@@ -123,11 +123,12 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
 
         Console.ResetColor();
 
-        foreach (var code in this.personnelCodes)
+        Console.WriteLine("Personnel Codes Start");
+        foreach (var code in personnelCodes)
         {
             Console.WriteLine(code);
         }
-        //Console.WriteLine("");
+        Console.WriteLine("Personnel Codes End");
     }
       
     private void PersonnelNumberTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
