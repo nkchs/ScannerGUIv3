@@ -17,7 +17,7 @@ namespace ScannerGUIv3.Views;
 
 public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
 {
-    private List<string> personnelCodes = ((App)Application.Current).personnelCodes;
+    private readonly List<string> personnelCodes = ((App)Application.Current).personnelCodes;
     private readonly LogImportExportService _logService;
 
     public MainViewModel ViewModel
@@ -84,7 +84,7 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
 
         var dayShiftLog = LogImportExportService.ExportDayShiftLog(App.EmployeeDict);
         Console.WriteLine(dayShiftLog);
-
+        Console.ResetColor();
         Console.WriteLine("");
     }
 

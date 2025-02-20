@@ -10,38 +10,42 @@ namespace ScannerGUIv3.Services
 {
     public class ExcelService
     {
-        List<string> personnelCodes = ((App)Application.Current).personnelCodes;
+        private readonly List<string> personnelCodes = ((App)Application.Current).personnelCodes;
 
         public async Task InitializeEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, string resourcesOnSiteExcel)
         {
             await Task.Run(() => PopulateEmployeeDictionaryUsingXML(employeeDict, resourcesOnSiteExcel));
-            Console.WriteLine("Calling Trim");
-            await TrimEmployeeDictionaryAsync(employeeDict, personnelCodes);
+            //Console.WriteLine("Calling Trim");
+            await Task.Run(() => TrimEmployeeDictionaryAsync(employeeDict, personnelCodes));
         }
 
-        public async Task InitializeEmployeeCodesAsync(List<string> personnelCodes, string resourcesMasterExcel)
+
+        public static async Task InitializeEmployeeCodesAsync(List<string> personnelCodes, string resourcesMasterExcel)
         {
             try
             {
-                using var httpClient = new HttpClient();
-                var response = await httpClient.GetStringAsync("https://prod-18.australiasoutheast.logic.azure.com:443/workflows/7d90dc45ba274d86992b23406da6a420/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=fbi68AVQta0kznlTwHvggUqjoSuLZar2MME9iTklucY&action=SEND_MT_CODES");
+                await Task.Run(async () =>
+                {
+                    using var httpClient = new HttpClient();
+                    var response = await httpClient.GetStringAsync("https://prod-18.australiasoutheast.logic.azure.com:443/workflows/7d90dc45ba274d86992b23406da6a420/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=fbi68AVQta0kznlTwHvggUqjoSuLZar2MME9iTklucY&action=SEND_MT_CODES");
 
-                if (!string.IsNullOrEmpty(response) && response.Contains("Code") && response.EndsWith("Code_End"))
-                {
-                    var codes = response.Split(new[] { "Code", "Code_End" }, StringSplitOptions.RemoveEmptyEntries)[1].Trim().Split('\n');
-                    foreach (var code in codes)
+                    if (!string.IsNullOrEmpty(response) && response.Contains("Code") && response.EndsWith("Code_End"))
                     {
-                        if (int.TryParse(code, out var personnelCode))
+                        var codes = response.Split(new[] { "Code", "Code_End" }, StringSplitOptions.RemoveEmptyEntries)[1].Trim().Split('\n');
+                        foreach (var code in codes)
                         {
-                            personnelCodes.Add(code.Trim());
+                            if (int.TryParse(code, out var personnelCode))
+                            {
+                                personnelCodes.Add(code.Trim());
+                            }
                         }
+                        AppState.PersonnelCodesLoaded = true;
                     }
-                    AppState.PersonnelCodesLoaded = true;
-                }
-                else
-                {
-                    throw new Exception("Invalid response format");
-                }
+                    else
+                    {
+                        throw new Exception("Invalid response format");
+                    }
+                });
             }
             catch
             {
@@ -49,30 +53,33 @@ namespace ScannerGUIv3.Services
             }
         }
 
+
         public static async Task PopulateEmployeeCodesUsingXML(List<string> personnelCodes, string filePath)
         {
-            using var doc = SpreadsheetDocument.Open(filePath, false);
-            var workbookPart = doc.WorkbookPart;
-            var sheet = workbookPart.Workbook.Descendants<Sheet>().FirstOrDefault();
-            if (sheet == null) return;
+            await Task.Run(() => {
+                using var doc = SpreadsheetDocument.Open(filePath, false);
+                var workbookPart = doc.WorkbookPart;
+                var sheet = workbookPart.Workbook.Descendants<Sheet>().FirstOrDefault();
+                if (sheet == null) return;
 
-            var worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
-            var sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
-            if (sheetData == null) return;
+                var worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
+                var sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
+                if (sheetData == null) return;
 
-            foreach (var row in sheetData.Elements<Row>().Where(r => r.RowIndex >= 10))
-            {
-                var personnelCode = GetCellValue(row, "B", workbookPart);
-                var department = GetCellValue(row, "G", workbookPart);
-                var activeStatus = GetCellValue(row, "O", workbookPart);
-
-                if (!string.IsNullOrEmpty(department) && department.StartsWith("MT", StringComparison.OrdinalIgnoreCase)
-                    && activeStatus.Equals("Yes", StringComparison.OrdinalIgnoreCase))
+                foreach (var row in sheetData.Elements<Row>().Where(r => r.RowIndex >= 10))
                 {
-                    personnelCodes.Add(personnelCode);
+                    var personnelCode = GetCellValue(row, "B", workbookPart);
+                    var department = GetCellValue(row, "G", workbookPart);
+                    var activeStatus = GetCellValue(row, "O", workbookPart);
+
+                    if (!string.IsNullOrEmpty(department) && department.StartsWith("MT", StringComparison.OrdinalIgnoreCase)
+                        && activeStatus.Equals("Yes", StringComparison.OrdinalIgnoreCase))
+                    {
+                        personnelCodes.Add(personnelCode);
+                    }
                 }
-            }
-            AppState.PersonnelCodesLoaded = true;
+                AppState.PersonnelCodesLoaded = true;
+            });
         }
 
 
@@ -127,7 +134,6 @@ namespace ScannerGUIv3.Services
 
                         if (i == 0)
                         {
-                            //Console.WriteLine(shiftValue);
                             employee.ShiftType = shiftValue;
                         }
                         employee.ShiftSchedule[dateHeaders[i]] = shiftValue;
@@ -163,6 +169,7 @@ namespace ScannerGUIv3.Services
             return DateTime.MinValue;
         }
 
+
         private static string GetCellValue(Cell cell, WorkbookPart workbookPart)
         {
             if (cell == null || cell.CellValue == null) return string.Empty;
@@ -173,6 +180,7 @@ namespace ScannerGUIv3.Services
             }
             return value;
         }
+
 
         private static string GetCellValue(Row row, string columnLetter, WorkbookPart workbookPart)
         {
@@ -194,10 +202,12 @@ namespace ScannerGUIv3.Services
             return value;
         }
 
+
         private static string GetColumnLetter(string cellReference)
         {
             return Regex.Match(cellReference, "[A-Za-z]+").Value;
         }
+
 
         private async Task TrimEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, List<string> personnelCodes)
         {

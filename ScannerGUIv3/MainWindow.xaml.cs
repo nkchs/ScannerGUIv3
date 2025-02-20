@@ -14,12 +14,12 @@ public sealed partial class MainWindow : WindowEx
 
     public MainWindow()
     {
-        Console.WriteLine("Initializing Main Window.");
+        //Console.WriteLine("Initializing Main Window.");
 
         InitializeComponent();
 
-        this.Width = 1000;
-        this.Height = 1300;
+        Width = 1000;
+        Height = 1300;
 
         AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets/WindowIcon.ico"));
         Content = null;
