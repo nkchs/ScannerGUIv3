@@ -18,6 +18,9 @@ public sealed partial class MainWindow : WindowEx
 
         InitializeComponent();
 
+        this.Width = 1000;
+        this.Height = 1300;
+
         AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets/WindowIcon.ico"));
         Content = null;
         Title = "AppDisplayName".GetLocalized();

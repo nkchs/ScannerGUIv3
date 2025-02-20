@@ -5,9 +5,6 @@ public class Employee
 
     public string? Name { get; set; }
 
-    //public string? ShiftType { get; set; }
-    private string? shiftType;
-
     //public string? ShiftType
     //{
     //    get => shiftType;
@@ -36,26 +33,38 @@ public class Employee
     //    }
     //}
 
+
+    //public string? ShiftType
+    //{
+    //    get
+    //    {
+    //        // Try to get today's shift from the ShiftSchedule dictionary
+    //        if (ShiftSchedule.TryGetValue(DateTime.Today, out var shift))
+    //        {
+    //            return NormalizeShiftType(shift);
+    //        }
+    //        return null;
+    //    }
+    //    //set => shiftType = NormalizeShiftType(value);
+    //    set
+    //    {
+    //        NormalizeShiftType(value);
+    //    }
+    //}
+
     public string? ShiftType
     {
-        get
-        {
-            // Try to get today's shift from the ShiftSchedule dictionary
-            if (ShiftSchedule.TryGetValue(DateTime.Today, out var shift))
-            {
-                return NormalizeShiftType(shift);
-            }
-            return null;
-        }
-        set
-        {
-            shiftType = NormalizeShiftType(value);
-        }
+        get => shiftType;// Try to get today's shift from the ShiftSchedule dictionary//if (ShiftSchedule.TryGetValue(DateTime.Today, out var shift))//{//    return NormalizeShiftType(shift);//}//return null;
+
+        set => shiftType = NormalizeShiftType(value);
     }
+
+    private string? shiftType;
 
     // Helper function to normalize shift values
     private string? NormalizeShiftType(string? value)
     {
+        //Console.WriteLine(value);
         if (string.IsNullOrEmpty(value))
         {
             return "OS";
@@ -80,7 +89,6 @@ public class Employee
     public DateTime? SignInTime { get; set; }
 
     public DateTime? SignOutTime { get; set; }
-
 
     // Default constructor
     public Employee()

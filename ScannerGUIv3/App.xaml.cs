@@ -85,7 +85,8 @@ public partial class App : Application
         var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
         Configuration = builder.Build();    // CONFIG Setup END
 
-        Console.WriteLine("Initializing App.");
+        Console.WriteLine("Initializing App @ " + DateTime.Now.ToString("HH:mm:ss"));
+        //Console.WriteLine("Current Time: " + DateTime.Now.ToString("HH:mm:ss"));
         InitializeComponent();
 
         Host = Microsoft.Extensions.Hosting.Host.
@@ -108,6 +109,7 @@ public partial class App : Application
 
             // Core Services
             services.AddSingleton<IFileService, FileService>();
+            
 
             // Views and ViewModels
             services.AddTransient<SettingsViewModel>();
@@ -121,89 +123,99 @@ public partial class App : Application
 
             // File Handling
             services.AddSingleton<LogImportExportService>();
+            services.AddSingleton<ExcelService>();
+
+            // Scheduling
+            services.AddSingleton<ScheduleService>();
 
             // Configuration
             services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
         }).
         Build();
 
+
         AppState.PersonnelCodesLoaded = false;
         AppState.EmployeeDictionaryLoaded = false;
         AppState.EmployeeDictionaryTrimmed = false;
         AppState.EmployeeDictionaryRefreshed = false;
-        var excelService = new ExcelService();
-        //var logService = new LogImportExportService();
 
+
+        ExcelService _excelService = GetService<ExcelService>();
+        Console.WriteLine("Roster Start     @ " + DateTime.Now.ToString("HH:mm:ss"));
         // TODO: This logic needs to be updated to find the excel. // Async function to fill the dictionary with employee values.
         var resourcesOnSiteExcel = @"C:\Users\ChaseN\source\ScannerGUIRepair\Resources\SRF175 Roster to Excel Today_90days.xlsx";
         //var resourcesMasterExcel = @"C:\Users\ChaseN\source\ScannerGUIRepair\Resources\SRF195 Profile Master Trimmed.xlsx";
         var resourcesMasterExcel = @"C:\Users\ChaseN\source\ScannerGUIRepair\Resources\SRF195 Profile Master.xlsx";
-        _ = excelService.InitializeEmployeeDictionaryAsync(EmployeeDict, resourcesOnSiteExcel);
-        _ = excelService.InitializeEmployeeCodesAsync(personnelCodes, resourcesMasterExcel);
-        //_ = InitializeEmployeeCodesAsync(personnelCodes, resourcesMasterExcel);
 
-        SetupDailyScheduler();  // TIMER Setup. Enable the daily scheduler. This is the basis of the timers.
+        _ = _excelService.InitializeEmployeeDictionaryAsync(EmployeeDict, resourcesOnSiteExcel);
+        _ = _excelService.InitializeEmployeeCodesAsync(personnelCodes, resourcesMasterExcel);
+
+
+        ScheduleService _scheduleService = GetService<ScheduleService>();
+        //_scheduleService = new ScheduleService();
+        _scheduleService.SetupDailyScheduler();
+        //SetupDailyScheduler();  // TIMER Setup. Enable the daily scheduler. This is the basis of the timers.
         UnhandledException += App_UnhandledException; // From the default generator.
     }
 
     
     // ########## TIMER FUNCS ########## //
-    public void SetupDailyScheduler()
-    {
-        ScheduleNextTask();
-    }
+    //public void SetupDailyScheduler()
+    //{
+    //    ScheduleNextTask();
+    //}
 
 
-    private void ScheduleNextTask()
-    {
-        var now = DateTime.Now;
-        var timeUntilNextTask = GetNextScheduledTime(now);
-        // Set the timer to trigger at the calculated interval
-        timer = new Timer(timeUntilNextTask.TotalMilliseconds);
-        timer.Elapsed += (sender, e) =>
-        {
-            timer.Stop();  // Stop the timer temporarily
+    //private void ScheduleNextTask()
+    //{
+    //    var now = DateTime.Now;
+    //    var timeUntilNextTask = GetNextScheduledTime(now);
+    //    // Set the timer to trigger at the calculated interval
+    //    timer = new Timer(timeUntilNextTask.TotalMilliseconds);
+    //    timer.Elapsed += (sender, e) =>
+    //    {
+    //        timer.Stop();  // Stop the timer temporarily
 
-            // Check if DispatcherQueue is available
-            var dispatcherQueue = DispatcherQueue.GetForCurrentThread();
-            if (dispatcherQueue != null)
-            {
-                dispatcherQueue.TryEnqueue(() => PerformScheduledOperation());
-            }
-            else
-            {
-                // Perform operation directly if no DispatcherQueue is available
-                PerformScheduledOperation();
-            }
+    //        // Check if DispatcherQueue is available
+    //        var dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+    //        if (dispatcherQueue != null)
+    //        {
+    //            dispatcherQueue.TryEnqueue(() => PerformScheduledOperation());
+    //        }
+    //        else
+    //        {
+    //            // Perform operation directly if no DispatcherQueue is available
+    //            PerformScheduledOperation();
+    //        }
 
-            // Reschedule the timer for the next time
-            ScheduleNextTask();
-        };
-        timer.Start();
-    }
-
-
-    private TimeSpan GetNextScheduledTime(DateTime now)
-    {
-        foreach (var time in scheduleTimes)
-        {
-            //DateTime next = now.Date + now.TimeOfDay + time;
-            var next = now.Date + time;
-            if (next > now)
-            {
-                return next - now;
-            }
-        }
-        // If all times are in the past, the next scheduled time is tomorrow at the first time
-        return (now.Date.AddDays(1) + scheduleTimes[0]) - now;
-    }
+    //        // Reschedule the timer for the next time
+    //        ScheduleNextTask();
+    //    };
+    //    timer.Start();
+    //}
 
 
-    private static void PerformScheduledOperation()
-    {
-        // Your task code here, which runs at 5:00 AM, 5:00 PM, and midnight
-        ConsoleService.WriteLine("Scheduled operation executed at " + DateTime.Now);
-    }
+    //private TimeSpan GetNextScheduledTime(DateTime now)
+    //{
+    //    foreach (var time in scheduleTimes)
+    //    {
+    //        //DateTime next = now.Date + now.TimeOfDay + time;
+    //        var next = now.Date + time;
+    //        if (next > now)
+    //        {
+    //            return next - now;
+    //        }
+    //    }
+    //    // If all times are in the past, the next scheduled time is tomorrow at the first time
+    //    return (now.Date.AddDays(1) + scheduleTimes[0]) - now;
+    //}
+
+
+    //private static void PerformScheduledOperation()
+    //{
+    //    // Your task code here, which runs at 5:00 AM, 5:00 PM, and midnight
+    //    ConsoleService.WriteLine("Scheduled operation executed at " + DateTime.Now);
+    //}
 
 
     // ########## Management FUNCS ########## //

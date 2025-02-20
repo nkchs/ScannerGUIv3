@@ -10,10 +10,11 @@ namespace ScannerGUIv3.Services
         public static string ExportDayShiftLog(Dictionary<int, Employee> employeeDict)
         {
             var csvBuilder = new StringBuilder();
-            //csvBuilder.AppendLine("EmployeeNumber,Name,FormattedSignInTime,FormattedSignOutTime");
+            //csvBuilder.AppendLine("EmployeeNumber, Name, FormattedSignInTime, FormattedSignOutTime");
 
             foreach (var employee in employeeDict.Values)
             {
+                //Console.WriteLine(employee.Name + " " + employee.ShiftType);
                 if (employee.ShiftType == "DS")
                 {
                     var line = $"{employee.EmployeeNumber},{employee.Name},{employee.FormattedSignInTime},{employee.FormattedSignOutTime}";
@@ -23,5 +24,8 @@ namespace ScannerGUIv3.Services
 
             return csvBuilder.ToString();
         }
+
+
+
     }
 }

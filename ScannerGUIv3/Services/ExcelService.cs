@@ -15,6 +15,7 @@ namespace ScannerGUIv3.Services
         public async Task InitializeEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, string resourcesOnSiteExcel)
         {
             await Task.Run(() => PopulateEmployeeDictionaryUsingXML(employeeDict, resourcesOnSiteExcel));
+            Console.WriteLine("Calling Trim");
             await TrimEmployeeDictionaryAsync(employeeDict, personnelCodes);
         }
 
@@ -74,51 +75,70 @@ namespace ScannerGUIv3.Services
             AppState.PersonnelCodesLoaded = true;
         }
 
+
         public void PopulateEmployeeDictionaryUsingXML(Dictionary<int, Employee> employeeDict, string excelPath)
         {
+            // Open the Excel document for reading
             using var doc = SpreadsheetDocument.Open(excelPath, false);
             var workbookPart = doc.WorkbookPart;
-            if (workbookPart == null) return;
+            if (workbookPart == null) return; // Exit if the workbook part is null
 
+            // Find the sheet named "Report"
             var sheet = workbookPart.Workbook.Descendants<Sheet>().FirstOrDefault(s => s.Name == "Report");
             if (sheet == null)
             {
                 Console.WriteLine("Sheet 'Report' not found.");
-                return;
+                return; // Exit if the sheet is not found
             }
 
+            // Get the worksheet part associated with the sheet
             var worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
             var sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
-            if (sheetData == null) return;
+            if (sheetData == null) return; // Exit if the sheet data is null
 
+            // Get the roster start date from the worksheet
             var rosterStartDate = GetRosterStartDate(worksheetPart);
             Console.WriteLine("Roster Start Date: " + (rosterStartDate != DateTime.MinValue ? rosterStartDate.ToString("dd/MM/yyyy") : "Invalid Date"));
 
+            // Create a dictionary to hold the date headers for the next 8 days
             var dateHeaders = new Dictionary<int, DateTime>();
             for (var i = 0; i < 8; i++)
             {
                 dateHeaders[i] = rosterStartDate.AddDays(i);
             }
 
+            // Iterate through each row starting from row index 10
             foreach (var row in sheetData.Elements<Row>().Where(r => r.RowIndex >= 10))
             {
+                // Get the first name, surname, and personnel code from the row
                 var firstName = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(0), workbookPart);
                 var surname = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(1), workbookPart);
                 var personnelCodeStr = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(2), workbookPart);
 
+                // If the personnel code is a valid integer, create an Employee object
                 if (int.TryParse(personnelCodeStr, out var personnelCode))
                 {
                     var employee = new Employee(personnelCode, firstName + " " + surname);
+
+                    // Populate the employee's shift schedule for the next 8 days
                     for (var i = 0; i < 8; i++)
                     {
                         var shiftValue = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(i + 3), workbookPart);
+
+                        if (i == 0)
+                        {
+                            //Console.WriteLine(shiftValue);
+                            employee.ShiftType = shiftValue;
+                        }
                         employee.ShiftSchedule[dateHeaders[i]] = shiftValue;
                     }
+                    // Add the employee to the dictionary
                     employeeDict[personnelCode] = employee;
                 }
             }
-            AppState.EmployeeDictionaryLoaded = true;
+            AppState.EmployeeDictionaryLoaded = true; // Set the state to indicate the employee dictionary is loaded
         }
+
 
         private static DateTime GetRosterStartDate(WorksheetPart worksheetPart)
         {
@@ -181,10 +201,12 @@ namespace ScannerGUIv3.Services
 
         private async Task TrimEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, List<string> personnelCodes)
         {
+            //Console.WriteLine("Trim Entered");
             if (AppState.EmployeeDictionaryLoaded && AppState.PersonnelCodesLoaded && !AppState.EmployeeDictionaryTrimmed)
             {
                 await Task.Run(() =>
                 {
+                    //Console.WriteLine("Roster Trim Start");
                     var personnelCodeSet = new HashSet<string>(personnelCodes);
                     var keysToRemove = employeeDict.Keys.Where(key => !personnelCodeSet.Contains(key.ToString())).ToList();
                     foreach (var key in keysToRemove)
@@ -194,6 +216,7 @@ namespace ScannerGUIv3.Services
                     AppState.EmployeeDictionaryTrimmed = true;
                 });
             }
+            Console.WriteLine("Trim End         @ " + DateTime.Now.ToString("HH:mm:ss"));
         }
     }
 }

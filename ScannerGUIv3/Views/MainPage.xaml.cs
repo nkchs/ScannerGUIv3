@@ -26,7 +26,6 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
     }
 
     
-    //public MainPage(LogImportExportService logService)
     public MainPage()// 
     {
         ViewModel = App.GetService<MainViewModel>();
