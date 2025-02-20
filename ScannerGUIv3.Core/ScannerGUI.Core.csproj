@@ -19,7 +19,6 @@
     <None Include="Models\SampleCompany.cs" />
     <None Include="Models\SampleOrder.cs" />
     <None Include="Models\SampleOrderDetail.cs" />
-    <None Include="Services\SampleDataService.cs" />
   </ItemGroup>
 
   <ItemGroup>

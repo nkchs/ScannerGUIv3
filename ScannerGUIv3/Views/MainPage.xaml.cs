@@ -1,77 +1,48 @@
 ﻿using Microsoft.Office.Interop.Excel;
 using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
-using ScannerGUIv3.ViewModels;
 using ScannerGUIv3.Helpers;
 using System.Runtime.InteropServices;
-using Application = Microsoft.UI.Xaml.Application;
 using ScannerGUIv3.Definitions;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml;
+using ScannerGUIv3.ViewModels;
+using Application = Microsoft.UI.Xaml.Application;
 using Microsoft.UI.Xaml.Input;
 using Windows.System;
 using ScannerGUIv3.Services;
-using Microsoft.UI.Xaml.Controls;
 using ScannerGUIv3.Core;
+using ScannerGUIv3.Models;
 
 namespace ScannerGUIv3.Views;
 
 public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
 {
-    List<string> personnelCodes = ((App)Application.Current).personnelCodes;
+    private List<string> personnelCodes = ((App)Application.Current).personnelCodes;
+    private readonly LogImportExportService _logService;
 
     public MainViewModel ViewModel
     {
         get;
     }
 
-
-    public MainPage() // 
+    
+    //public MainPage(LogImportExportService logService)
+    public MainPage()// 
     {
         ViewModel = App.GetService<MainViewModel>();
+        _logService = App.GetService<LogImportExportService>();
         //Console.WriteLine("Initializing Main Page.");
         InitializeComponent();
         ConsoleService.Initialize(ConsoleOutput); // Initialize with the console TextBox
         Loaded += OnLoaded;
     }
 
+
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         PersonnelNumberTextBox.Focus(FocusState.Programmatic);
     }
 
-    //static void ExcelLoader()
-    //{
-    //    Console.WriteLine("Excel Loader Called");
-    //    //var excel_ = new Microsoft.Office.Interop.Excel.Application
-    //    //{
-    //    //    //Visible = false,
-    //    //    Visible = true,
-    //    //};
-
-    //    //var resourcesOneSiteExcelUrl = @"https://newcrestmining-my.sharepoint.com/personal/nic_chase_newcrest_com_au/Documents/Documents/Projects/Scanner/ResourceOnSite_20240620043001.xlsx";
-    //    ////string _excelURLOne = @"https://newcrestmining.sharepoint.com/:x:/r/teams/TelferEngineeringReliabilityGovernance/Shared%20Documents/General/Projects/Nic%20Chase/ResourceOnSite.xlsx";
-    //    ////string _excelURLTwo = @"https://newcrestmining.sharepoint.com/:x:/r/teams/TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/2024/Week%2043.xlsm?d=wc07871ef3cd04c2293ada7bcff29cc6d&csf=1&web=1&e=DORZmS";
-    //    ////string _excelURLTwo = @"https://newcrestmining.sharepoint.com/:x:/r/teams/TelferMaint-Mill/Shared%20Documents/Attendance%20Register/FPM%20Daily%20Sign%20On/2024/Week%2043.xlsm";
-    //    ////_excelURLOne = @"C:\Users\ChaseN\ResourceOnSite_20240620043001.xlsx";
-    //    ////_excelURLOne = @"C:\Users\nicch\source\repos\nkchs\ScannerGUIv3\ResourceOnSite.xlsx";
-    //    //var _excelURLTwo = resourcesOneSiteExcelUrl;
-    //    //var _excelURLOne = resourcesOneSiteExcelUrl;
-
-    //    ////Workbook excelWorkbook = excel_.Workbooks.Open(_excelURLOne, ReadOnly: true);
-    //    //var excelWorkbook = excel_.Workbooks.Open(_excelURLTwo, ReadOnly: true);
-    //    //var excelWorksheet = (Worksheet)excelWorkbook.Sheets[3];
-    //    //var excelRange = excelWorksheet.UsedRange;
-    //    //Console.WriteLine("Excel address: " + _excelURLOne);
-
-    //    //var maxRow = excelRange.Rows.Count;
-    //    //var maxCol = excelRange.Columns.Count;
-    //    //Console.WriteLine("Rows: " + maxRow);
-    //    //Console.WriteLine("Columns: " + maxCol);
-
-    //    //excelWorkbook.Close(false, null, null);
-    //    //excel_.Quit();
-    //    //Marshal.ReleaseComObject(excelWorkbook);
-    //    //Marshal.ReleaseComObject(excel_);
-    //}
 
     private void signInButton_Click(object sender, RoutedEventArgs e)
     {
@@ -79,7 +50,7 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         {
             if (App.EmployeeDict.TryGetValue(personnelCode, out var employee))
             {
-                ConsoleService.WriteLine( employee.SignIn() );
+                ConsoleService.WriteLine(employee.SignIn());
             }
         }
         else
@@ -88,6 +59,7 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         }
         PersonnelNumberTextBox.Text = "";
     }
+
 
     private void signOutButton_Click(object sender, RoutedEventArgs e)
     {
@@ -104,6 +76,19 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         }
         PersonnelNumberTextBox.Text = "";
     }
+
+
+    private void exportLogButton_Click(object sender, RoutedEventArgs e)
+    {
+        Console.ForegroundColor = ConsoleColor.Blue;
+        Console.WriteLine("\nExport");
+
+        var dayShiftLog = LogImportExportService.ExportDayShiftLog(App.EmployeeDict);
+        Console.WriteLine(dayShiftLog);
+
+        Console.WriteLine("");
+    }
+
 
     private void debugButton_Click(object sender, RoutedEventArgs e)
     {
@@ -130,7 +115,8 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         }
         Console.WriteLine("Personnel Codes End");
     }
-      
+
+
     private void PersonnelNumberTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
     {
         if (e.Key == VirtualKey.Enter)

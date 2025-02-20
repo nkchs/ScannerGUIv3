@@ -1,6 +1,7 @@
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Globalization;
+using Application = Microsoft.UI.Xaml.Application;
 using System.Text.RegularExpressions;
 using ScannerGUIv3.Definitions;
 using ScannerGUIv3.Core;
@@ -9,9 +10,12 @@ namespace ScannerGUIv3.Services
 {
     public class ExcelService
     {
+        List<string> personnelCodes = ((App)Application.Current).personnelCodes;
+
         public async Task InitializeEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, string resourcesOnSiteExcel)
         {
             await Task.Run(() => PopulateEmployeeDictionaryUsingXML(employeeDict, resourcesOnSiteExcel));
+            await TrimEmployeeDictionaryAsync(employeeDict, personnelCodes);
         }
 
         public async Task InitializeEmployeeCodesAsync(List<string> personnelCodes, string resourcesMasterExcel)
@@ -19,7 +23,7 @@ namespace ScannerGUIv3.Services
             try
             {
                 using var httpClient = new HttpClient();
-                var response = await httpClient.GetStringAsync("https://example.com/api");
+                var response = await httpClient.GetStringAsync("https://prod-18.australiasoutheast.logic.azure.com:443/workflows/7d90dc45ba274d86992b23406da6a420/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=fbi68AVQta0kznlTwHvggUqjoSuLZar2MME9iTklucY&action=SEND_MT_CODES");
 
                 if (!string.IsNullOrEmpty(response) && response.Contains("Code") && response.EndsWith("Code_End"))
                 {
@@ -173,6 +177,23 @@ namespace ScannerGUIv3.Services
         private static string GetColumnLetter(string cellReference)
         {
             return Regex.Match(cellReference, "[A-Za-z]+").Value;
+        }
+
+        private async Task TrimEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, List<string> personnelCodes)
+        {
+            if (AppState.EmployeeDictionaryLoaded && AppState.PersonnelCodesLoaded && !AppState.EmployeeDictionaryTrimmed)
+            {
+                await Task.Run(() =>
+                {
+                    var personnelCodeSet = new HashSet<string>(personnelCodes);
+                    var keysToRemove = employeeDict.Keys.Where(key => !personnelCodeSet.Contains(key.ToString())).ToList();
+                    foreach (var key in keysToRemove)
+                    {
+                        employeeDict.Remove(key);
+                    }
+                    AppState.EmployeeDictionaryTrimmed = true;
+                });
+            }
         }
     }
 }

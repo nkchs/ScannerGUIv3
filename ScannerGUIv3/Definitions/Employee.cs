@@ -81,9 +81,6 @@ public class Employee
 
     public DateTime? SignOutTime { get; set; }
 
-    //public DateTime? ArrivalDate { get; set; }
-
-    //public DateTime? DepartureDate { get; set; }
 
     // Default constructor
     public Employee()
@@ -105,7 +102,7 @@ public class Employee
         SignInTime = signInTime;
         SignOutTime = signOutTime;
     }
-
+    
     public Employee(int employeeNumber, string name, string shiftType)
     {
         EmployeeNumber = employeeNumber;
@@ -134,7 +131,6 @@ public class Employee
     //    {
     //        return "Already signed in. Sign out before signing in again.";
     //    }
-
     //    DateTime now = DateTime.Now;
     //    // Check valid sign-in times
     //    if (ShiftType == "DS" && (now.Hour < 4 || now.Hour >= 16))
