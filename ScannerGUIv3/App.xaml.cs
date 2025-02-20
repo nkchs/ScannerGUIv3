@@ -59,23 +59,9 @@ public partial class App : Application
         get; set;
     }
 
-    public List<string> personnelCodes = new();
+    public List<string> personnelCodes = [];
     public static Dictionary<int, Employee> EmployeeDict { get; } = new Dictionary<int, Employee>();
-
-    // ########## Start Timer Declarations ########## //
-    //public DispatcherTimer _timer;
-
-    //public Timer timer = new Timer();
-    //public readonly TimeSpan[] scheduleTimes =
-    //{
-    //    new(15,55,0),
-    //    new(15,56,0),
-    //    new(15,57,0),
-    //    new(15,58,0),
-    //    new(15,59,0),
-    //};
-    // ########## End Timer Declarations ########## //
-   
+  
     
     public App()
     {
@@ -148,7 +134,8 @@ public partial class App : Application
         
 
         ScheduleService _scheduleService = GetService<ScheduleService>();
-        _scheduleService.SetupDailyScheduler();
+        //_scheduleService = new ScheduleService();
+
         UnhandledException += App_UnhandledException; // From the default generator.
     }
 
