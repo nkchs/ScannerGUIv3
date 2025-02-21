@@ -43,7 +43,12 @@
     <None Include="Helpers\ExcelHandling.cs" />
     <None Include="Helpers\ScheduledFuncs__.cs" />
     <None Include="Reference.cs" />
-    <None Include="Views\BlankPage.xaml.cs" />
+    <None Include="ViewModels\ContentGridDetailViewModel.cs" />
+    <None Include="ViewModels\ContentGridViewModel.cs" />
+    <None Include="ViewModels\ListDetailsViewModel.cs" />
+    <None Include="Views\ContentGridDetailPage.xaml.cs" />
+    <None Include="Views\ContentGridPage.xaml.cs" />
+    <None Include="Views\ListDetailsPage.xaml.cs" />
   </ItemGroup>
 
   <ItemGroup>
