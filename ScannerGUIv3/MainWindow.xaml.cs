@@ -14,12 +14,14 @@ public sealed partial class MainWindow : WindowEx
 
     public MainWindow()
     {
-        Console.WriteLine("Initializing Main Window.");
+        //Console.WriteLine("Initializing Main Window.");
 
         InitializeComponent();
 
+        Width = 1000;
+        Height = 1300;
+
         AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets/WindowIcon.ico"));
-        //AppWindow.SetIcon(Microsoft.UI.IconId.)
         Content = null;
         Title = "AppDisplayName".GetLocalized();
 
@@ -30,11 +32,9 @@ public sealed partial class MainWindow : WindowEx
 
         //var windowWidth = Bounds.Width;
         //var windowHeight = Bounds.Height;
-
         //Console.WriteLine("Window Width: " + windowWidth);
         //Console.WriteLine("Window Height: " + windowHeight);
     }
-
 
     // this handles updating the caption button colors correctly when windows system theme is changed
     // while the app is open

@@ -16,9 +16,8 @@ public sealed partial class DataGridPage : Page
     public DataGridPage()
     {
         ViewModel = App.GetService<DataGridViewModel>();
-        //ViewModel = App.GetService<DataGridPersonnelModel>();
-        Console.WriteLine("Initializing Data Grid Page.");
+        //Console.WriteLine("Initializing Data Grid Page.");
         InitializeComponent();
-        Console.WriteLine("Debug.");
+        //Console.WriteLine("");
     }
 }

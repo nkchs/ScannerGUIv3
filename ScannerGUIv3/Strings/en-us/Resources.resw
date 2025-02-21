@@ -169,12 +169,24 @@
     <value>https://YourPrivacyUrlGoesHere/</value>
   </data>
   <data name="SettingsPage_Spreadsheet_Resources.Text" xml:space="preserve">
-    <value />
+    <value>C:\Users\ChaseN\source\ScannerGUIRepair\Resources</value>
+  </data>
+  <data name="SettingsPage_Spreadsheet_Master.Text" xml:space="preserve">
+    <value>C:\Users\ChaseN\source\ScannerGUIRepair\Resources</value>
   </data>
   <data name="SettingsPage_Spreadsheet_WeeklyRecord.Text" xml:space="preserve">
-    <value />
+    <value>C:\Users\ChaseN\source\ScannerGUIRepair\Resources</value>
   </data>
   <data name="Settings_Spreadsheet.Text" xml:space="preserve">
     <value>Spreadsheet Selection</value>
+  </data>
+  <data name="Shell_Export.Content" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="Export_Header.Text" xml:space="preserve">
+    <value>Export Details</value>
+  </data>
+  <data name="EmailAddressTextBox.Text" xml:space="preserve">
+    <value>user@example.com</value>
   </data>
 </root>

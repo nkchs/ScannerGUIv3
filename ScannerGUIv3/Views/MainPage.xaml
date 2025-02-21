@@ -4,29 +4,83 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="using:ScannerGUIv3"
     mc:Ignorable="d">
 
-    <Grid x:Name="ContentArea">
+    <Grid x:Name="ContentArea" Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="10" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="10" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200" />
-            <!-- First column takes twice the width of the second -->
-            <ColumnDefinition Width="200" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
-            <!-- Second column takes the remaining space -->
         </Grid.ColumnDefinitions>
 
-        <Button x:Name="signInButton" Click="signInButton_Click"  Style="{StaticResource AccentButtonStyle}" Grid.Row="0" Grid.Column="1">Sign In</Button>
+        <!-- Personnel Number TextBox spanning two columns -->
+        <TextBox x:Name="PersonnelNumberTextBox" 
+             PlaceholderText="Personnel Number" 
+             KeyDown="PersonnelNumberTextBox_KeyDown" 
+             Width="200" 
+             Grid.Row="0" 
+             Grid.Column="0" 
+             Grid.ColumnSpan="2" 
+             Margin="0,0,0,10"/>
 
-        <Button x:Name="debugButton" Click="debugButton_Click"  Grid.Row="2" Grid.Column="1">Debug</Button>
+        <!-- Buttons with aligned grid positions -->
+        <Button x:Name="signInButton" 
+            Content="Sign In" 
+            Click="signInButton_Click"  
+            Style="{StaticResource AccentButtonStyle}" 
+            Grid.Row="2" 
+            Grid.Column="0" 
+            Margin="0,10,5,0" 
+            HorizontalAlignment="Right"/>
 
-        <TextBox x:Name="PersonnelNumberTextBox" Header="" PlaceholderText="Personnel Number" Width="180" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1" />
+        <Button x:Name="signOutButton" 
+            Content="Sign Out" 
+            Click="signOutButton_Click"  
+            Style="{StaticResource AccentButtonStyle}" 
+            Grid.Row="2" 
+            Grid.Column="1" 
+            Margin="5,10,0,0" 
+            HorizontalAlignment="Left"/>
+
+        <Button x:Name="exportLogButton"
+                Content="Export Log"
+                Click="exportLogButton_Click"
+                Grid.Row="2"
+                Grid.Column="2"
+                Margin="5,10,0,0" 
+                HorizontalAlignment="Right"/>
+
+        <Button x:Name="debugButton"
+                Content="Debug"
+                Click="debugButton_Click"
+                Grid.Row="2"
+                Grid.Column="3"
+                Margin="5,10,0,0" 
+                HorizontalAlignment="Right"/>
+
+        <!-- ConsoleOutput TextBox for display -->
+        <TextBox x:Name="ConsoleOutput"
+             FontFamily="Consolas"
+             FontSize="14"
+             IsReadOnly="True"
+             TextWrapping="Wrap"
+             AcceptsReturn="True"
+             ScrollViewer.VerticalScrollBarVisibility="Auto"
+             Grid.Row="3" 
+             Grid.Column="0" 
+             Grid.ColumnSpan="4" 
+             Margin="0,10,0,0"
+             Height="300"
+             Width="Auto"
+             VerticalAlignment="Top"/>
     </Grid>
 </Page>

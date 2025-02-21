@@ -1,14 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>ScannerGUIv3.Core</RootNamespace>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <Platforms>x86;x64;arm64;AnyCPU</Platforms>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Contracts\Services\ISampleDataService.cs" />
+    <Compile Remove="Models\SampleCompany.cs" />
+    <Compile Remove="Models\SampleOrder.cs" />
+    <Compile Remove="Models\SampleOrderDetail.cs" />
+    <Compile Remove="Services\SampleDataService.cs" />
+  </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\" />
+    <None Include="Contracts\Services\ISampleDataService.cs" />
+    <None Include="Models\SampleCompany.cs" />
+    <None Include="Models\SampleOrder.cs" />
+    <None Include="Models\SampleOrderDetail.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -6,6 +6,6 @@ public partial class MainViewModel : ObservableRecipient
 {
     public MainViewModel()
     {
-        Console.WriteLine("Hit MainViewModel()");
+        //Console.WriteLine("Hit MainViewModel()");
     }
 }

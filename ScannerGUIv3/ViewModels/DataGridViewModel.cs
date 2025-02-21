@@ -1,10 +1,8 @@
 ﻿using System.Collections.ObjectModel;
-
 using CommunityToolkit.Mvvm.ComponentModel;
-
 using ScannerGUIv3.Contracts.ViewModels;
-using ScannerGUIv3.Core.Contracts.Services;
-using ScannerGUIv3.Core.Models;
+//using ScannerGUIv3.Core.Contracts.Services;
+//using ScannerGUIv3.Core.Models;
 using ScannerGUIv3.Definitions;
 
 namespace ScannerGUIv3.ViewModels;

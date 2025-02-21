@@ -23,13 +23,20 @@ public class ActivationService : IActivationService
 
     public async Task ActivateAsync(object activationArgs)
     {
+        if (App.MainWindow == null)
+        {
+            App.MainWindow = new MainWindow();
+            //App.MainWindow.Activate(); // Check if Activation needs to occur here.
+            //Console.WriteLine("Failed MainWindow() check. Creating new.");
+        }
+
         // Execute tasks before activation.
         await InitializeAsync();
 
         // Set the MainWindow Content.
         if (App.MainWindow.Content == null)
         {
-            Console.WriteLine("App.MainWindow.Content == null.");
+            //Console.WriteLine("App.MainWindow.Content == null.");
             _shell = App.GetService<ShellPage>();
             App.MainWindow.Content = _shell ?? new Frame();
         }
@@ -37,13 +44,12 @@ public class ActivationService : IActivationService
         // Handle activation via ActivationHandlers.
         await HandleActivationAsync(activationArgs);
 
-
         // Activate the MainWindow.
-        App.MainWindow.Activate();
-        Console.WriteLine("After MainWindow.Activate");
+        App.MainWindow.Activate(); // Check if activation needs to occur here.
+        //Console.WriteLine("After MainWindow.Activate");
 
         //App.MainWindow.MoveAndResize(App.MainWindow.Bounds.X, App.MainWindow.Bounds.Y, 700, 700);
-        App.MainWindow.MoveAndResize(2000, 700, 700, 700);
+        //App.MainWindow.MoveAndResize(2000, 700, 700, 700);
 
         // Execute tasks after activation.
         await StartupAsync();
