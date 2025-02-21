@@ -25,12 +25,6 @@ namespace ScannerGUIv3.Services
             ScheduleNextTask();
         }
 
-        // Method to set up the daily scheduler
-        public void SetupDailyScheduler()
-        {
-            ScheduleNextTask();
-        }
-
         // Method to schedule the next task based on the current time
         private void ScheduleNextTask()
         {
@@ -79,9 +73,35 @@ namespace ScannerGUIv3.Services
         }
 
         // Method to perform the scheduled operation
-        private static void PerformScheduledOperation()
+        private void PerformScheduledOperation()
         {
-            Console.WriteLine("Scheduled operation executed at " + DateTime.Now);
+            var now = DateTime.Now.TimeOfDay;
+            if (now >= new TimeSpan(3, 0, 0) && now < new TimeSpan(9, 0, 0))
+            {
+                morningUpdate();
+            }
+            else if (now >= new TimeSpan(18, 0, 0) && now < new TimeSpan(24, 0, 0))
+            {
+                eveningUpdate();
+            }
+            else
+            {
+                Console.WriteLine("No scheduled operation for this time.");
+            }
+        }
+
+        // Example function to perform a morning update
+        private void morningUpdate()
+        {
+            Console.WriteLine("Morning update executed at " + DateTime.Now);
+            // Add your morning update logic here
+        }
+
+        // Example function to perform an evening update
+        private void eveningUpdate()
+        {
+            Console.WriteLine("Evening update executed at " + DateTime.Now);
+            // Add your evening update logic here
         }
     }
 }

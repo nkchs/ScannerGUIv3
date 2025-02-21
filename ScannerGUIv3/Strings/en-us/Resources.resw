@@ -180,4 +180,13 @@
   <data name="Settings_Spreadsheet.Text" xml:space="preserve">
     <value>Spreadsheet Selection</value>
   </data>
+  <data name="Shell_Export.Content" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="Export_Header.Text" xml:space="preserve">
+    <value>Export Details</value>
+  </data>
+  <data name="EmailAddressTextBox.Text" xml:space="preserve">
+    <value>user@example.com</value>
+  </data>
 </root>

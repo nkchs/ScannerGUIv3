@@ -18,6 +18,7 @@ public class PageService : IPageService
         Configure<BlankViewModel, BlankPage>();
         Configure<DataGridViewModel, DataGridPage>();
         Configure<SettingsViewModel, SettingsPage>();
+        Configure<ExportViewModel, ExportPage>();
     }
 
     public Type GetPageType(string key)

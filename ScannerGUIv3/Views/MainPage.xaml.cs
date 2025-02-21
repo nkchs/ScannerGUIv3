@@ -83,6 +83,7 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         Console.WriteLine("\nExport");
 
         var dayShiftLog = LogImportExportService.ExportDayShiftLog(App.EmployeeDict);
+        _ = LogImportExportService.ExportToWeb(dayShiftLog, LogImportExportService.teamsUrl);
         Console.WriteLine(dayShiftLog);
         Console.ResetColor();
         Console.WriteLine("");

@@ -7,8 +7,9 @@ namespace ScannerGUIv3.Services
 {
     public class LogImportExportService
     {
-        private static readonly string postUrl = "https://prod-08.australiasoutheast.logic.azure.com:443/workflows/ffd31ea3fab043d088f02cfbc959548e/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=KkGwF2ZPk7lbUde9u2SHXVoDnVbxuLJcdHAQ5KNHjKg";
-        
+        public static readonly string teamsUrl = "https://prod-08.australiasoutheast.logic.azure.com:443/workflows/ffd31ea3fab043d088f02cfbc959548e/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=KkGwF2ZPk7lbUde9u2SHXVoDnVbxuLJcdHAQ5KNHjKg";
+        public static readonly string emailUrl = "";
+
         public static string ExportDayShiftLog(Dictionary<int, Employee> employeeDict)
         {
             var csvBuilder = new StringBuilder();
@@ -24,12 +25,12 @@ namespace ScannerGUIv3.Services
                 }
             }
             //_ = ExportToWeb(csvBuilder.ToString());
-            _ = ExportToWeb(csvBuilder.ToString(), postUrl);
-            //Console.WriteLine(postUrl);
+            //_ = ExportToWeb(csvBuilder.ToString(), teamsUrl);
+            //Console.WriteLine(teamsUrl);
             return csvBuilder.ToString();
         }
 
-        private static async Task ExportToWeb(string message, string url)
+        public static async Task ExportToWeb(string message, string url)
         {
             //var url = "https://prod-08.australiasoutheast.logic.azure.com:443/workflows/ffd31ea3fab043d088f02cfbc959548e/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=KkGwF2ZPk7lbUde9u2SHXVoDnVbxuLJcdHAQ5KNHjKg";
 

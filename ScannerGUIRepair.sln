@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScannerGUI", "ScannerGUIv3\ScannerGUI.csproj", "{0CE68DD5-3C7A-4A4E-9E52-C630050EDFCB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScannerGUIv3", "ScannerGUIv3\ScannerGUIv3.csproj", "{0CE68DD5-3C7A-4A4E-9E52-C630050EDFCB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScannerGUI.Core", "ScannerGUIv3.Core\ScannerGUI.Core.csproj", "{26401993-5DD9-42E3-862E-D5285D41C723}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScannerGUIv3.Core", "ScannerGUIv3.Core\ScannerGUIv3.Core.csproj", "{26401993-5DD9-42E3-862E-D5285D41C723}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

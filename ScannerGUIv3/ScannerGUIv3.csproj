@@ -17,8 +17,10 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Helpers\ExcelHandling.cs" />
     <Compile Remove="Helpers\ScheduledFuncs__.cs" />
     <Compile Remove="Reference.cs" />
+    <Compile Remove="Views\BlankPage - Copy.xaml.cs" />
     <Compile Remove="Views\BlankPage.xaml.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -38,6 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="Helpers\ExcelHandling.cs" />
     <None Include="Helpers\ScheduledFuncs__.cs" />
     <None Include="Reference.cs" />
     <None Include="Views\BlankPage.xaml.cs" />
@@ -62,7 +65,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ScannerGUIv3.Core\ScannerGUI.Core.csproj" />
+    <ProjectReference Include="..\ScannerGUIv3.Core\ScannerGUIv3.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="appsettings.json">

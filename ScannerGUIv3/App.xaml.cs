@@ -1,24 +1,29 @@
 ﻿using System.Globalization;
+using System.Text.RegularExpressions;
+
+using Application = Microsoft.UI.Xaml.Application;
+
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.UI.Xaml;
-using Timer = System.Timers.Timer;
 using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml;
+
 using ScannerGUIv3.Activation;
 using ScannerGUIv3.Contracts.Services;
+using ScannerGUIv3.Core;
 using ScannerGUIv3.Core.Contracts.Services;
 using ScannerGUIv3.Core.Services;
+using ScannerGUIv3.Definitions;
 using ScannerGUIv3.Models;
 using ScannerGUIv3.Services;
 using ScannerGUIv3.ViewModels;
 using ScannerGUIv3.Views;
-using ScannerGUIv3.Definitions;
-using Application = Microsoft.UI.Xaml.Application;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Spreadsheet;
-using System.Text.RegularExpressions;
-using ScannerGUIv3.Core;
+
+using Timer = System.Timers.Timer;
 
 namespace ScannerGUIv3;
 
@@ -94,6 +99,8 @@ public partial class App : Application
             
 
             // Views and ViewModels
+            services.AddTransient<ExportViewModel>();
+            services.AddTransient<ExportPage>();
             services.AddTransient<SettingsViewModel>();
             services.AddTransient<SettingsPage>();
             services.AddTransient<DataGridViewModel>();
