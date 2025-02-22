@@ -11,7 +11,9 @@
         <RowDefinition Height="Auto"/>
         <!-- Header -->
         <RowDefinition Height="Auto"/>
-        <!-- Email address -->
+        <!-- Email address label -->
+        <RowDefinition Height="Auto"/>
+        <!-- Email address textbox -->
         <RowDefinition Height="Auto"/>
         <!-- Export options -->
         <RowDefinition Height="Auto"/>
@@ -23,25 +25,29 @@
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="Auto"/>
         <!-- Labels -->
-        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="Auto"/>
         <!-- Inputs -->
+        <ColumnDefinition Width="Auto"/>
+        <!-- Buttons -->
       </Grid.ColumnDefinitions>
 
       <!-- Header -->
       <TextBlock
           Grid.Row="0"
-          Grid.ColumnSpan="2"
+          Grid.ColumnSpan="3"
           Style="{ThemeResource SubtitleTextBlockStyle}"
           Text="Export Staff Logs"
           Margin="0,0,0,10"/>
 
-      <!-- Email Address -->
+      <!-- Email Address Label -->
       <TextBlock
           Grid.Row="1"
           Grid.Column="0"
-          Text="Email Address:"
-          Margin="0,0,10,0"
+          Text="Email Address"
+          Margin="0,0,10,10"
           VerticalAlignment="Center"/>
+      
+      <!-- Email Address TextBox -->
       <TextBox
           Grid.Row="1"
           Grid.Column="1"
@@ -52,31 +58,37 @@
           Margin="0,0,0,10"/>
 
       <!-- Export Options -->
-      <StackPanel
+      <TextBlock
           Grid.Row="2"
-          Grid.ColumnSpan="2"
-          Margin="0,0,0,10">
-        <TextBlock Text="Export to:" Margin="0,0,0,5"/>
-        <RadioButtons x:Name="ExportOptionsGroup">
-          <RadioButton Content="Email"/>
-          <RadioButton Content="Teams"/>
-          <RadioButton Content="File"/>
-        </RadioButtons>
-      </StackPanel>
+          Grid.Column="0"
+          Text="Export to"
+          Margin="0,0,10,10"
+          VerticalAlignment="Center"/>
+      <ComboBox
+          Grid.Row="2"
+          Grid.Column="1"
+          x:Name="ExportOptionsGroup"
+          Margin="0,0,0,10"
+          SelectedIndex="0">
+          <ComboBoxItem Content="Email"/>
+          <ComboBoxItem Content="Teams"/>
+          <ComboBoxItem Content="File"/>
+      </ComboBox>
 
       <!-- Export Button -->
       <Button
-          Grid.Row="3"
-          Grid.ColumnSpan="2"
+          Grid.Row="2"
+          Grid.Column="1"
           x:Name="exportButton"
           Content="Export"
           Click="exportButton_Click"
-          HorizontalAlignment="Left"/>
+          Margin="10,0,0,10"
+          HorizontalAlignment="Right"/>
 
       <!-- Test Button -->
       <Button
-          Grid.Row="4"
-          Grid.ColumnSpan="2"
+          Grid.Row="5"
+          Grid.ColumnSpan="3"
           x:Name="testButton"
           Content="Test"
           Click="testButton_Click"

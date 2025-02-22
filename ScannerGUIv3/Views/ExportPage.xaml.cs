@@ -30,7 +30,7 @@ public sealed partial class ExportPage : Page
 
     private async void exportButton_Click(object sender, RoutedEventArgs e)
     {
-        var selectedOption = ExportOptionsGroup.SelectedItem as RadioButton;
+        var selectedOption = ExportOptionsGroup.SelectedItem as ComboBoxItem;
         if (selectedOption == null)
         {
             await ShowMessage("Error", "Please select an export option.");
@@ -127,50 +127,16 @@ public sealed partial class ExportPage : Page
         await dialog.ShowAsync();
     }
 
-    private void testButton_Click(object sender, RoutedEventArgs e)
+    private async void testButton_Click(object sender, RoutedEventArgs e)
     {
-        Console.ForegroundColor = ConsoleColor.Green;
-        //Console.WriteLine("Export");
-        var selectedOption = ExportOptionsGroup.SelectedItem as RadioButton;
-        if (selectedOption != null)
+        bool success = await LogImportExportService.DownloadExcelFileAsync("C:/Users/Public/Documents", "Roster");
+        if (success)
         {
-            var ShiftLog = LogImportExportService.ExportDayShiftLog(App.EmployeeDict);
-            switch (selectedOption.Content)
-            {
-                default:
-                    switch (selectedOption.Content)
-                    {
-                        case "Email":
-                            Console.WriteLine("Exporting via Email...");
-                            var emailAddress = EmailAddressTextBox.Text;
-                            Console.WriteLine(emailAddress);
-                            // Add logic to export via Email
-                            break;
-                        case "Teams":
-                            Console.WriteLine("Exporting via Teams...");
-                            // Add logic to export via Teams
-                            _ = LogImportExportService.ExportToWeb(ShiftLog, LogImportExportService.teamsUrl);
-                            break;
-                        case "File":
-                            Console.WriteLine("Exporting to File...");
-                            // Add logic to export to File
-                            break;
-                        default:
-                            Console.WriteLine("Unknown export option.");
-                            break;
-                    }
-                    break;
-            }
-            //Console.WriteLine($"Selected Option: {selectedOption.Content}");
+            await ShowMessage("Success", "Roster downloaded and saved successfully.");
         }
         else
         {
-            Console.WriteLine("No option selected.");
+            await ShowMessage("Error", "Failed to download and save roster.");
         }
-        //var ShiftLog = LogImportExportService.ExportDayShiftLog(App.EmployeeDict);
-        //_ = LogImportExportService.ExportToWeb(ShiftLog, LogImportExportService.teamsUrl);
-        //Console.WriteLine(ShiftLog);
-        Console.ResetColor();
-        //Console.WriteLine("");
     }
 }
