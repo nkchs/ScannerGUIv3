@@ -5,45 +5,82 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-  
-  <Border BorderBrush="Gray" BorderThickness="1">
-   <Grid Margin="20">
+
+    <Grid Margin="20">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <!-- Header -->
+        <RowDefinition Height="Auto"/>
+        <!-- Email address -->
+        <RowDefinition Height="Auto"/>
+        <!-- Export options -->
+        <RowDefinition Height="Auto"/>
+        <!-- Button -->
+        <RowDefinition Height="Auto"/>
+        <!-- Button -->
+      </Grid.RowDefinitions>
       
-      <StackPanel x:Name="ContentArea">
-        
-        <StackPanel Margin="{StaticResource SmallTopBottomMargin}">
-          
-          <TextBlock x:Uid="Export_Header"  Style="{ThemeResource SubtitleTextBlockStyle}" />
-          
-          <TextBlock Text="Email Address:" Margin="{StaticResource XSmallTopMargin}" />
-          <TextBox x:Name="EmailAddressTextBox"
-                   PlaceholderText="example@domain.com"
-                   Width="200"
-                   Margin="0,10,0,0"
-                   HorizontalAlignment="Left" />
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>
+        <!-- Labels -->
+        <ColumnDefinition Width="*"/>
+        <!-- Inputs -->
+      </Grid.ColumnDefinitions>
 
-          <RadioButtons x:Name="ExportOptionsGroup">
-            <RadioButton Content="Email" />
-            <RadioButton Content="Teams" />
-            <RadioButton Content="File" />
-          </RadioButtons>
+      <!-- Header -->
+      <TextBlock
+          Grid.Row="0"
+          Grid.ColumnSpan="2"
+          Style="{ThemeResource SubtitleTextBlockStyle}"
+          Text="Export Staff Logs"
+          Margin="0,0,0,10"/>
 
-          <Button x:Name="exportButton"
-                  Content="Export"
-                  Click="exportButton_Click"
-                  Margin="0,10,0,0"
-                  HorizontalAlignment="Left"/>
+      <!-- Email Address -->
+      <TextBlock
+          Grid.Row="1"
+          Grid.Column="0"
+          Text="Email Address:"
+          Margin="0,0,10,0"
+          VerticalAlignment="Center"/>
+      <TextBox
+          Grid.Row="1"
+          Grid.Column="1"
+          x:Name="EmailAddressTextBox"
+          PlaceholderText="example@domain.com"
+          Width="200"
+          HorizontalAlignment="Left"
+          Margin="0,0,0,10"/>
 
-          <Button x:Name="testButton"
-                  Content="Test"
-                  Click="testButton_Click"
-                  Margin="0,10,0,0"
-                  HorizontalAlignment="Left"/>
-
-        </StackPanel>
-        
+      <!-- Export Options -->
+      <StackPanel
+          Grid.Row="2"
+          Grid.ColumnSpan="2"
+          Margin="0,0,0,10">
+        <TextBlock Text="Export to:" Margin="0,0,0,5"/>
+        <RadioButtons x:Name="ExportOptionsGroup">
+          <RadioButton Content="Email"/>
+          <RadioButton Content="Teams"/>
+          <RadioButton Content="File"/>
+        </RadioButtons>
       </StackPanel>
+
+      <!-- Export Button -->
+      <Button
+          Grid.Row="3"
+          Grid.ColumnSpan="2"
+          x:Name="exportButton"
+          Content="Export"
+          Click="exportButton_Click"
+          HorizontalAlignment="Left"/>
+
+      <!-- Test Button -->
+      <Button
+          Grid.Row="4"
+          Grid.ColumnSpan="2"
+          x:Name="testButton"
+          Content="Test"
+          Click="testButton_Click"
+          HorizontalAlignment="Left"/>
       
     </Grid>
-  </Border>
 </Page>
