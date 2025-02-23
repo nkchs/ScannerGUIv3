@@ -64,7 +64,17 @@ public partial class App : Application
         get; set;
     }
 
-    public List<string> personnelCodes = [];
+    // Variable Declarations
+
+    public string resourcesOnSiteExcel
+    {
+        get; set;
+    }
+        public string resourcesMasterExcel
+    {
+        get; set;
+    }
+        public List<string> personnelCodes = [];
     public static Dictionary<int, Employee> EmployeeDict { get; } = new Dictionary<int, Employee>();
   
     
@@ -97,7 +107,6 @@ public partial class App : Application
             // Core Services
             services.AddSingleton<IFileService, FileService>();
             
-
             // Views and ViewModels
             services.AddTransient<ExportViewModel>();
             services.AddTransient<ExportPage>();
@@ -132,16 +141,16 @@ public partial class App : Application
         ExcelService _excelService = GetService<ExcelService>();
         Console.WriteLine("Roster Start     @ " + DateTime.Now.ToString("HH:mm:ss"));
         // TODO: This logic needs to be updated to find the excel. // Async function to fill the dictionary with employee values.
-        var resourcesOnSiteExcel = @"C:\Users\ChaseN\source\ScannerGUIRepair\Resources\SRF175 Roster to Excel Today_90days.xlsx";
-        var resourcesMasterExcel = @"C:\Users\ChaseN\source\ScannerGUIRepair\Resources\SRF195 Profile Master.xlsx";
+        resourcesOnSiteExcel = @"C:\Users\ChaseN\source\ScannerGUIRepair\Resources\SRF175 Roster to Excel Today_90days.xlsx";
+        resourcesMasterExcel = @"C:\Users\ChaseN\source\ScannerGUIRepair\Resources\SRF195 Profile Master.xlsx";
         //var resourcesMasterExcel = @"C:\Users\ChaseN\source\ScannerGUIRepair\Resources\SRF195 Profile Master Trimmed.xlsx";
-
         _ = ExcelService.InitializeEmployeeCodesAsync(personnelCodes, resourcesMasterExcel);
         _ = _excelService.InitializeEmployeeDictionaryAsync(EmployeeDict, resourcesOnSiteExcel);
-        
+
 
         ScheduleService _scheduleService = GetService<ScheduleService>();
         //_scheduleService = new ScheduleService();
+
 
         UnhandledException += App_UnhandledException; // From the default generator.
     }

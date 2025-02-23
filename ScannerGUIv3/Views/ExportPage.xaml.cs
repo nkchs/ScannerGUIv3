@@ -2,12 +2,8 @@
 using Microsoft.UI.Xaml.Controls;
 using ScannerGUIv3.Services;
 using ScannerGUIv3.ViewModels;
-using System;
-using System.Threading.Tasks;
-using Windows.Storage.Pickers;
 using Windows.Storage;
-using Microsoft.UI; // For WindowId
-using Microsoft.UI.Windowing; // For AppWindow
+using Windows.Storage.Pickers;
 using WinRT.Interop; // For WindowNative and InitializeWithWindow
 
 namespace ScannerGUIv3.Views;
@@ -114,7 +110,6 @@ public sealed partial class ExportPage : Page
         }
     }
 
-
     private async Task ShowMessage(string title, string message)
     {
         var dialog = new ContentDialog
@@ -129,7 +124,7 @@ public sealed partial class ExportPage : Page
 
     private async void testButton_Click(object sender, RoutedEventArgs e)
     {
-        bool success = await LogImportExportService.DownloadExcelFileAsync("C:/Users/Public/Documents", "Roster");
+        var success = await LogImportExportService.DownloadExcelFileAsync("C:/Users/Public/Documents", "Roster");
         if (success)
         {
             await ShowMessage("Success", "Roster downloaded and saved successfully.");

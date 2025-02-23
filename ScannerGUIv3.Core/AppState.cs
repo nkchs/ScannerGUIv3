@@ -8,11 +8,14 @@ public class AppState
     // ########## Variable Declarations ########## //
     // Time variables //
     public static DateTime currentDate = DateTime.Now;
+
     //public static Calendar calendar = CultureInfo.CurrentCulture.Calendar;
 
     public static DateTime today = DateTime.Today;
+
     // Define start and end times for day and night shifts
     public static DateTime dayShiftStart = today.AddHours(6);   // 6am on the same day
+
     public static DateTime dayShiftEnd = today.AddHours(18);    // 6pm on the same day
 
     public static DateTime nightShiftStart = today.AddHours(18); // 6pm on the same day
@@ -27,6 +30,7 @@ public class AppState
             Console.WriteLine($"PersonnelCodesLoaded set to: {value}");
         }
     }
+
     private static bool _personnelCodesLoaded;
 
     public static bool EmployeeDictionaryLoaded
@@ -38,6 +42,7 @@ public class AppState
             Console.WriteLine($"EmployeeDictionaryLoaded set to: {value}");
         }
     }
+
     private static bool _employeeDictionaryLoaded;
 
     public static bool EmployeeDictionaryTrimmed
@@ -49,6 +54,7 @@ public class AppState
             Console.WriteLine($"EmployeeDictionaryTrimmed set to: {value}");
         }
     }
+
     private static bool _employeeDictionaryTrimmed;
 
     public static bool EmployeeDictionaryRefreshed
@@ -60,6 +66,7 @@ public class AppState
             Console.WriteLine($"EmployeeDictionaryRefreshed set to: {value}");
         }
     }
+
     private static bool _employeeDictionaryRefreshed;
 
     // Private constructor to prevent instantiation
