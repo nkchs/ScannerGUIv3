@@ -11,14 +11,14 @@
   IgnorableNamespaces="uap rescap genTemplate">
 
   <Identity
-    Name="e0489c6b-caa7-4e9e-974a-4c84342bab43"
+    Name="e0489c6b-caa7-4e9e-974a-4c84342bab44"
     Publisher="CN=ChaseN"
     Version="1.0.0.0" />
     
   <mp:PhoneIdentity PhoneProductId="e0489c6b-caa7-4e9e-974a-4c84342bab43" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
     
   <Properties>
-    <DisplayName>ScannerGUIv3</DisplayName>
+    <DisplayName>ScannerGUI</DisplayName>
     <PublisherDisplayName>ChaseN</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
