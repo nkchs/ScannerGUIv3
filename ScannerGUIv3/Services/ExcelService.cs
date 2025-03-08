@@ -10,8 +10,11 @@ namespace ScannerGUIv3.Services;
 
 public class ExcelService
 {
+    // VARIABLES
     private readonly List<string> personnelCodes = ((App)Application.Current).personnelCodes;
 
+
+    // MAIN FUNCTIONS
     public static async Task InitializeEmployeeCodesAsyncHTTP(List<string> personnelCodes, string resourcesMasterExcel)
     {
         Console.WriteLine("Employee Codes DLS@ " + DateTime.Now.ToString("HH:mm:ss"));
@@ -83,14 +86,6 @@ public class ExcelService
         });
     }
 
-    public async Task InitializeEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, string resourcesOnSiteExcel)
-    {
-        Console.WriteLine("Populate Employee Dictionary Start @ " + DateTime.Now.ToString("HH:mm:ss"));
-        await Task.Run(() => PopulateEmployeeDictionaryUsingXML(employeeDict, resourcesOnSiteExcel));
-        //Console.WriteLine("Calling Trim");
-        await Task.Run(() => TrimEmployeeDictionaryAsync(employeeDict, personnelCodes));
-    }
-
     public void PopulateEmployeeDictionaryUsingXML(Dictionary<int, Employee> employeeDict, string excelPath)
     {
         // Open the Excel document for reading
@@ -153,6 +148,34 @@ public class ExcelService
         AppState.EmployeeDictionaryLoaded = true; // Set the state to indicate the employee dictionary is loaded
     }
 
+    public static async Task TrimEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, List<string> personnelCodes)
+    {
+        //Console.WriteLine("Trim Entered");
+        if (AppState.EmployeeDictionaryLoaded && AppState.PersonnelCodesLoaded && !AppState.EmployeeDictionaryTrimmed)
+        {
+            await Task.Run(() =>
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Trim Start       @ " + DateTime.Now.ToString("HH:mm:ss"));
+                Console.ResetColor();
+
+                var personnelCodeSet = new HashSet<string>(personnelCodes);
+                var keysToRemove = employeeDict.Keys.Where(key => !personnelCodeSet.Contains(key.ToString())).ToList();
+                foreach (var key in keysToRemove)
+                {
+                    employeeDict.Remove(key);
+                }
+                AppState.EmployeeDictionaryTrimmed = true;
+            });
+        }
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Trim End         @ " + DateTime.Now.ToString("HH:mm:ss"));
+        Console.ResetColor();
+    }
+
+
+
+    // EXCEL HANDLERS & MINOR FUNCTIONS
     private static string GetCellValue(Cell cell, WorkbookPart workbookPart)
     {
         if (cell == null || cell.CellValue == null) return string.Empty;
@@ -211,29 +234,16 @@ public class ExcelService
         Console.WriteLine("D1 could not be converted to a valid date.");
         return DateTime.MinValue;
     }
-    
-    public async Task TrimEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, List<string> personnelCodes)
-    {
-        //Console.WriteLine("Trim Entered");
-        if (AppState.EmployeeDictionaryLoaded && AppState.PersonnelCodesLoaded && !AppState.EmployeeDictionaryTrimmed)
-        {
-            await Task.Run(() =>
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Trim Start       @ " + DateTime.Now.ToString("HH:mm:ss"));
-                Console.ResetColor();
 
-                var personnelCodeSet = new HashSet<string>(personnelCodes);
-                var keysToRemove = employeeDict.Keys.Where(key => !personnelCodeSet.Contains(key.ToString())).ToList();
-                foreach (var key in keysToRemove)
-                {
-                    employeeDict.Remove(key);
-                }
-                AppState.EmployeeDictionaryTrimmed = true;
-            });
-        }
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Trim End         @ " + DateTime.Now.ToString("HH:mm:ss"));
-        Console.ResetColor();
+
+
+    // RETIRED
+    public async Task InitializeEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, string resourcesOnSiteExcel)
+    {
+        Console.WriteLine("Populate Employee Dictionary Start @ " + DateTime.Now.ToString("HH:mm:ss"));
+        await Task.Run(() => PopulateEmployeeDictionaryUsingXML(employeeDict, resourcesOnSiteExcel));
+        //Console.WriteLine("Calling Trim");
+        await Task.Run(() => TrimEmployeeDictionaryAsync(employeeDict, personnelCodes));
     }
+
 }

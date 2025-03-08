@@ -64,15 +64,13 @@ public partial class App : Application
         get; set;
     }
 
-    // Variable Declarations
 
-    public string resourcesMasterExcel
-    {
-    get; set;
-    }
+
+    // Variable Declarations
     public List<string> personnelCodes = [];
     public static Dictionary<int, Employee> EmployeeDict { get; } = new Dictionary<int, Employee>();
   
+
     
     public App()
     {
@@ -127,15 +125,11 @@ public partial class App : Application
         }).
         Build();
 
+
         AppState.ResourcesExcelFolderPath = @"C:/Users/Public/Documents";
         ExcelService _excelService = GetService<ExcelService>();
         StartUpAsync(_excelService);
 
-        //Console.WriteLine("Roster Start     @ " + DateTime.Now.ToString("HH:mm:ss"));
-        // TODO: This logic needs to be updated to find the excel. // Async function to fill the dictionary with employee values.
-
-        //resourcesMasterExcel = AppState.ResourcesExcelFolderPath + @"\SRF195 Profile Master.xlsx";
-        //_ = ExcelService.InitializeEmployeeCodesAsyncHTTP(personnelCodes, resourcesMasterExcel);
 
         ScheduleService _scheduleService = GetService<ScheduleService>();
         UnhandledException += App_UnhandledException; // From the default generator.
@@ -153,16 +147,16 @@ public partial class App : Application
         AppState.EmployeeDictionaryRefreshed = false;
         Console.ForegroundColor = ConsoleColor.DarkRed;
 
-        AppState.ResourcesExcelFolderPath = @"C:/Users/Public/Documents";
+        //AppState.ResourcesExcelFolderPath = @"C:/Users/Public/Documents";
 
         // Download the roster
         await LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath, "Roster");
         // Download the personnel codes
-        await Task.Run(() => ExcelService.InitializeEmployeeCodesAsyncHTTP(personnelCodes, AppState.ResourcesExcelFolderPath + $"/SRF195 Profile Master.xlsx"));
+        await Task.Run(() => ExcelService.InitializeEmployeeCodesAsyncHTTP(personnelCodes, AppState.ResourcesMasterExcelPath));
         // Populare the dictionary
-        await Task.Run(() => _excelService.PopulateEmployeeDictionaryUsingXML(EmployeeDict, AppState.ResourcesExcelFolderPath + $"/Roster.xlsx"));
+        await Task.Run(() => _excelService.PopulateEmployeeDictionaryUsingXML(EmployeeDict, AppState.ResourcesOnSiteExcelPath));
         // Trim the dictionary
-        await Task.Run(() => _excelService.TrimEmployeeDictionaryAsync(EmployeeDict, personnelCodes));
+        await Task.Run(() => ExcelService.TrimEmployeeDictionaryAsync(EmployeeDict, personnelCodes));
 
         Console.WriteLine("STARTUP FUNCTIONS END  @ " + DateTime.Now.ToString("HH:mm:ss"));
         //return true;

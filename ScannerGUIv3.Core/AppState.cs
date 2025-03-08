@@ -25,17 +25,39 @@ public class AppState
 
 
     // File Variables
+
+    //public static string ResourcesExcelFolderPath
+    //{
+    //    get; set;
+    //}
+    //public static string ResourcesOnSiteExcelPath
+    //{
+    //    get; set;
+    //}
+    //public static string ResourcesMasterExcelPath
+    //{
+    //    get; set;
+    //}
+
+    private static string _resourcesExcelFolderPath;
+    public static string ResourcesExcelFolderPath
+    {
+        get => _resourcesExcelFolderPath;
+        set
+        {
+            _resourcesExcelFolderPath = value;
+            ResourcesOnSiteExcelPath = _resourcesExcelFolderPath + @"/Roster.xlsx";
+            ResourcesMasterExcelPath = _resourcesExcelFolderPath + @"/SRF195 Profile Master.xlsx";
+        }
+    }
+
     public static string ResourcesOnSiteExcelPath
     {
-        get; set;
+        get; private set;
     }
     public static string ResourcesMasterExcelPath
     {
-        get; set;
-    }
-    public static string ResourcesExcelFolderPath
-    {
-        get; set;
+        get; private set;
     }
 
 
