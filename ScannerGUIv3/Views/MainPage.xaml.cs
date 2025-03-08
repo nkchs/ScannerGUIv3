@@ -17,8 +17,9 @@ namespace ScannerGUIv3.Views;
 
 public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
 {
-    private readonly List<string> personnelCodes = ((App)Application.Current).personnelCodes;
-    private readonly LogImportExportService _logService;
+    private readonly List<string> personnelCodes = App.personnelCodes;
+    //private readonly LogImportExportService _logService;
+    //private readonly LogImportExportService _logService = App.GetService<LogImportExportService>();
 
     public MainViewModel ViewModel
     {
@@ -29,7 +30,7 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
     public MainPage()// 
     {
         ViewModel = App.GetService<MainViewModel>();
-        _logService = App.GetService<LogImportExportService>();
+        //_logService = App.GetService<LogImportExportService>();
         //Console.WriteLine("Initializing Main Page.");
         InitializeComponent();
         ConsoleService.Initialize(ConsoleOutput); // Initialize with the console TextBox
