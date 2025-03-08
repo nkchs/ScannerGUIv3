@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/ScannerGUIv3/ViewModels/ListDetailsViewModel.cs
+/ScannerGUIv3/ViewModels/ContentGridViewModel.cs
+/ScannerGUIv3/ViewModels/ContentGridDetailViewModel.cs
