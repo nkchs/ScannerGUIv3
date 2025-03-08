@@ -12,8 +12,16 @@ public class ExcelService
 {
     private readonly List<string> personnelCodes = ((App)Application.Current).personnelCodes;
 
-    public static async Task InitializeEmployeeCodesAsync(List<string> personnelCodes, string resourcesMasterExcel)
+    public static async Task InitializeEmployeeCodesAsyncHTTP(List<string> personnelCodes, string resourcesMasterExcel)
     {
+        Console.WriteLine("Employee Codes DLS@ " + DateTime.Now.ToString("HH:mm:ss"));
+        // THIS STILL ACCEPTS resourcesMasterExcel AS A PARAMETER.
+        // Currently it tries HTTP Request and if that fails it will string it from the master excel.
+        // TODO
+        // 1. Update the location of "resourcesMasterExcel" to be in the Public Documents folder.
+        // 2. Download the master excel (will require new powerautomate flow).
+        // For now, the master excel is in the Public Documents folder.
+
         try
         {
             await Task.Run(async () =>
@@ -43,6 +51,7 @@ public class ExcelService
         {
             await Task.Run(() => PopulateEmployeeCodesUsingXML(personnelCodes, resourcesMasterExcel));
         }
+        Console.WriteLine("Employee Codes DLE@ " + DateTime.Now.ToString("HH:mm:ss"));
     }
 
     public static async Task PopulateEmployeeCodesUsingXML(List<string> personnelCodes, string filePath)
@@ -203,14 +212,17 @@ public class ExcelService
         return DateTime.MinValue;
     }
     
-    private async Task TrimEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, List<string> personnelCodes)
+    public async Task TrimEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, List<string> personnelCodes)
     {
         //Console.WriteLine("Trim Entered");
         if (AppState.EmployeeDictionaryLoaded && AppState.PersonnelCodesLoaded && !AppState.EmployeeDictionaryTrimmed)
         {
             await Task.Run(() =>
             {
-                //Console.WriteLine("Roster Trim Start");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Trim Start       @ " + DateTime.Now.ToString("HH:mm:ss"));
+                Console.ResetColor();
+
                 var personnelCodeSet = new HashSet<string>(personnelCodes);
                 var keysToRemove = employeeDict.Keys.Where(key => !personnelCodeSet.Contains(key.ToString())).ToList();
                 foreach (var key in keysToRemove)
@@ -220,6 +232,8 @@ public class ExcelService
                 AppState.EmployeeDictionaryTrimmed = true;
             });
         }
+        Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("Trim End         @ " + DateTime.Now.ToString("HH:mm:ss"));
+        Console.ResetColor();
     }
 }
