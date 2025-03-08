@@ -76,6 +76,7 @@ public class ExcelService
 
     public async Task InitializeEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, string resourcesOnSiteExcel)
     {
+        Console.WriteLine("Populate Employee Dictionary Start @ " + DateTime.Now.ToString("HH:mm:ss"));
         await Task.Run(() => PopulateEmployeeDictionaryUsingXML(employeeDict, resourcesOnSiteExcel));
         //Console.WriteLine("Calling Trim");
         await Task.Run(() => TrimEmployeeDictionaryAsync(employeeDict, personnelCodes));

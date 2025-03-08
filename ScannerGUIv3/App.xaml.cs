@@ -70,11 +70,11 @@ public partial class App : Application
     {
         get; set;
     }
-        public string resourcesMasterExcel
+    public string resourcesMasterExcel
     {
-        get; set;
+    get; set;
     }
-        public List<string> personnelCodes = [];
+    public List<string> personnelCodes = [];
     public static Dictionary<int, Employee> EmployeeDict { get; } = new Dictionary<int, Employee>();
   
     
@@ -131,21 +131,18 @@ public partial class App : Application
         }).
         Build();
 
-
-        AppState.PersonnelCodesLoaded = false;
-        AppState.EmployeeDictionaryLoaded = false;
-        AppState.EmployeeDictionaryTrimmed = false;
-        AppState.EmployeeDictionaryRefreshed = false;
-
+        
 
         ExcelService _excelService = GetService<ExcelService>();
+        StartUpAsync(_excelService);
+
         Console.WriteLine("Roster Start     @ " + DateTime.Now.ToString("HH:mm:ss"));
         // TODO: This logic needs to be updated to find the excel. // Async function to fill the dictionary with employee values.
-        resourcesOnSiteExcel = @"C:\Users\ChaseN\source\ScannerGUIRepair\Resources\SRF175 Roster to Excel Today_90days.xlsx";
+        //resourcesOnSiteExcel = @"C:\Users\ChaseN\source\ScannerGUIRepair\Resources\SRF175 Roster to Excel Today_90days.xlsx";
         resourcesMasterExcel = @"C:\Users\ChaseN\source\ScannerGUIRepair\Resources\SRF195 Profile Master.xlsx";
         //var resourcesMasterExcel = @"C:\Users\ChaseN\source\ScannerGUIRepair\Resources\SRF195 Profile Master Trimmed.xlsx";
         _ = ExcelService.InitializeEmployeeCodesAsync(personnelCodes, resourcesMasterExcel);
-        _ = _excelService.InitializeEmployeeDictionaryAsync(EmployeeDict, resourcesOnSiteExcel);
+        //_ = _excelService.InitializeEmployeeDictionaryAsync(EmployeeDict, resourcesOnSiteExcel);
 
 
         ScheduleService _scheduleService = GetService<ScheduleService>();
@@ -154,8 +151,29 @@ public partial class App : Application
 
         UnhandledException += App_UnhandledException; // From the default generator.
     }
+    // ########## Startup FUNCS ########## //
 
-  
+    private async void StartUpAsync(ExcelService _excelService)
+    {
+        Console.ForegroundColor = ConsoleColor.DarkRed;
+        Console.WriteLine("STARTUP FUNCTIONS START");
+
+        AppState.PersonnelCodesLoaded = false;
+        AppState.EmployeeDictionaryLoaded = false;
+        AppState.EmployeeDictionaryTrimmed = false;
+        AppState.EmployeeDictionaryRefreshed = false;
+        Console.ForegroundColor = ConsoleColor.DarkRed;
+
+        AppState.ResourcesExcelFolderPath = @"C:/Users/Public/Documents";
+
+        await LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath, "Roster");
+        _ = _excelService.InitializeEmployeeDictionaryAsync(EmployeeDict, AppState.ResourcesExcelFolderPath + $"/Roster.xlsx");
+
+        Console.WriteLine("STARTUP FUNCTIONS END");
+        Console.ResetColor();
+        //return true;
+    }
+
     // ########## Management FUNCS ########## //
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {

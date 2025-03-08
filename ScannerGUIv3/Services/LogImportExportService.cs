@@ -27,6 +27,7 @@ public class LogImportExportService
             throw new ArgumentException("File name cannot be null or empty.", nameof(fileName));
         }
 
+        Console.WriteLine(filePath);
         // Ensure the directory exists
         Directory.CreateDirectory(filePath);
 
