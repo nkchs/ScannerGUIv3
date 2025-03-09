@@ -17,7 +17,7 @@ namespace ScannerGUIv3.Views;
 
 public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
 {
-    private readonly List<string> personnelCodes = App.personnelCodes;
+    private readonly List<string> personnelCodes = App.PersonnelCodes;
     //private readonly LogImportExportService _logService;
     //private readonly LogImportExportService _logService = App.GetService<LogImportExportService>();
 

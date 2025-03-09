@@ -10,7 +10,7 @@ namespace ScannerGUIv3.Views;
 
 public sealed partial class ExportPage : Page
 {
-    private readonly LogImportExportService _logService;
+    //private readonly LogImportExportService _logService;
 
     public ExportViewModel ViewModel
     {
@@ -20,7 +20,7 @@ public sealed partial class ExportPage : Page
     public ExportPage()
     {
         ViewModel = App.GetService<ExportViewModel>();
-        _logService = App.GetService<LogImportExportService>();
+        //_logService = App.GetService<LogImportExportService>();
         InitializeComponent();
     }
 
@@ -34,8 +34,8 @@ public sealed partial class ExportPage : Page
         }
 
         var shiftLog = LogImportExportService.ExportDayShiftLog(App.EmployeeDict);
-        bool success = false;
-        string option = selectedOption.Content.ToString();
+        bool success;
+        var option = selectedOption.Content.ToString();
 
         switch (option)
         {

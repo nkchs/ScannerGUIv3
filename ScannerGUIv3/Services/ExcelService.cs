@@ -11,7 +11,7 @@ namespace ScannerGUIv3.Services;
 public class ExcelService
 {
     // VARIABLES
-    private readonly List<string> personnelCodes = App.personnelCodes;
+    //private readonly List<string> personnelCodes = App.personnelCodes;
 
 
     // MAIN FUNCTIONS
@@ -117,7 +117,7 @@ public class ExcelService
         Console.WriteLine("Populate Employee Dictionary Start @ " + DateTime.Now.ToString("HH:mm:ss"));
         await Task.Run(() => PopulateEmployeeDictionaryUsingXML(employeeDict, resourcesOnSiteExcel));
         //Console.WriteLine("Calling Trim");
-        await Task.Run(() => TrimEmployeeDictionaryAsync(employeeDict, App.personnelCodes));
+        await Task.Run(() => TrimEmployeeDictionaryAsync(employeeDict, App.PersonnelCodes));
     }
 
     public static void PopulateEmployeeDictionaryUsingXML(Dictionary<int, Employee> employeeDict, string excelPath)

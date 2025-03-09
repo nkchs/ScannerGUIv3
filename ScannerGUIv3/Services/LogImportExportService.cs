@@ -82,6 +82,20 @@ public class LogImportExportService
         return csvBuilder.ToString();
     }
 
+    public static string ExportShiftLog(Dictionary<int, Employee> employeeDict, String ShiftType)
+    {
+        var csvBuilder = new StringBuilder();
+        foreach (var employee in employeeDict.Values)
+        {
+            if (employee.ShiftType == ShiftType)
+            {
+                var line = $"{employee.Name}, {employee.EmployeeNumber}, {employee.FormattedSignInTime}, {employee.FormattedSignOutTime}<br>";
+                csvBuilder.AppendLine(line);
+            }
+        }
+        return csvBuilder.ToString();
+    }
+
     public static async Task<bool> ExportToWeb(string url, object payload)
     {
         try

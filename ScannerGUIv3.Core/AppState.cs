@@ -1,23 +1,19 @@
-﻿using Microsoft.Identity.Client.Extensibility;
-
-namespace ScannerGUIv3.Core;
+﻿namespace ScannerGUIv3.Core;
 
 public class AppState
 {
-    private static readonly AppState _instance = new();
-    public static AppState Instance => _instance;
+    private bool Logging = false;
+
+    private static readonly AppState instance = new();
+    private static AppState Instance => instance;
 
     // ########## Variable Declarations ########## //
     // Time variables //
     public static DateTime currentDate = DateTime.Now;
-
-    //public static Calendar calendar = CultureInfo.CurrentCulture.Calendar;
-
     public static DateTime today = DateTime.Today;
 
     // Define start and end times for day and night shifts
     public static DateTime dayShiftStart = today.AddHours(6);   // 6am on the same day
-
     public static DateTime dayShiftEnd = today.AddHours(18);    // 6pm on the same day
 
     public static DateTime nightShiftStart = today.AddHours(18); // 6pm on the same day
@@ -25,19 +21,6 @@ public class AppState
 
 
     // File Variables
-
-    //public static string ResourcesExcelFolderPath
-    //{
-    //    get; set;
-    //}
-    //public static string ResourcesOnSiteExcelPath
-    //{
-    //    get; set;
-    //}
-    //public static string ResourcesMasterExcelPath
-    //{
-    //    get; set;
-    //}
 
     private static string _resourcesExcelFolderPath;
     public static string ResourcesExcelFolderPath
@@ -61,12 +44,17 @@ public class AppState
     }
 
 
+
     public static bool PersonnelCodesLoaded
     {
         get => _personnelCodesLoaded;
         set
         {
             _personnelCodesLoaded = value;
+            if (!Instance.Logging)
+            {
+                return;
+            }
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"PersonnelCodesLoaded set to: {value}");
             Console.ResetColor();
@@ -81,6 +69,10 @@ public class AppState
         set
         {
             _employeeDictionaryLoaded = value;
+            if (!Instance.Logging)
+            {
+                return;
+            }
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"EmployeeDictionaryLoaded set to: {value}");
             Console.ResetColor();
@@ -95,6 +87,10 @@ public class AppState
         set
         {
             _employeeDictionaryTrimmed = value;
+            if (!Instance.Logging)
+            {
+                return;
+            }
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"EmployeeDictionaryTrimmed set to: {value}");
             Console.ResetColor();
@@ -109,6 +105,10 @@ public class AppState
         set
         {
             _employeeDictionaryRefreshed = value;
+            if (!Instance.Logging)
+            {
+                return;
+            }
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"EmployeeDictionaryRefreshed set to: {value}");
             Console.ResetColor();
@@ -122,3 +122,16 @@ public class AppState
     {
     }
 }
+
+//public static string ResourcesExcelFolderPath
+//{
+//    get; set;
+//}
+//public static string ResourcesOnSiteExcelPath
+//{
+//    get; set;
+//}
+//public static string ResourcesMasterExcelPath
+//{
+//    get; set;
+//}

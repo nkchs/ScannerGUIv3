@@ -22,6 +22,7 @@ using ScannerGUIv3.Models;
 using ScannerGUIv3.Services;
 using ScannerGUIv3.ViewModels;
 using ScannerGUIv3.Views;
+using Serilog;
 
 //using Timer = System.Timers.Timer;
 
@@ -30,15 +31,19 @@ namespace ScannerGUIv3;
 // To learn more about WinUI 3, see https://docs.microsoft.com/windows/apps/winui/winui3/
 public partial class App : Application
 {
-    // Variable Declarations
-    public static List<string> personnelCodes = [];
-
     public App()
     {
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .WriteTo.Console()
+            .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+            .CreateLogger();
+
         var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
         Configuration = builder.Build();    // CONFIG Setup END
 
-        Console.WriteLine("Initializing App @ " + DateTime.Now.ToString("HH:mm:ss"));
+
+        Log.Information("Initializing App @ " + DateTime.Now.ToString("HH:mm:ss"));
         InitializeComponent();
 
         Host = Microsoft.Extensions.Hosting.Host.
@@ -92,7 +97,7 @@ public partial class App : Application
         // Services
         //ExcelService _excelService = GetService<ExcelService>();
         StartUpAsync(); // Startup functions
-        ScheduleService _scheduleService = GetService<ScheduleService>();
+        //ScheduleService scheduleService = GetService<ScheduleService>();
 
         // Exceptions
         UnhandledException += App_UnhandledException; // From the default generator.
@@ -103,6 +108,9 @@ public partial class App : Application
         get; set;
     }
 
+    // Variable Declarations
+    public static readonly List<string> PersonnelCodes = [];
+    
     public static Dictionary<int, Employee> EmployeeDict { get; } = new Dictionary<int, Employee>();
 
     public static WindowEx MainWindow { get; set; } = new MainWindow();
@@ -136,6 +144,7 @@ public partial class App : Application
         await App.GetService<IActivationService>().ActivateAsync(args);
     }
 
+
     // ########## Management FUNCS ########## //
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
@@ -146,7 +155,8 @@ public partial class App : Application
     private async void StartUpAsync()
     {
         Console.ForegroundColor = ConsoleColor.DarkRed;
-        Console.WriteLine("STARTUP FUNCTIONS START @ " + DateTime.Now.ToString("HH:mm:ss"));
+        //Console.WriteLine("STARTUP FUNCTIONS START @ " + DateTime.Now.ToString("HH:mm:ss"));
+        Log.Warning("STARTUP FUNCTIONS BEGIN");
 
         AppState.PersonnelCodesLoaded = false;
         AppState.EmployeeDictionaryLoaded = false;
@@ -157,12 +167,14 @@ public partial class App : Application
         // Download the roster
         await Task.Run(() => LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath, "Roster"));
         // Download the personnel codes
-        await Task.Run(() => ExcelService.InitializeEmployeeCodesAsyncHTTP(personnelCodes, AppState.ResourcesMasterExcelPath));
-        // Populare the dictionary
+        await Task.Run(() => ExcelService.InitializeEmployeeCodesAsyncHTTP(PersonnelCodes, AppState.ResourcesMasterExcelPath));
+        // Populate the dictionary
         await Task.Run(() => ExcelService.PopulateEmployeeDictionaryUsingXML(EmployeeDict, AppState.ResourcesOnSiteExcelPath));
         // Trim the dictionary
-        await Task.Run(() => ExcelService.TrimEmployeeDictionaryAsync(EmployeeDict, personnelCodes));
+        await Task.Run(() => ExcelService.TrimEmployeeDictionaryAsync(EmployeeDict, PersonnelCodes));
 
-        Console.WriteLine("STARTUP FUNCTIONS END  @ " + DateTime.Now.ToString("HH:mm:ss"));
+        Log.Warning("STARTUP FUNCTIONS END");
+        //Console.WriteLine("STARTUP FUNCTIONS END  @ " + DateTime.Now.ToString("HH:mm:ss"));
     }
+
 }
