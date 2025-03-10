@@ -2,6 +2,7 @@ using Microsoft.UI.Dispatching;
 using ScannerGUIv3.Core;
 using Timer = System.Timers.Timer;
 using ScannerGUIv3.Definitions;
+using Serilog;
 
 namespace ScannerGUIv3.Services
 {
@@ -25,6 +26,11 @@ namespace ScannerGUIv3.Services
                 new(7, 0, 0),
                 new(18, 10, 0),
                 new(19, 0, 0),
+                //new(DateTime.Now.Hour, DateTime.Now.Minute+1, DateTime.Now.Second),
+                //new(10,41,0),
+                //new(10,42,0),
+                //new(10,43,0),
+                //new(10,44,0)
             };
 
             // This one is for debugging
@@ -68,25 +74,27 @@ namespace ScannerGUIv3.Services
                 {
                     if (time == new TimeSpan(4, 10, 0))
                     {
-                        // Download roster files & initialize employee dictionary
-                        // Set various variables
-                        Task.Run(() => Task1());
+                        Task.Run(Task1);
                     }
                     else if (time == new TimeSpan(6, 10, 0))
                     {
-                        Task.Run(() => Task2());
+                        Task.Run(Task2);
                     }
                     else if (time == new TimeSpan(7, 0, 0))
                     {
-                        Task.Run(() => Task3());
+                        Task.Run(Task3);
                     }
                     else if (time == new TimeSpan(18, 10, 0))
                     {
-                        Task.Run(() => Task4());
+                        Task.Run(Task4);
                     }
                     else if (time == new TimeSpan(19, 0, 0))
                     {
-                        Task.Run(() => Task5());
+                        Task.Run(Task5);
+                    }
+                    else
+                    {
+                        Log.Verbose("Alternative Task");
                     }
                     break;
                 }
@@ -111,7 +119,7 @@ namespace ScannerGUIv3.Services
                 if (dispatcherQueue != null)
                 {
                     // Enqueue the scheduled operation to run on the DispatcherQueue
-                    dispatcherQueue.TryEnqueue(() => PerformScheduledOperation());
+                    dispatcherQueue.TryEnqueue(PerformScheduledOperation);
                 }
                 else
                 {
@@ -127,7 +135,7 @@ namespace ScannerGUIv3.Services
         // Example tasks
         private async Task Task1() // 4:10 AM
         {
-            Console.WriteLine(@"Task 1 executed at " + DateTime.Now);
+            Log.Verbose(@"Task 1 Executed");
 
             // Download the roster
             await Task.Run(() => LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath, "Roster"));
@@ -138,41 +146,42 @@ namespace ScannerGUIv3.Services
             // Trim the dictionary
             await Task.Run(() => ExcelService.TrimEmployeeDictionaryAsync(EmployeeDict, App.PersonnelCodes));
 
-
-            Console.WriteLine(@"Task 1 completed at " + DateTime.Now);
+            Log.Verbose(@"Task 1 Completed");
         }
 
         private static async Task Task2() // 6:10 AM
         {
-            Console.WriteLine(@"Task 2 executed at " + DateTime.Now);
+            Log.Verbose(@"Task 2 Executed");
+
             // Generate the shiftLog for the concluding night shift
             var shiftLog = LogImportExportService.ExportShiftLog(EmployeeDict, "NS");
             // Export the shiftLog to Teams
             var success = await LogImportExportService.ExportToWeb(LogImportExportService.teamsUrl, shiftLog);
+            Log.Verbose(success ? @"Task 2 Completed" : @"Task 2 Failed");
         }
 
         private static async Task Task3() // 7:00 am
         {
-            Console.WriteLine(@"Task 3 executed at " + DateTime.Now);
-            // Add your task 3 logic here
+            Log.Verbose(@"Task 3 Executed");
         }
 
         private static async Task Task4() // 6:10 PM
         {
-            Console.WriteLine(@"Task 4 executed at " + DateTime.Now);
+            Log.Verbose(@"Task 4 Executed");
+
             // Generate the shiftLog for the concluding night shift
             var shiftLog = LogImportExportService.ExportShiftLog(EmployeeDict, "DS");
             // Export the shiftLog to Teams
             var success = await LogImportExportService.ExportToWeb(LogImportExportService.teamsUrl, shiftLog);
-            if (success)
-            {
-            }
+            // Generate the crossover shiftLog
+            await ExcelService.NightShiftCrossoverAsync();
+
+            Log.Verbose(success ? @"Task 4 Completed" : @"Task 4 Failed");
         }
 
         private static async Task Task5() // 7:00 PM
         {
-            Console.WriteLine(@"Task 5 executed at " + DateTime.Now);
-            // Add your task 5 logic here
+            Log.Verbose(@"Task 5 Executed");
         }
     }
 }

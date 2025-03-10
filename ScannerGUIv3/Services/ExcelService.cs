@@ -1,29 +1,22 @@
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Globalization;
-using Application = Microsoft.UI.Xaml.Application;
 using System.Text.RegularExpressions;
 using ScannerGUIv3.Definitions;
 using ScannerGUIv3.Core;
+using Serilog;
 
 namespace ScannerGUIv3.Services;
 
 public class ExcelService
 {
     // VARIABLES
-    //private readonly List<string> personnelCodes = App.personnelCodes;
 
 
     // MAIN FUNCTIONS
     public static async Task InitializeEmployeeCodesAsyncHTTP(List<string> personnelCodes, string resourcesMasterExcel)
     {
-        Console.WriteLine("Employee Codes DLS@ " + DateTime.Now.ToString("HH:mm:ss"));
-        // THIS STILL ACCEPTS resourcesMasterExcel AS A PARAMETER.
-        // Currently it tries HTTP Request and if that fails it will string it from the master excel.
-        // TODO
-        // 1. Update the location of "resourcesMasterExcel" to be in the Public Documents folder.
-        // 2. Download the master excel (will require new powerautomate flow).
-        // For now, the master excel is in the Public Documents folder.
+        Log.Verbose("Employee Code DL Start");
 
         try
         {
@@ -39,7 +32,7 @@ public class ExcelService
                     {
                         if (int.TryParse(code, out var personnelCode))
                         {
-                            personnelCodes.Add(code.Trim());
+                            App.PersonnelCodes.Add(code.Trim());
                         }
                     }
                     AppState.PersonnelCodesLoaded = true;
@@ -50,39 +43,48 @@ public class ExcelService
                 }
             });
         }
-        catch
+        catch (Exception ex)
         {
-            await Task.Run(() => PopulateEmployeeCodesUsingXML(personnelCodes, resourcesMasterExcel));
+            Log.Error(ex, "Failed to download employee codes via HTTP. Falling back to local Excel file.");
+            await Task.Run(() => PopulateEmployeeCodesUsingXML(App.PersonnelCodes, resourcesMasterExcel));
         }
-        Console.WriteLine("Employee Codes DLE@ " + DateTime.Now.ToString("HH:mm:ss"));
+        Log.Verbose("Employee Code DL End");
     }
 
     public static async Task PopulateEmployeeCodesUsingXML(List<string> personnelCodes, string filePath)
     {
         await Task.Run(() =>
         {
-            using var doc = SpreadsheetDocument.Open(filePath, false);
-            var workbookPart = doc.WorkbookPart;
-            var sheet = workbookPart.Workbook.Descendants<Sheet>().FirstOrDefault();
-            if (sheet == null) return;
-
-            var worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
-            var sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
-            if (sheetData == null) return;
-
-            foreach (var row in sheetData.Elements<Row>().Where(r => r.RowIndex >= 10))
+            try
             {
-                var personnelCode = GetCellValue(row, "B", workbookPart);
-                var department = GetCellValue(row, "G", workbookPart);
-                var activeStatus = GetCellValue(row, "O", workbookPart);
+                using var doc = SpreadsheetDocument.Open(filePath, false);
+                var workbookPart = doc.WorkbookPart;
+                var sheet = workbookPart.Workbook.Descendants<Sheet>().FirstOrDefault();
+                if (sheet == null) throw new Exception("Sheet not found in the Excel file.");
 
-                if (!string.IsNullOrEmpty(department) && department.StartsWith("MT", StringComparison.OrdinalIgnoreCase)
-                    && activeStatus.Equals("Yes", StringComparison.OrdinalIgnoreCase))
+                var worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
+                var sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
+                if (sheetData == null) throw new Exception("Sheet data not found in the Excel file.");
+
+                foreach (var row in sheetData.Elements<Row>().Where(r => r.RowIndex >= 10))
                 {
-                    personnelCodes.Add(personnelCode);
+                    var personnelCode = GetCellValue(row, "B", workbookPart);
+                    var department = GetCellValue(row, "G", workbookPart);
+                    var activeStatus = GetCellValue(row, "O", workbookPart);
+
+                    if (!string.IsNullOrEmpty(department) && department.StartsWith("MT", StringComparison.OrdinalIgnoreCase)
+                        && activeStatus.Equals("Yes", StringComparison.OrdinalIgnoreCase))
+                    {
+                        personnelCodes.Add(personnelCode);
+                    }
                 }
+                AppState.PersonnelCodesLoaded = true;
             }
-            AppState.PersonnelCodesLoaded = true;
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to populate employee codes from local Excel file.");
+                AppState.PersonnelCodesLoaded = false;
+            }
         });
     }
 
@@ -92,11 +94,9 @@ public class ExcelService
         {
             await Task.Run(() =>
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Trim Start       @ " + DateTime.Now.ToString("HH:mm:ss"));
-                Console.ResetColor();
+                Log.Verbose("Trim Start");
 
-                var personnelCodeSet = new HashSet<string>(personnelCodes);
+                var personnelCodeSet = new HashSet<string>(App.PersonnelCodes);
                 var keysToRemove = employeeDict.Keys.Where(key => !personnelCodeSet.Contains(key.ToString())).ToList();
                 foreach (var key in keysToRemove)
                 {
@@ -105,84 +105,113 @@ public class ExcelService
                 AppState.EmployeeDictionaryTrimmed = true;
             });
         }
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Trim End         @ " + DateTime.Now.ToString("HH:mm:ss"));
-        Console.ResetColor();
+        Log.Verbose("Trim End");
+    }
+
+    public static async Task TrimEmployeeDictionaryShiftType()
+    {
+        await Task.Run(() =>
+        {
+            Log.Verbose("Trim Shift Type Start");
+
+            var keysToRemove = App.EmployeeDict.Where(e => e.Value.ShiftType == "OS").Select(e => e.Key).ToList();
+            foreach (var key in keysToRemove)
+            {
+                App.EmployeeDict.Remove(key);
+            }
+            Log.Verbose("Trim Shift Type End");
+        });
+    }
+
+    public static async Task NightShiftCrossoverAsync()
+    {
+        await Task.Run(() =>
+        {
+            Log.Verbose("Night Shift Crossover Start");
+
+            var keysToRemove = new List<int>();
+            foreach (var employee in App.EmployeeDict.Values.Where(employee => employee.ShiftType == "NS"))
+            {
+                App.EmployeeCrossoverDict[employee.EmployeeNumber] = employee;
+                keysToRemove.Add(employee.EmployeeNumber);
+            }
+
+            foreach (var key in keysToRemove)
+            {
+                App.EmployeeDict.Remove(key);
+            }
+
+            Log.Verbose("Night Shift Crossover End");
+        });
     }
 
 
     // RETIRED
     public static async Task InitializeEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, string resourcesOnSiteExcel)
     {
-        Console.WriteLine("Populate Employee Dictionary Start @ " + DateTime.Now.ToString("HH:mm:ss"));
+        Log.Verbose("Populate Employee Dictionary ASYNC [Using XML]");
+        // Populate the dictionary using XML
         await Task.Run(() => PopulateEmployeeDictionaryUsingXML(employeeDict, resourcesOnSiteExcel));
-        //Console.WriteLine("Calling Trim");
+        // Trim the employee dictionary
         await Task.Run(() => TrimEmployeeDictionaryAsync(employeeDict, App.PersonnelCodes));
     }
 
     public static void PopulateEmployeeDictionaryUsingXML(Dictionary<int, Employee> employeeDict, string excelPath)
     {
-        // Open the Excel document for reading
-        using var doc = SpreadsheetDocument.Open(excelPath, false);
-        var workbookPart = doc.WorkbookPart;
-        if (workbookPart == null) return; // Exit if the workbook part is null
-
-        // Find the sheet named "Report"
-        var sheet = workbookPart.Workbook.Descendants<Sheet>().FirstOrDefault(s => s.Name == "Report");
-        if (sheet == null)
+        try
         {
-            Console.WriteLine("Sheet 'Report' not found.");
-            return; // Exit if the sheet is not found
-        }
+            using var doc = SpreadsheetDocument.Open(excelPath, false);
+            var workbookPart = doc.WorkbookPart;
+            if (workbookPart == null) throw new Exception("Workbook part is null.");
 
-        // Get the worksheet part associated with the sheet
-        var worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
-        var sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
-        if (sheetData == null) return; // Exit if the sheet data is null
+            var sheet = workbookPart.Workbook.Descendants<Sheet>().FirstOrDefault(s => s.Name == "Report");
+            if (sheet == null) throw new Exception("Sheet 'Report' not found.");
 
-        // Get the roster start date from the worksheet
-        var rosterStartDate = GetRosterStartDate(worksheetPart);
-        Console.WriteLine("Roster Start Date: " + (rosterStartDate != DateTime.MinValue ? rosterStartDate.ToString("dd/MM/yyyy") : "Invalid Date"));
+            var worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
+            var sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
+            if (sheetData == null) throw new Exception("Sheet data is null.");
 
-        // Create a dictionary to hold the date headers for the next 8 days
-        var dateHeaders = new Dictionary<int, DateTime>();
-        for (var i = 0; i < 8; i++)
-        {
-            dateHeaders[i] = rosterStartDate.AddDays(i);
-        }
+            var rosterStartDate = GetRosterStartDate(worksheetPart);
+            if (rosterStartDate == DateTime.MinValue) throw new Exception("Invalid roster start date.");
 
-        // Iterate through each row starting from row index 10
-        foreach (var row in sheetData.Elements<Row>().Where(r => r.RowIndex >= 10))
-        {
-            // Get the first name, surname, and personnel code from the row
-            var firstName = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(0), workbookPart);
-            var surname = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(1), workbookPart);
-            var personnelCodeStr = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(2), workbookPart);
-
-            // If the personnel code is a valid integer, create an Employee object
-            if (int.TryParse(personnelCodeStr, out var personnelCode))
+            var dateHeaders = new Dictionary<int, DateTime>();
+            for (var i = 0; i < 8; i++)
             {
-                var employee = new Employee(personnelCode, firstName + " " + surname);
-
-                // Populate the employee's shift schedule for the next 8 days
-                for (var i = 0; i < 8; i++)
-                {
-                    var shiftValue = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(i + 3), workbookPart);
-
-                    if (i == 0)
-                    {
-                        employee.ShiftType = shiftValue;
-                    }
-                    employee.ShiftSchedule[dateHeaders[i]] = shiftValue;
-                }
-                // Add the employee to the dictionary
-                employeeDict[personnelCode] = employee;
+                dateHeaders[i] = rosterStartDate.AddDays(i);
             }
+
+            foreach (var row in sheetData.Elements<Row>().Where(r => r.RowIndex >= 10))
+            {
+                var firstName = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(0), workbookPart);
+                var surname = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(1), workbookPart);
+                var personnelCodeStr = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(2), workbookPart);
+
+                if (int.TryParse(personnelCodeStr, out var personnelCode))
+                {
+                    var employee = new Employee(personnelCode, firstName + " " + surname);
+
+                    for (var i = 0; i < 8; i++)
+                    {
+                        var shiftValue = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(i + 3), workbookPart);
+
+                        if (i == 0)
+                        {
+                            employee.ShiftType = shiftValue;
+                        }
+                        employee.ShiftSchedule[dateHeaders[i]] = shiftValue;
+                    }
+                    App.EmployeeDict[personnelCode] = employee;
+                }
+            }
+            AppState.EmployeeDictionaryLoaded = true;
         }
-        AppState.EmployeeDictionaryLoaded = true; // Set the state to indicate the employee dictionary is loaded
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to populate employee dictionary from local Excel file.");
+        }
     }
-    
-    
+
+
     // EXCEL HANDLERS & MINOR FUNCTIONS
     private static string GetCellValue(Cell cell, WorkbookPart workbookPart)
     {

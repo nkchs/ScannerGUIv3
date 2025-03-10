@@ -1,17 +1,8 @@
-﻿//using System.Globalization;
-//using System.Text.RegularExpressions;
-
-using Application = Microsoft.UI.Xaml.Application;
-
-//using DocumentFormat.OpenXml.Packaging;
-//using DocumentFormat.OpenXml.Spreadsheet;
-
+﻿using Application = Microsoft.UI.Xaml.Application;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-//using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
-
 using ScannerGUIv3.Activation;
 using ScannerGUIv3.Contracts.Services;
 using ScannerGUIv3.Core;
@@ -23,20 +14,32 @@ using ScannerGUIv3.Services;
 using ScannerGUIv3.ViewModels;
 using ScannerGUIv3.Views;
 using Serilog;
-
-//using Timer = System.Timers.Timer;
+using Serilog.Sinks.SystemConsole.Themes;
 
 namespace ScannerGUIv3;
 
-// To learn more about WinUI 3, see https://docs.microsoft.com/windows/apps/winui/winui3/
 public partial class App : Application
 {
     public App()
     {
+        AppState.Logging = false;
+
+        var customTheme = new AnsiConsoleTheme(
+            new Dictionary<ConsoleThemeStyle, string>
+            {
+                [ConsoleThemeStyle.LevelVerbose] = "\x1b[96m",     // Cyan
+                [ConsoleThemeStyle.LevelDebug] = "\x1b[94m",       // Blue
+                [ConsoleThemeStyle.LevelInformation] = "\x1b[92m", // Green
+                [ConsoleThemeStyle.LevelWarning] = "\x1b[93m",     // Yellow
+                [ConsoleThemeStyle.LevelError] = "\x1b[91m",       // Red
+                [ConsoleThemeStyle.LevelFatal] = "\x1b[95m"        // Magenta
+            });
+
         Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
-            .WriteTo.Console()
-            .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+            .MinimumLevel.Verbose()
+            .WriteTo.Console(outputTemplate: "{LevelColor}{Timestamp:HH:mm:ss} {Level:u3} {Message}\x1b[0m{NewLine}",
+                theme: customTheme)
+            .WriteTo.File(@"C:\Users\Public\Documents\Scanner Logs\log-.txt", rollingInterval: RollingInterval.Day)
             .CreateLogger();
 
         var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
@@ -92,26 +95,28 @@ public partial class App : Application
         Build();
 
         // Variables
-        AppState.ResourcesExcelFolderPath = @"C:/Users/Public/Documents";
 
         // Services
-        //ExcelService _excelService = GetService<ExcelService>();
         StartUpAsync(); // Startup functions
-        //ScheduleService scheduleService = GetService<ScheduleService>();
+        var scheduleService = GetService<ScheduleService>(); // 
 
         // Exceptions
         UnhandledException += App_UnhandledException; // From the default generator.
     }
+
+
 
     public static UIElement? AppTitlebar
     {
         get; set;
     }
 
+
     // Variable Declarations
     public static readonly List<string> PersonnelCodes = [];
-    
-    public static Dictionary<int, Employee> EmployeeDict { get; } = new Dictionary<int, Employee>();
+    public static Dictionary<int, Employee> EmployeeDict { get; } = new();
+    public static Dictionary<int, Employee> EmployeeCrossoverDict { get; } = new();
+
 
     public static WindowEx MainWindow { get; set; } = new MainWindow();
 
@@ -120,7 +125,7 @@ public partial class App : Application
         get;
     }
 
-    public IHost Host
+    private IHost Host
     {
         get;
     }
@@ -145,6 +150,7 @@ public partial class App : Application
     }
 
 
+
     // ########## Management FUNCS ########## //
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
@@ -154,15 +160,12 @@ public partial class App : Application
 
     private async void StartUpAsync()
     {
-        Console.ForegroundColor = ConsoleColor.DarkRed;
-        //Console.WriteLine("STARTUP FUNCTIONS START @ " + DateTime.Now.ToString("HH:mm:ss"));
         Log.Warning("STARTUP FUNCTIONS BEGIN");
 
         AppState.PersonnelCodesLoaded = false;
         AppState.EmployeeDictionaryLoaded = false;
         AppState.EmployeeDictionaryTrimmed = false;
         AppState.EmployeeDictionaryRefreshed = false;
-        Console.ForegroundColor = ConsoleColor.DarkRed;
 
         // Download the roster
         await Task.Run(() => LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath, "Roster"));
@@ -170,11 +173,11 @@ public partial class App : Application
         await Task.Run(() => ExcelService.InitializeEmployeeCodesAsyncHTTP(PersonnelCodes, AppState.ResourcesMasterExcelPath));
         // Populate the dictionary
         await Task.Run(() => ExcelService.PopulateEmployeeDictionaryUsingXML(EmployeeDict, AppState.ResourcesOnSiteExcelPath));
-        // Trim the dictionary
+        // Trim the dictionary of personnel codes
         await Task.Run(() => ExcelService.TrimEmployeeDictionaryAsync(EmployeeDict, PersonnelCodes));
+        // Trim the dictionary of shift types
+        await Task.Run(ExcelService.TrimEmployeeDictionaryShiftType);
 
         Log.Warning("STARTUP FUNCTIONS END");
-        //Console.WriteLine("STARTUP FUNCTIONS END  @ " + DateTime.Now.ToString("HH:mm:ss"));
     }
-
 }

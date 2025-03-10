@@ -1,25 +1,21 @@
-﻿using Microsoft.Office.Interop.Excel;
-using Microsoft.UI.Windowing;
-using ScannerGUIv3.Helpers;
-using System.Runtime.InteropServices;
-using ScannerGUIv3.Definitions;
-using Microsoft.UI.Xaml.Controls;
+﻿//using Microsoft.Office.Interop.Excel;
+//using Microsoft.UI.Windowing;
+//using ScannerGUIv3.Helpers;
+//using System.Runtime.InteropServices;
+//using ScannerGUIv3.Definitions;
+//using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml;
 using ScannerGUIv3.ViewModels;
-using Application = Microsoft.UI.Xaml.Application;
 using Microsoft.UI.Xaml.Input;
 using Windows.System;
 using ScannerGUIv3.Services;
 using ScannerGUIv3.Core;
-using ScannerGUIv3.Models;
+//using ScannerGUIv3.Models;
 
 namespace ScannerGUIv3.Views;
 
 public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
 {
-    private readonly List<string> personnelCodes = App.PersonnelCodes;
-    //private readonly LogImportExportService _logService;
-    //private readonly LogImportExportService _logService = App.GetService<LogImportExportService>();
 
     public MainViewModel ViewModel
     {
@@ -30,7 +26,6 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
     public MainPage()// 
     {
         ViewModel = App.GetService<MainViewModel>();
-        //_logService = App.GetService<LogImportExportService>();
         //Console.WriteLine("Initializing Main Page.");
         InitializeComponent();
         ConsoleService.Initialize(ConsoleOutput); // Initialize with the console TextBox
@@ -91,30 +86,37 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
     }
 
 
-    private void debugButton_Click(object sender, RoutedEventArgs e)
+    private async void debugButton_Click(object sender, RoutedEventArgs e)
     {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine("\nDebug");
-
-        Console.WriteLine(AppState.currentDate);
-        Console.WriteLine(AppState.today);
-
-        Console.WriteLine(AppState.dayShiftStart);
-        Console.WriteLine(AppState.dayShiftEnd);
-
-        Console.WriteLine(AppState.nightShiftStart);
-        Console.WriteLine(AppState.nightShiftEnd);
-
-        Console.WriteLine();
-
-        Console.ResetColor();
-
-        Console.WriteLine("Personnel Codes Start");
-        foreach (var code in personnelCodes)
+        try
         {
-            Console.WriteLine(code);
+            await ExcelService.NightShiftCrossoverAsync();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("\nDebug");
+
+            Console.WriteLine(AppState.CurrentDate);
+            Console.WriteLine(AppState.Today);
+
+            Console.WriteLine(AppState.DayShiftStart);
+            Console.WriteLine(AppState.DayShiftEnd);
+
+            Console.WriteLine(AppState.NightShiftStart);
+            Console.WriteLine(AppState.NightShiftEnd);
+
+            Console.WriteLine();
+            Console.ResetColor();
+
+            Console.WriteLine(@"Personnel Codes Start");
+            foreach (var code in App.PersonnelCodes)
+            {
+                Console.WriteLine(code);
+            }
+            Console.WriteLine(@"Personnel Codes End");
         }
-        Console.WriteLine("Personnel Codes End");
+        catch (Exception)
+        {
+            throw; // TODO handle exception
+        }
     }
 
 

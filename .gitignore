@@ -364,3 +364,6 @@ FodyWeavers.xsd
 /ScannerGUIv3/ViewModels/ListDetailsViewModel.cs
 /ScannerGUIv3/ViewModels/ContentGridViewModel.cs
 /ScannerGUIv3/ViewModels/ContentGridDetailViewModel.cs
+/ScannerGUIv3/Views/ContentGridDetailPage.xaml.cs
+/ScannerGUIv3/Views/ContentGridPage.xaml.cs
+/Public Documents.lnk

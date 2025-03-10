@@ -2,27 +2,25 @@
 
 public class AppState
 {
-    private bool Logging = false;
+    public static bool Logging;
 
-    private static readonly AppState instance = new();
-    private static AppState Instance => instance;
+    //private static readonly AppState Instance = new();
 
     // ########## Variable Declarations ########## //
     // Time variables //
-    public static DateTime currentDate = DateTime.Now;
-    public static DateTime today = DateTime.Today;
+    public static DateTime CurrentDate = DateTime.Now;
+    public static DateTime Today = DateTime.Today;
 
     // Define start and end times for day and night shifts
-    public static DateTime dayShiftStart = today.AddHours(6);   // 6am on the same day
-    public static DateTime dayShiftEnd = today.AddHours(18);    // 6pm on the same day
+    public static DateTime DayShiftStart = Today.AddHours(6);   // 6am on the same day
+    public static DateTime DayShiftEnd = Today.AddHours(18);    // 6pm on the same day
 
-    public static DateTime nightShiftStart = today.AddHours(18); // 6pm on the same day
-    public static DateTime nightShiftEnd = today.AddDays(1).AddHours(6); // 6am on the following day
+    public static DateTime NightShiftStart = Today.AddHours(18); // 6pm on the same day
+    public static DateTime NightShiftEnd = Today.AddDays(1).AddHours(6); // 6am on the following day
 
 
     // File Variables
-
-    private static string _resourcesExcelFolderPath;
+    private static string _resourcesExcelFolderPath = @"C:/Users/Public/Documents";
     public static string ResourcesExcelFolderPath
     {
         get => _resourcesExcelFolderPath;
@@ -33,7 +31,6 @@ public class AppState
             ResourcesMasterExcelPath = _resourcesExcelFolderPath + @"/SRF195 Profile Master.xlsx";
         }
     }
-
     public static string ResourcesOnSiteExcelPath
     {
         get; private set;
@@ -44,14 +41,14 @@ public class AppState
     }
 
 
-
+    // Bool flags
     public static bool PersonnelCodesLoaded
     {
         get => _personnelCodesLoaded;
         set
         {
             _personnelCodesLoaded = value;
-            if (!Instance.Logging)
+            if (!Logging)
             {
                 return;
             }
@@ -69,7 +66,7 @@ public class AppState
         set
         {
             _employeeDictionaryLoaded = value;
-            if (!Instance.Logging)
+            if (!Logging)
             {
                 return;
             }
@@ -87,7 +84,7 @@ public class AppState
         set
         {
             _employeeDictionaryTrimmed = value;
-            if (!Instance.Logging)
+            if (!Logging)
             {
                 return;
             }
@@ -105,7 +102,7 @@ public class AppState
         set
         {
             _employeeDictionaryRefreshed = value;
-            if (!Instance.Logging)
+            if (!Logging)
             {
                 return;
             }
