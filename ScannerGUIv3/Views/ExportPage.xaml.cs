@@ -110,7 +110,7 @@ public sealed partial class ExportPage : Page
         }
     }
 
-    private async Task ShowMessage(string title, string message)
+    public async Task ShowMessage(string title, string message)
     {
         var dialog = new ContentDialog
         {

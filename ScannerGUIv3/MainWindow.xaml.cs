@@ -18,8 +18,6 @@ public sealed partial class MainWindow : WindowEx
 
     public MainWindow()
     {
-        //Console.WriteLine("Initializing Main Window.");
-
         InitializeComponent();
 
         Width = 1000;

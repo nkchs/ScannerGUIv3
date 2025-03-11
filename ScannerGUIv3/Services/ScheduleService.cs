@@ -141,7 +141,7 @@ namespace ScannerGUIv3.Services
             // Download the roster
             await Task.Run(() => LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath, "Roster"));
             // Initialize the employee codes from HTTP
-            await Task.Run(() => ExcelService.InitializeEmployeeCodesAsyncHTTP(AppState.ResourcesMasterExcelPath));
+            await Task.Run(() => ExcelService.InitializeMaintenanceCodesHTTP(AppState.ResourcesMasterExcelPath));
             // Populate the dictionary
             await Task.Run(() => ExcelService.PopulateEmployeeDictionaryUsingXML(EmployeeDict, AppState.ResourcesOnSiteExcelPath));
             // Trim the dictionary

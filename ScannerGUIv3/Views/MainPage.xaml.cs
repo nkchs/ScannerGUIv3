@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml.Input;
 using Windows.System;
 using ScannerGUIv3.Services;
 using ScannerGUIv3.Core;
+using Microsoft.UI.Xaml.Controls;
 
 namespace ScannerGUIv3.Views;
 
@@ -22,12 +23,13 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         //Console.WriteLine("Initializing Main Page.");
         InitializeComponent();
         ConsoleService.Initialize(ConsoleOutput); // Initialize with the console TextBox
-        Loaded += OnLoaded;
+        Loaded += OnLoadedAsync;
     }
 
 
-    private void OnLoaded(object sender, RoutedEventArgs e)
+    private async void OnLoadedAsync(object sender, RoutedEventArgs e)
     {
+        //await ShowMessage("Initializing", "Retrieving Data");
         PersonnelNumberTextBox.Focus(FocusState.Programmatic);
     }
 
@@ -43,7 +45,7 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         }
         else
         {
-            ConsoleService.WriteLine("Invalid Personnel Code.");
+            ConsoleService.WriteLine("Invalid Maintenance Code.");
         }
         PersonnelNumberTextBox.Text = "";
     }
@@ -60,7 +62,7 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         }
         else
         {
-            ConsoleService.WriteLine("Invalid Personnel Code.");
+            ConsoleService.WriteLine("Invalid MaintenanceCode.");
         }
         PersonnelNumberTextBox.Text = "";
     }
@@ -99,12 +101,12 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
             Console.WriteLine();
             Console.ResetColor();
 
-            Console.WriteLine(@"Personnel Codes Start");
+            Console.WriteLine(@"MaintenanceCodes Start");
             foreach (var code in App.MaintenanceCodes)
             {
                 Console.WriteLine(code);
             }
-            Console.WriteLine(@"Personnel Codes End");
+            Console.WriteLine(@"Maintenance Codes End");
         }
         catch (Exception)
         {
@@ -112,6 +114,17 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         }
     }
 
+    public async Task ShowMessage(string title, string message)
+    {
+        var dialog = new ContentDialog
+        {
+            Title = title,
+            Content = message,
+            CloseButtonText = "OK",
+            XamlRoot = this.XamlRoot // Set the XamlRoot to the current page's XamlRoot
+        };
+        await dialog.ShowAsync();
+    }
 
     private void PersonnelNumberTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
     {
@@ -163,13 +176,13 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
                 }
                 else
                 {
-                    ConsoleService.WriteLine("Invalid Personnel Number.");
+                    ConsoleService.WriteLine("Invalid Maintenance Number.");
                 }
             }
             else
             {
                 // Didn't get a valid int.
-                ConsoleService.WriteLine("Invalid Personnel Number.");
+                ConsoleService.WriteLine("Invalid Maintenance Number.");
             }
 
             // Clear the input

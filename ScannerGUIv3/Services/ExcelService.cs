@@ -15,7 +15,7 @@ public class ExcelService
 
 
     // MAIN FUNCTIONS
-    public static async Task InitializeEmployeeCodesAsyncHTTP(string resourcesMasterExcel)
+    public static async Task InitializeMaintenanceCodesHTTP(string resourcesMasterExcel)
     {
         Log.Verbose("Employee Code DL Start");
 
@@ -49,18 +49,18 @@ public class ExcelService
         catch (HttpRequestException ex)
         {
             Log.Error($"HTTP request failed: {ex.Message}");
-            await Task.Run(() => PopulateEmployeeCodesUsingXML(resourcesMasterExcel));
+            await Task.Run(() => InitializeMaintenanceCodesXML(resourcesMasterExcel));
         }
         catch (Exception ex)
         {
             Log.Error($"An error occurred: {ex.Message}");
-            await Task.Run(() => PopulateEmployeeCodesUsingXML(resourcesMasterExcel));
+            await Task.Run(() => InitializeMaintenanceCodesXML(resourcesMasterExcel));
         }
         Log.Verbose("Employee Code DL End");
         Log.Information($"Populated Maintenance Codes [Length: {App.MaintenanceCodes.Count}]");
     }
 
-    public static async Task PopulateEmployeeCodesUsingXML(string filePath)
+    public static async Task InitializeMaintenanceCodesXML(string filePath)
     {
         await Task.Run(() =>
         {
