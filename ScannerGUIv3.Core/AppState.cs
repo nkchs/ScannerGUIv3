@@ -20,7 +20,7 @@ public class AppState
 
 
     // File Variables
-    private static string _resourcesExcelFolderPath = @"C:/Users/Public/Documents";
+    private static string _resourcesExcelFolderPath;
     public static string ResourcesExcelFolderPath
     {
         get => _resourcesExcelFolderPath;
@@ -29,6 +29,8 @@ public class AppState
             _resourcesExcelFolderPath = value;
             ResourcesOnSiteExcelPath = _resourcesExcelFolderPath + @"/Roster.xlsx";
             ResourcesMasterExcelPath = _resourcesExcelFolderPath + @"/SRF195 Profile Master.xlsx";
+            LogFolder = _resourcesExcelFolderPath; // + @"/Logs";
+            StateFolder = _resourcesExcelFolderPath; // + @"/State"; 
         }
     }
     public static string ResourcesOnSiteExcelPath
@@ -40,25 +42,35 @@ public class AppState
         get; private set;
     }
 
+    public static string LogFolder
+    {
+        get;
+        private set;
+    }
+    public static string StateFolder
+    {
+        get; private set;
+    }
+
 
     // Bool flags
-    public static bool PersonnelCodesLoaded
+    public static bool MaintenanceCodesLoaded
     {
-        get => _personnelCodesLoaded;
+        get => _MaintenanceCodesLoaded;
         set
         {
-            _personnelCodesLoaded = value;
+            _MaintenanceCodesLoaded = value;
             if (!Logging)
             {
                 return;
             }
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"PersonnelCodesLoaded set to: {value}");
+            Console.WriteLine($"MaintenanceCodesLoaded set to: {value}");
             Console.ResetColor();
         }
     }
 
-    private static bool _personnelCodesLoaded;
+    private static bool _MaintenanceCodesLoaded;
 
     public static bool EmployeeDictionaryLoaded
     {

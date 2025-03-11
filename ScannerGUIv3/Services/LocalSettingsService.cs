@@ -8,6 +8,7 @@ using ScannerGUIv3.Models;
 
 using Windows.ApplicationModel;
 using Windows.Storage;
+using Serilog;
 
 namespace ScannerGUIv3.Services;
 
@@ -23,6 +24,8 @@ public class LocalSettingsService : ILocalSettingsService
     private readonly string _applicationDataFolder;
     private readonly string _localsettingsFile;
 
+    public static string? AppDataPath;
+
     private IDictionary<string, object> _settings;
 
     private bool _isInitialized;
@@ -34,6 +37,22 @@ public class LocalSettingsService : ILocalSettingsService
 
         _applicationDataFolder = Path.Combine(_localApplicationData, _options.ApplicationDataFolder ?? _defaultApplicationDataFolder);
         _localsettingsFile = _options.LocalSettingsFile ?? _defaultLocalSettingsFile;
+
+        //if (!Directory.Exists(_applicationDataFolder))
+        //{
+        //    Directory.CreateDirectory(_applicationDataFolder);
+        //}
+
+        try
+        {
+            var appDataDirectory = Directory.CreateDirectory(_applicationDataFolder);
+            AppDataPath = appDataDirectory.FullName;
+            Log.Information(@"Folder created: " + AppDataPath);
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(@"Error creating folder: " + ex.Message);
+        }
 
         _settings = new Dictionary<string, object>();
     }

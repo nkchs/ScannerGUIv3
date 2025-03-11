@@ -14,15 +14,16 @@ public class LogImportExportService
 
     public static async Task<bool> DownloadExcelFileAsync(string filePath, string fileName)
     {
+        Log.Information("Attempt Download Excel");
         // Validate inputs
         if (string.IsNullOrWhiteSpace(filePath))
         {
-            throw new ArgumentException("File path cannot be null or empty.", nameof(filePath));
+            throw new ArgumentException(@"File path cannot be null or empty.", nameof(filePath));
         }
 
         if (string.IsNullOrWhiteSpace(fileName))
         {
-            throw new ArgumentException("File name cannot be null or empty.", nameof(fileName));
+            throw new ArgumentException(@"File name cannot be null or empty.", nameof(fileName));
         }
 
         //Console.WriteLine(filePath);
@@ -112,4 +113,36 @@ public class LogImportExportService
             return false;
         }
     }
+
+    public static async Task SaveEmployeeDictionaryAsync(string filePath)
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(App.EmployeeDict);
+            await File.WriteAllTextAsync(filePath, json);
+            Log.Information("Employee Dictionary Saved: {FilePath}", filePath);
+        }
+        catch (Exception ex)
+        {
+            //Log.Error(ex, "Employee Dictionary NOT Saved {FilePath}", filePath);
+            Log.Error(ex, "Employee Dictionary NOT Saved");
+        }
+    }
+    public static async Task<Dictionary<int, Employee>> LoadEmployeeDictionaryAsync(string filePath)
+    {
+        try
+        {
+            var json = await File.ReadAllTextAsync(filePath);
+            var employeeDict = JsonSerializer.Deserialize<Dictionary<int, Employee>>(json);
+            Log.Information("Employee Dictionary Loaded: {FilePath}", filePath);
+            return employeeDict ?? new Dictionary<int, Employee>();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Employee Dictionary NOT Loaded {FilePath}", filePath);
+            return new Dictionary<int, Employee>();
+        }
+    }
+
+
 }

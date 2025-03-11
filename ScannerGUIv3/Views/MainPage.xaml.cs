@@ -1,16 +1,9 @@
-﻿//using Microsoft.Office.Interop.Excel;
-//using Microsoft.UI.Windowing;
-//using ScannerGUIv3.Helpers;
-//using System.Runtime.InteropServices;
-//using ScannerGUIv3.Definitions;
-//using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using ScannerGUIv3.ViewModels;
 using Microsoft.UI.Xaml.Input;
 using Windows.System;
 using ScannerGUIv3.Services;
 using ScannerGUIv3.Core;
-//using ScannerGUIv3.Models;
 
 namespace ScannerGUIv3.Views;
 
@@ -107,7 +100,7 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
             Console.ResetColor();
 
             Console.WriteLine(@"Personnel Codes Start");
-            foreach (var code in App.PersonnelCodes)
+            foreach (var code in App.MaintenanceCodes)
             {
                 Console.WriteLine(code);
             }

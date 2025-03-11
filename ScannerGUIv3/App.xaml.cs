@@ -22,8 +22,13 @@ public partial class App : Application
 {
     public App()
     {
+        // Settings
         AppState.Logging = false;
 
+        // Variables
+        AppState.ResourcesExcelFolderPath = @"C:\Users\Public\Documents\Scanner";
+
+        // Logger setup
         var customTheme = new AnsiConsoleTheme(
             new Dictionary<ConsoleThemeStyle, string>
             {
@@ -34,12 +39,11 @@ public partial class App : Application
                 [ConsoleThemeStyle.LevelError] = "\x1b[91m",       // Red
                 [ConsoleThemeStyle.LevelFatal] = "\x1b[95m"        // Magenta
             });
-
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Verbose()
             .WriteTo.Console(outputTemplate: "{LevelColor}{Timestamp:HH:mm:ss} {Level:u3} {Message}\x1b[0m{NewLine}",
                 theme: customTheme)
-            .WriteTo.File(@"C:\Users\Public\Documents\Scanner Logs\log-.txt", rollingInterval: RollingInterval.Day)
+            .WriteTo.File(AppState.LogFolder + @"\log-.txt", rollingInterval: RollingInterval.Day) // TODO Change to Log Folder
             .CreateLogger();
 
         var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
@@ -49,8 +53,7 @@ public partial class App : Application
         Log.Information("Initializing App @ " + DateTime.Now.ToString("HH:mm:ss"));
         InitializeComponent();
 
-        Host = Microsoft.Extensions.Hosting.Host.
-        CreateDefaultBuilder().
+        Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder().
         UseContentRoot(AppContext.BaseDirectory).
         ConfigureServices((context, services) =>
         {
@@ -91,11 +94,9 @@ public partial class App : Application
 
             // Configuration
             services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
-        }).
-        Build();
+        }).Build();
 
-        // Variables
-
+        
         // Services
         StartUpAsync(); // Startup functions
         var scheduleService = GetService<ScheduleService>(); // 
@@ -113,9 +114,10 @@ public partial class App : Application
 
 
     // Variable Declarations
-    public static readonly List<string> PersonnelCodes = [];
-    public static Dictionary<int, Employee> EmployeeDict { get; } = new();
-    public static Dictionary<int, Employee> EmployeeCrossoverDict { get; } = new();
+    //public static readonly List<string> MaintenanceCodes = [];
+    public static readonly List<int> MaintenanceCodes = [];
+    public static Dictionary<int, Employee> EmployeeDict { get; set; } = new();
+    public static Dictionary<int, Employee> EmployeeCrossoverDict { get; set; } = new();
 
 
     public static WindowEx MainWindow { get; set; } = new MainWindow();
@@ -161,8 +163,8 @@ public partial class App : Application
     private async void StartUpAsync()
     {
         Log.Warning("STARTUP FUNCTIONS BEGIN");
-
-        AppState.PersonnelCodesLoaded = false;
+        
+        AppState.MaintenanceCodesLoaded = false;
         AppState.EmployeeDictionaryLoaded = false;
         AppState.EmployeeDictionaryTrimmed = false;
         AppState.EmployeeDictionaryRefreshed = false;
@@ -170,13 +172,15 @@ public partial class App : Application
         // Download the roster
         await Task.Run(() => LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath, "Roster"));
         // Download the personnel codes
-        await Task.Run(() => ExcelService.InitializeEmployeeCodesAsyncHTTP(PersonnelCodes, AppState.ResourcesMasterExcelPath));
+        await Task.Run(() => ExcelService.InitializeEmployeeCodesAsyncHTTP(AppState.ResourcesMasterExcelPath));
         // Populate the dictionary
         await Task.Run(() => ExcelService.PopulateEmployeeDictionaryUsingXML(EmployeeDict, AppState.ResourcesOnSiteExcelPath));
         // Trim the dictionary of personnel codes
-        await Task.Run(() => ExcelService.TrimEmployeeDictionaryAsync(EmployeeDict, PersonnelCodes));
+        await Task.Run(() => ExcelService.TrimEmployeeDictionaryAsync(EmployeeDict, MaintenanceCodes));
         // Trim the dictionary of shift types
         await Task.Run(ExcelService.TrimEmployeeDictionaryShiftType);
+        // 
+        //Log.Information($"Trimmed Employee Dict [Length: {App.EmployeeDict.Count}]");
 
         Log.Warning("STARTUP FUNCTIONS END");
     }

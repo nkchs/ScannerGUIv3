@@ -8,7 +8,7 @@ namespace ScannerGUIv3.Services
 {
     public class ScheduleService
     {
-        private readonly List<string> personnelCodes = App.PersonnelCodes;
+        private readonly List<int> MaintenanceCodes = App.MaintenanceCodes;
         public static Dictionary<int, Employee> EmployeeDict = App.EmployeeDict;
 
         // Constructor to initialize the scheduleTimes array
@@ -33,14 +33,15 @@ namespace ScannerGUIv3.Services
                 //new(10,44,0)
             };
 
-            // This one is for debugging
+            // TURN ON FOR DEBUG
             // Initialize the scheduleTimes array to execute 10 times, each 30 seconds apart
-            scheduleTimes = new TimeSpan[10];
-            var startTime = DateTime.Now.TimeOfDay;
-            for (var i = 0; i < scheduleTimes.Length; i++)
-            {
-                scheduleTimes[i] = startTime.Add(TimeSpan.FromSeconds(10 * i));
-            }
+            //scheduleTimes = new TimeSpan[10];
+            //var startTime = DateTime.Now.TimeOfDay;
+            //for (var i = 0; i < scheduleTimes.Length; i++)
+            //{
+            //    scheduleTimes[i] = startTime.Add(TimeSpan.FromSeconds(10 * i));
+            //}
+            // TURN ON FOR DEBUG
 
             // Initialize the timer
             timer = new Timer();
@@ -140,11 +141,11 @@ namespace ScannerGUIv3.Services
             // Download the roster
             await Task.Run(() => LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath, "Roster"));
             // Initialize the employee codes from HTTP
-            await Task.Run(() => ExcelService.InitializeEmployeeCodesAsyncHTTP(personnelCodes, AppState.ResourcesMasterExcelPath));
+            await Task.Run(() => ExcelService.InitializeEmployeeCodesAsyncHTTP(AppState.ResourcesMasterExcelPath));
             // Populate the dictionary
             await Task.Run(() => ExcelService.PopulateEmployeeDictionaryUsingXML(EmployeeDict, AppState.ResourcesOnSiteExcelPath));
             // Trim the dictionary
-            await Task.Run(() => ExcelService.TrimEmployeeDictionaryAsync(EmployeeDict, App.PersonnelCodes));
+            await Task.Run(() => ExcelService.TrimEmployeeDictionaryAsync(EmployeeDict, App.MaintenanceCodes));
 
             Log.Verbose(@"Task 1 Completed");
         }
@@ -163,6 +164,7 @@ namespace ScannerGUIv3.Services
         private static async Task Task3() // 7:00 am
         {
             Log.Verbose(@"Task 3 Executed");
+            // This is a good time to get the nightshift staff for that night.
         }
 
         private static async Task Task4() // 6:10 PM
@@ -175,6 +177,10 @@ namespace ScannerGUIv3.Services
             var success = await LogImportExportService.ExportToWeb(LogImportExportService.teamsUrl, shiftLog);
             // Generate the crossover shiftLog
             await ExcelService.NightShiftCrossoverAsync();
+            // Create a function that:
+            // 1. Empties the employeeDict
+            // 2. Moves the CrossoverDict to EmployeeDict
+            App.EmployeeDict = App.EmployeeCrossoverDict;
 
             Log.Verbose(success ? @"Task 4 Completed" : @"Task 4 Failed");
         }
