@@ -15,7 +15,7 @@ public class ExcelService
 
 
     // MAIN FUNCTIONS
-    public static async Task InitializeMaintenanceCodesHTTP(string resourcesMasterExcel)
+    public static async Task InitializeMaintenanceCodesHttp(string resourcesMasterExcel)
     {
         Log.Verbose("Employee Code DL Start");
 
@@ -49,18 +49,18 @@ public class ExcelService
         catch (HttpRequestException ex)
         {
             Log.Error($"HTTP request failed: {ex.Message}");
-            await Task.Run(() => InitializeMaintenanceCodesXML(resourcesMasterExcel));
+            await Task.Run(() => InitializeMaintenanceCodesXml(resourcesMasterExcel));
         }
         catch (Exception ex)
         {
             Log.Error($"An error occurred: {ex.Message}");
-            await Task.Run(() => InitializeMaintenanceCodesXML(resourcesMasterExcel));
+            await Task.Run(() => InitializeMaintenanceCodesXml(resourcesMasterExcel));
         }
         Log.Verbose("Employee Code DL End");
         Log.Information($"Populated Maintenance Codes [Length: {App.MaintenanceCodes.Count}]");
     }
 
-    public static async Task InitializeMaintenanceCodesXML(string filePath)
+    public static async Task InitializeMaintenanceCodesXml(string filePath)
     {
         await Task.Run(() =>
         {
@@ -96,7 +96,7 @@ public class ExcelService
         });
     }
 
-    public static async Task TrimEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, List<int> MaintenanceCodes)
+    public static async Task TrimEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, List<int> maintenanceCodes)
     {
         if (AppState.EmployeeDictionaryLoaded && AppState.MaintenanceCodesLoaded && !AppState.EmployeeDictionaryTrimmed)
         {
@@ -104,8 +104,8 @@ public class ExcelService
             {
                 //Log.Verbose("Trim Start");
 
-                var MaintenanceCodeset = new HashSet<int>(App.MaintenanceCodes);
-                var keysToRemove = employeeDict.Keys.Where(key => !MaintenanceCodeset.Contains(key)).ToList();
+                var maintenanceCodeset = new HashSet<int>(App.MaintenanceCodes);
+                var keysToRemove = employeeDict.Keys.Where(key => !maintenanceCodeset.Contains(key)).ToList();
                 foreach (var key in keysToRemove)
                 {
                     employeeDict.Remove(key);
@@ -167,12 +167,12 @@ public class ExcelService
     {
         Log.Verbose("Populate Employee Dictionary ASYNC [Using XML]");
         // Populate the dictionary using XML
-        await Task.Run(() => PopulateEmployeeDictionaryUsingXML(employeeDict, resourcesOnSiteExcel));
+        await Task.Run(() => PopulateEmployeeDictionaryUsingXml(employeeDict, resourcesOnSiteExcel));
         // Trim the employee dictionary
         await Task.Run(() => TrimEmployeeDictionaryAsync(employeeDict, App.MaintenanceCodes));
     }
 
-    public static void PopulateEmployeeDictionaryUsingXML(Dictionary<int, Employee> employeeDict, string excelPath)
+    public static void PopulateEmployeeDictionaryUsingXml(Dictionary<int, Employee> employeeDict, string excelPath)
     {
         Log.Information($"Populate Employee Dict Start");
         try
@@ -195,11 +195,11 @@ public class ExcelService
 
             foreach (var row in sheetData.Elements<Row>().Where(r => r.RowIndex >= 10))
             {
-                var MaintenanceCodestr = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(2), workbookPart);
+                var maintenanceCodestr = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(2), workbookPart);
 
-                if (string.IsNullOrEmpty(MaintenanceCodestr) ||
+                if (string.IsNullOrEmpty(maintenanceCodestr) ||
                     App.MaintenanceCodes.Count == 0 ||
-                    !int.TryParse(MaintenanceCodestr, out var personnelCode) ||
+                    !int.TryParse(maintenanceCodestr, out var personnelCode) ||
                     !App.MaintenanceCodes.Contains(personnelCode))
                 {
                     continue;

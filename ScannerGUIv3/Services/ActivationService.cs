@@ -4,30 +4,25 @@ using Microsoft.UI.Xaml.Controls;
 using ScannerGUIv3.Activation;
 using ScannerGUIv3.Contracts.Services;
 using ScannerGUIv3.Views;
+using Serilog;
 
 namespace ScannerGUIv3.Services;
 
-public class ActivationService : IActivationService
+public class ActivationService(ActivationHandler<LaunchActivatedEventArgs> defaultHandler, IEnumerable<IActivationHandler> activationHandlers, IThemeSelectorService themeSelectorService) : IActivationService
 {
-    private readonly ActivationHandler<LaunchActivatedEventArgs> _defaultHandler;
-    private readonly IEnumerable<IActivationHandler> _activationHandlers;
-    private readonly IThemeSelectorService _themeSelectorService;
+    private readonly ActivationHandler<LaunchActivatedEventArgs> _defaultHandler = defaultHandler;
+    private readonly IEnumerable<IActivationHandler> _activationHandlers = activationHandlers;
+    private readonly IThemeSelectorService _themeSelectorService = themeSelectorService;
     private UIElement? _shell = null;
-
-    public ActivationService(ActivationHandler<LaunchActivatedEventArgs> defaultHandler, IEnumerable<IActivationHandler> activationHandlers, IThemeSelectorService themeSelectorService)
-    {
-        _defaultHandler = defaultHandler;
-        _activationHandlers = activationHandlers;
-        _themeSelectorService = themeSelectorService;
-    }
 
     public async Task ActivateAsync(object activationArgs)
     {
+        //Log.Information("ActivateAsync() from ActivationService.cs");
         if (App.MainWindow == null)
         {
+            //Log.Information("MainWindow == null | from ActivationService.cs");
             App.MainWindow = new MainWindow();
-            //App.MainWindow.Activate(); // Check if Activation needs to occur here.
-            //Console.WriteLine("Failed MainWindow() check. Creating new.");
+            App.MainWindow.Activate(); // Check if Activation needs to occur here.
         }
 
         // Execute tasks before activation.
@@ -46,7 +41,6 @@ public class ActivationService : IActivationService
 
         // Activate the MainWindow.
         App.MainWindow.Activate(); // Check if activation needs to occur here.
-        //Console.WriteLine("After MainWindow.Activate");
 
         //App.MainWindow.MoveAndResize(App.MainWindow.Bounds.X, App.MainWindow.Bounds.Y, 700, 700);
         //App.MainWindow.MoveAndResize(2000, 700, 700, 700);

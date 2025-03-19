@@ -7,13 +7,13 @@ using Microsoft.UI.Xaml;
 using ScannerGUIv3.Core;
 using ScannerGUIv3.Services;
 using Serilog;
+using Microsoft.UI.Xaml.Controls;
 
 namespace ScannerGUIv3;
 
 public sealed partial class MainWindow : WindowEx
 {
     private Microsoft.UI.Dispatching.DispatcherQueue dispatcherQueue;
-
     private UISettings settings;
 
     public MainWindow()
@@ -32,15 +32,10 @@ public sealed partial class MainWindow : WindowEx
         settings = new UISettings();
         settings.ColorValuesChanged += Settings_ColorValuesChanged; // cannot use FrameworkElement.ActualThemeChanged event
 
-        //var windowWidth = Bounds.Width;
-        //var windowHeight = Bounds.Height;
-        //Console.WriteLine("Window Width: " + windowWidth);
-        //Console.WriteLine("Window Height: " + windowHeight);
-
         // Add the Closed event handler
         Closed += MainWindow_Closed;
     }
-
+    
     // this handles updating the caption button colors correctly when windows system theme is changed
     // while the app is open
     private void Settings_ColorValuesChanged(UISettings sender, object args)
@@ -61,5 +56,18 @@ public sealed partial class MainWindow : WindowEx
             Log.Error(ex, "Exception Raised On Exit");
             //throw; // TODO handle exception
         }
+    }
+
+    public static async Task ShowMessageDialog(string title, string content)
+    {
+        var dialog = new ContentDialog
+        {
+            Title = title,
+            Content = content,
+            CloseButtonText = "OK",
+            XamlRoot = App.MainWindow.Content.XamlRoot
+        };
+
+        await dialog.ShowAsync();
     }
 }

@@ -5,34 +5,37 @@ using Windows.System;
 using ScannerGUIv3.Services;
 using ScannerGUIv3.Core;
 using Microsoft.UI.Xaml.Controls;
+using ScannerGUIv3.Definitions;
+using Serilog;
+using System.Net.Mail;
 
 namespace ScannerGUIv3.Views;
 
 public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
 {
 
-    public MainViewModel ViewModel
-    {
-        get;
-    }
+    public MainViewModel ViewModel { get; }
 
-    
     public MainPage()// 
     {
         ViewModel = App.GetService<MainViewModel>();
-        //Console.WriteLine("Initializing Main Page.");
         InitializeComponent();
         ConsoleService.Initialize(ConsoleOutput); // Initialize with the console TextBox
         Loaded += OnLoadedAsync;
     }
 
-
-    private async void OnLoadedAsync(object sender, RoutedEventArgs e)
+    private void OnLoadedAsync(object sender, RoutedEventArgs e)
     {
-        //await ShowMessage("Initializing", "Retrieving Data");
-        PersonnelNumberTextBox.Focus(FocusState.Programmatic);
+        try
+        {
+            PersonnelNumberTextBox.Focus(FocusState.Programmatic);
+            ShowMessage("Initializing Data", "Please Wait...");
+        }
+        catch (Exception ex)
+        {
+            throw; // TODO handle exception
+        }
     }
-
 
     private void signInButton_Click(object sender, RoutedEventArgs e)
     {
@@ -50,7 +53,6 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         PersonnelNumberTextBox.Text = "";
     }
 
-
     private void signOutButton_Click(object sender, RoutedEventArgs e)
     {
         if (int.TryParse(PersonnelNumberTextBox.Text, out var personnelCode))
@@ -67,46 +69,61 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         PersonnelNumberTextBox.Text = "";
     }
 
-
     private void exportLogButton_Click(object sender, RoutedEventArgs e)
     {
         Console.ForegroundColor = ConsoleColor.Blue;
-        Console.WriteLine("\nExport");
+        Console.WriteLine("\nExport Log Button");
 
-        var dayShiftLog = LogImportExportService.ExportDayShiftLog(App.EmployeeDict);
-        _ = LogImportExportService.ExportToWeb(dayShiftLog, LogImportExportService.teamsUrl);
+        var dayShiftLog = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, "DS");
+        _ = LogImportExportService.ExportToWeb(LogImportExportService.TeamsUrl, new
+        {
+            email = "",
+            message = dayShiftLog
+        });
+
         Console.WriteLine(dayShiftLog);
         Console.ResetColor();
         Console.WriteLine("");
     }
 
-
     private async void debugButton_Click(object sender, RoutedEventArgs e)
     {
         try
         {
-            await ExcelService.NightShiftCrossoverAsync();
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("\nDebug");
-
-            Console.WriteLine(AppState.CurrentDate);
-            Console.WriteLine(AppState.Today);
-
-            Console.WriteLine(AppState.DayShiftStart);
-            Console.WriteLine(AppState.DayShiftEnd);
-
-            Console.WriteLine(AppState.NightShiftStart);
-            Console.WriteLine(AppState.NightShiftEnd);
+            var dayshifttable = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, "DS");
+            Console.WriteLine(dayshifttable);
+            var success = await LogImportExportService.ExportToWeb(LogImportExportService.TeamsUrl,
+                new
+                {
+                    message = dayshifttable
+                });
 
             Console.WriteLine();
-            Console.ResetColor();
 
-            Console.WriteLine(@"MaintenanceCodes Start");
-            foreach (var code in App.MaintenanceCodes)
-            {
-                Console.WriteLine(code);
-            }
-            Console.WriteLine(@"Maintenance Codes End");
+            var nightshifttable = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, "NS");
+            Console.WriteLine(nightshifttable);
+            //await ExcelService.NightShiftCrossoverAsync();
+            //Console.ForegroundColor = ConsoleColor.Red;
+            //Console.WriteLine("\nDebug");
+
+            //Console.WriteLine(AppState.CurrentDate);
+            //Console.WriteLine(AppState.Today);
+
+            //Console.WriteLine(AppState.DayShiftStart);
+            //Console.WriteLine(AppState.DayShiftEnd);
+
+            //Console.WriteLine(AppState.NightShiftStart);
+            //Console.WriteLine(AppState.NightShiftEnd);
+
+            //Console.WriteLine();
+            //Console.ResetColor();
+
+            //Console.WriteLine(@"MaintenanceCodes Start");
+            //foreach (var code in App.MaintenanceCodes)
+            //{
+            //    Console.WriteLine(code);
+            //}
+            //Console.WriteLine(@"Maintenance Codes End");
         }
         catch (Exception)
         {
@@ -114,16 +131,25 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         }
     }
 
-    public async Task ShowMessage(string title, string message)
+    private async Task ShowMessage(string title, string message)
     {
         var dialog = new ContentDialog
         {
             Title = title,
             Content = message,
             CloseButtonText = "OK",
-            XamlRoot = this.XamlRoot // Set the XamlRoot to the current page's XamlRoot
+            XamlRoot = XamlRoot // Set the XamlRoot to the current page's XamlRoot
         };
-        await dialog.ShowAsync();
+
+        // Show the dialog and wait for AppState.StartUpFunctionsComplete to be true
+        var dialogTask = dialog.ShowAsync();
+        while (!AppState.StartUpFunctionsComplete) { await Task.Delay(100); } // Check every 100ms
+
+        // Close the dialog once AppState.StartUpFunctionsComplete is true
+        //Log.Information("Closing Content Dialog");
+        dialog.Hide();
+        await dialogTask;
+        //PersonnelNumberTextBox.Focus(FocusState.Programmatic);
     }
 
     private void PersonnelNumberTextBox_KeyDown(object sender, KeyRoutedEventArgs e)

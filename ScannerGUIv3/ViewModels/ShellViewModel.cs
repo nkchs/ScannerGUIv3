@@ -10,10 +10,10 @@ namespace ScannerGUIv3.ViewModels;
 public partial class ShellViewModel : ObservableRecipient
 {
     [ObservableProperty]
-    private bool isBackEnabled;
+    private bool _isBackEnabled;
 
     [ObservableProperty]
-    private object? selected;
+    private object? _selected;
 
     public INavigationService NavigationService
     {

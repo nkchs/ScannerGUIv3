@@ -53,7 +53,7 @@ public partial class App : Application
         Configuration = builder.Build(); // CONFIG Setup END
 
 
-        Log.Information("Initializing App @ " + DateTime.Now.ToString("HH:mm:ss"));
+        Log.Information("+++ Initializing App +++");
         InitializeComponent();
 
         Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder().UseContentRoot(AppContext.BaseDirectory)
@@ -109,47 +109,21 @@ public partial class App : Application
     }
 
 
-
-    public static UIElement? AppTitlebar
-    {
-        get;
-        set;
-    }
-
+    public static UIElement? AppTitlebar { get; set; }
 
     // Variable Declarations
-    //public static readonly List<string> MaintenanceCodes = [];
     public static readonly List<int> MaintenanceCodes = [];
 
-    public static Dictionary<int, Employee> EmployeeDict
-    {
-        get;
-        set;
-    } = new();
+    private static readonly List<string> DebugEmployeeNumbers =
+    [
+        "20898", "24781", "22388", "24410", "24065", "11356", "27065", "5565", "15734", "3264", "23485", "22794", "4870"
+    ];
 
-    public static Dictionary<int, Employee> EmployeeCrossoverDict
-    {
-        get;
-        set;
-    } = new();
-
-
-    public static WindowEx MainWindow
-    {
-        get;
-        set;
-    } = new MainWindow();
-
-    public IConfiguration Configuration
-    {
-        get;
-    }
-
-    private IHost Host
-    {
-        get;
-    }
-
+    public static Dictionary<int, Employee> EmployeeDict { get; set; } = [];
+    public static Dictionary<int, Employee> EmployeeCrossoverDict { get; set; } = [];
+    public static WindowEx MainWindow { get; set; } = new MainWindow();
+    public IConfiguration Configuration { get; }
+    private IHost Host { get; }
     public static T GetService<T>()
         where T : class
     {
@@ -157,11 +131,10 @@ public partial class App : Application
         {
             throw new ArgumentException($"{typeof(T)} needs to be registered in ConfigureServices within App.xaml.cs.");
         }
-
         return service;
     }
-    // ########## Startup FUNCS ########## //
 
+    // ########## Management FUNCS ########## //
     protected async override void OnLaunched(LaunchActivatedEventArgs args)
     {
         base.OnLaunched(args);
@@ -169,20 +142,17 @@ public partial class App : Application
         await App.GetService<IActivationService>().ActivateAsync(args);
     }
 
-
-
-    // ########## Management FUNCS ########## //
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
         // TODO: Log and handle exceptions as appropriate.
         // https://docs.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.application.unhandledexception.
     }
 
-    private async void StartUpAsync()
+    // ########## Startup FUNCS ########## //
+    private static async Task StartUpAsync()
     {
         Log.Warning("STARTUP FUNCTIONS BEGIN");
-        //var mainPage = App.GetService<MainPage>();
-        //await mainPage.ShowMessage("Initalizing", "Retrieving Data");
+        //await MainWindow.ShowMessageDialogAsync("Initialization", "Please wait while the application is initializing...");
 
         AppState.MaintenanceCodesLoaded = false;
         AppState.EmployeeDictionaryLoaded = false;
@@ -192,46 +162,47 @@ public partial class App : Application
         // Download the roster  
         await Task.Run(() => LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath, "Roster"));
         // Download the Maintenance codes  
-        await Task.Run(() => ExcelService.InitializeMaintenanceCodesHTTP(AppState.ResourcesMasterExcelPath));
+        await Task.Run(() => ExcelService.InitializeMaintenanceCodesHttp(AppState.ResourcesMasterExcelPath));
         // Populate the dictionary  
-        await Task.Run(() => ExcelService.PopulateEmployeeDictionaryUsingXML(EmployeeDict, AppState.ResourcesOnSiteExcelPath));
+        await Task.Run(() => ExcelService.PopulateEmployeeDictionaryUsingXml(EmployeeDict, AppState.ResourcesOnSiteExcelPath));
         // Trim the dictionary of Maintenance codes  
         await Task.Run(() => ExcelService.TrimEmployeeDictionaryAsync(EmployeeDict, MaintenanceCodes));
         // Trim the dictionary of shift types  
         await Task.Run(ExcelService.TrimEmployeeDictionaryShiftType);
 
+        SignInEmployees(DebugEmployeeNumbers);
+
         Log.Warning("STARTUP FUNCTIONS END");
+        AppState.StartUpFunctionsComplete = true;
     }
 
-    //public static class MessageBoxHelper
-    //{
-    //    private static ContentDialog? _dialog;
-
-    //    public static async Task ShowMessageAsync(string title, string content)
-    //    {
-    //        if (_dialog != null)
-    //        {
-    //            await CloseMessageAsync();
-    //        }
-
-    //        _dialog = new ContentDialog
-    //        {
-    //            Title = title,
-    //            Content = content,
-    //            CloseButtonText = "Close",
-    //            XamlRoot = App.MainWindow.Content?.XamlRoot // Use App.MainWindow to access the instance  
-    //        };
-
-    //        await _dialog.ShowAsync();
-    //    }
-
-    //    public static async Task CloseMessageAsync()
-    //    {
-    //        if (_dialog != null)
-    //        {
-    //            _dialog.Hide();
-    //            _dialog = null;
-    //        }
-    //    }
-    //}
+    private static void SignInEmployees(List<string> employeeNumbers)
+    {
+        Log.Information("Sign In DEBUG Employees");
+        foreach (var number in employeeNumbers)
+        {
+            try
+            {
+                if (int.TryParse(number, out var employeeNumber))
+                {
+                    if (EmployeeDict.TryGetValue(employeeNumber, out var employee))
+                    {
+                        employee.SignIn();
+                    }
+                    else
+                    {
+                        Log.Warning($"Employee with number {employeeNumber} not found.");
+                    }
+                }
+                else
+                {
+                    Log.Warning($"Invalid employee number: {number}");
+                }
+            }
+            catch
+            {
+                // Pass if the number isn't found
+            }
+        }
+    }
 }

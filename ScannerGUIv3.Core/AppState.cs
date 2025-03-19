@@ -54,6 +54,7 @@ public class AppState
 
 
     // Bool flags
+    public static bool StartUpFunctionsComplete = false;
     public static bool MaintenanceCodesLoaded
     {
         get => _MaintenanceCodesLoaded;

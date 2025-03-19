@@ -10,8 +10,6 @@ namespace ScannerGUIv3.Views;
 
 public sealed partial class ExportPage : Page
 {
-    //private readonly LogImportExportService _logService;
-
     public ExportViewModel ViewModel
     {
         get;
@@ -20,12 +18,12 @@ public sealed partial class ExportPage : Page
     public ExportPage()
     {
         ViewModel = App.GetService<ExportViewModel>();
-        //_logService = App.GetService<LogImportExportService>();
         InitializeComponent();
     }
 
     private async void exportButton_Click(object sender, RoutedEventArgs e)
     {
+        var shiftType = ""; // TODO capture from UI
         var selectedOption = ExportOptionsGroup.SelectedItem as ComboBoxItem;
         if (selectedOption == null)
         {
@@ -33,7 +31,8 @@ public sealed partial class ExportPage : Page
             return;
         }
 
-        var shiftLog = LogImportExportService.ExportDayShiftLog(App.EmployeeDict);
+        //var shiftLog = LogImportExportService.ExportDayShiftLog(App.EmployeeDict);
+        var shiftLog = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, "DS");
         bool success;
         var option = selectedOption.Content.ToString();
 
@@ -46,7 +45,7 @@ public sealed partial class ExportPage : Page
                     await ShowMessage("Error", "Please enter an email address.");
                     return;
                 }
-                success = await LogImportExportService.ExportToWeb(LogImportExportService.emailUrl,
+                success = await LogImportExportService.ExportToWeb(LogImportExportService.EmailUrl,
                     new
                     {
                         email = emailAddress,
@@ -56,7 +55,7 @@ public sealed partial class ExportPage : Page
                 break;
 
             case "Teams":
-                success = await LogImportExportService.ExportToWeb(LogImportExportService.teamsUrl,
+                success = await LogImportExportService.ExportToWeb(LogImportExportService.TeamsUrl,
                     new
                     {
                         message = shiftLog
@@ -110,7 +109,7 @@ public sealed partial class ExportPage : Page
         }
     }
 
-    public async Task ShowMessage(string title, string message)
+    private async Task ShowMessage(string title, string message)
     {
         var dialog = new ContentDialog
         {

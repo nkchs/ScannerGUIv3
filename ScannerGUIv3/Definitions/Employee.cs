@@ -54,15 +54,15 @@ public class Employee
 
     public string? ShiftType
     {
-        get => shiftType;// Try to get today's shift from the ShiftSchedule dictionary//if (ShiftSchedule.TryGetValue(DateTime.Today, out var shift))//{//    return NormalizeShiftType(shift);//}//return null;
+        get => _shiftType;// Try to get today's shift from the ShiftSchedule dictionary//if (ShiftSchedule.TryGetValue(DateTime.Today, out var shift))//{//    return NormalizeShiftType(shift);//}//return null;
 
-        set => shiftType = NormalizeShiftType(value);
+        set => _shiftType = NormalizeShiftType(value);
     }
 
-    private string? shiftType;
+    private string? _shiftType;
 
     // Helper function to normalize shift values
-    private string? NormalizeShiftType(string? value)
+    private static string? NormalizeShiftType(string? value)
     {
         //Console.WriteLine(value);
         if (string.IsNullOrEmpty(value))
@@ -84,11 +84,11 @@ public class Employee
         return "OS";  // Invalid shift type, set to "OS Offsite"
     }
 
-    public Dictionary<DateTime, string> ShiftSchedule { get; set; } = new Dictionary<DateTime, string>();
+    public Dictionary<DateTime, string> ShiftSchedule { get; set; } = [];
 
-    public DateTime? SignInTime { get; set; }
+    public DateTime? SignInTime { get; private set; }
 
-    public DateTime? SignOutTime { get; set; }
+    public DateTime? SignOutTime { get; private set; }
 
     // Default constructor
     public Employee()
@@ -132,32 +132,11 @@ public class Employee
         return EmployeeNumber + " " + Name + " Signed In @ " + FormattedSignInTime;
     }
 
-    //public string SignIn()
-    //{
-    //    // Check if the employee is already signed in
-    //    if (SignInTime.HasValue)
-    //    {
-    //        return "Already signed in. Sign out before signing in again.";
-    //    }
-    //    DateTime now = DateTime.Now;
-    //    // Check valid sign-in times
-    //    if (ShiftType == "DS" && (now.Hour < 4 || now.Hour >= 16))
-    //    {
-    //        return "Invalid sign-in time for Day Shift. Valid hours are 4 AM to 4 PM.";
-    //    }
-    //    else if (ShiftType == "NS" && (now.Hour >= 4 && now.Hour < 16))
-    //    {
-    //        return "Invalid sign-in time for Night Shift. Valid hours are 4 PM to 4 AM.";
-    //    }
-    //    SignInTime = now;
-    //    return EmployeeNumber + " " + Name + " Signed In @ " + FormattedSignInTime;
-    //}
-
     public string SignOut()
     {
         if (SignInTime == null)
         {
-            return "Not signed in.";
+            return "No Sign In";
         }
         else
         {
@@ -165,10 +144,23 @@ public class Employee
             return EmployeeNumber + " " + Name + " Signed Out @ " + FormattedSignInTime;
         }
     }
+    public string ToAsciiTableRow()
+    {
+        const int signpadding = 11;
+        var name = Name?.PadRight(28) ?? "No Name".PadRight(28);
+        var id = EmployeeNumber.ToString().PadRight(8);
+        var signIn = SignInTime.HasValue ? FormattedSignInTime.PadRight(signpadding) : "No Sign In".PadRight(signpadding);
+        var signOut = SignOutTime.HasValue ? FormattedSignOutTime.PadRight(signpadding) : "No Sign Out".PadRight(signpadding);
+
+        return $"| {name} | {id} | {signIn} | {signOut} |";
+    }
 
     // Property to get formatted SignInTime
-    public string FormattedSignInTime => SignInTime?.ToString("dd/MM/yyyy HH:mm") ?? "Not signed in.";
+    public string FormattedSignInTime => SignInTime?.ToString("HH:mm") ?? "No Sign In";
 
+    // Formerly .ToString("dd/MM/yyyy HH:mm")
     // Property to get formatted SignOutTime
-    public string FormattedSignOutTime => SignOutTime?.ToString("dd/MM/yyyy HH:mm") ?? "Not signed out.";
+    public string FormattedSignOutTime => SignOutTime?.ToString("HH:mm") ?? "No Sign Out";
+
+
 }
