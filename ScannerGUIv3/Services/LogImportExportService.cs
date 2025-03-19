@@ -2,7 +2,6 @@ using System.Text;
 using System.Text.Json;
 using ScannerGUIv3.Definitions;
 using Serilog;
-//using Application = Microsoft.UI.Xaml.Application;
 
 namespace ScannerGUIv3.Services;
 
@@ -88,6 +87,8 @@ public class LogImportExportService
         }
     }
 
+
+
     public static async Task SaveEmployeeDictionaryAsync(string filePath)
     {
         try
@@ -121,11 +122,11 @@ public class LogImportExportService
 
     public static string ExportShiftLogWithSignInStatus(Dictionary<int, Employee> employeeDict, string shiftType)
     {
-        const string singleline =       "+---------------------------------------------------------------------------+";
-        const string generaltitle =     "| Name                         | ID       | Sign In        | Sign Out       |";
-        const string signedintitle =    "|                                 Signed In                                 |";
-        const string notsignedintitle = "|                               Not Signed In                               |";
-        const string tabledivider =     "+------------------------------+----------+----------------+----------------+";
+        const string singleline =       "+---------------------------------------------------------------------+";
+        const string generaltitle =     "| Name                         | ID       | Sign In     | Sign Out    |";
+        const string signedintitle =    "|                              Signed In                              |";
+        const string notsignedintitle = "|                            Not Signed In                            |";
+        const string tabledivider =     "+------------------------------+----------+-------------+-------------+";
 
         var csvBuilder = new StringBuilder();
         csvBuilder.AppendLine(singleline);
@@ -159,6 +160,138 @@ public class LogImportExportService
         csvBuilder.AppendLine(tabledivider);
         return csvBuilder.ToString();
     }
+    
+    //public static string ExportShiftLogToJson(Dictionary<int, Employee> employeeDict, string shiftType)
+    //{
+    //    var jsonBuilder = new StringBuilder();
+
+    //    jsonBuilder.Append(
+    //        "{\r\n  \"type\": \"message\",\r\n  \"attachments\": [\r\n    {\r\n      \"contentType\": \"application/vnd.microsoft.card.adaptive\",\r\n      \"content\": {\r\n        \"msteams\": {\r\n          \"width\": \"Full\"\r\n        },\r\n        \"$schema\": \"http://adaptivecards.io/schemas/adaptive-card.json\",\r\n        \"type\": \"AdaptiveCard\",\r\n        \"version\": \"1.5\",\r\n        \"body\": [\r\n          {\r\n            \"type\": \"TextBlock\",\r\n            \"size\": \"Medium\",\r\n            \"weight\": \"Bolder\",\r\n            \"text\": \"Attendance Report\"\r\n          },\r\n          {\r\n            \"type\": \"TextBlock\",\r\n            \"text\": \"Signed In\",\r\n            \"wrap\": true\r\n          },\r\n          {\r\n            \"type\": \"Table\",\r\n            \"columns\": [\r\n              { \"width\": 2 },  // Increased width for Name column\r\n              { \"width\": 1 },\r\n              { \"width\": 1 },\r\n              { \"width\": 1 }\r\n            ],\r\n            \"rows\": ");
+
+
+    //    jsonBuilder.AppendLine("[");
+
+    //    // Employees with SignIn times
+    //    foreach (var employee in employeeDict.Values)
+    //    {
+    //        if (employee.ShiftType == shiftType && employee.SignInTime.HasValue)
+    //        {
+    //            jsonBuilder.AppendLine(employee.ToJsonTableRow() + ",");
+    //        }
+    //    }
+
+    //    // Remove the last comma and close the JSON array
+    //    if (jsonBuilder.Length > 1)
+    //    {
+    //        jsonBuilder.Length--; // Remove the last comma
+    //    }
+    //    jsonBuilder.AppendLine("]");
+
+    //    return jsonBuilder.ToString();
+    //}
+
+    //public static string CreateAdaptiveCard(Dictionary<int, Employee> employeeDict, string shiftType)
+    //{
+    //    var signedInEmployees = employeeDict.Values
+    //        .Where(e => e.ShiftType == shiftType && e.SignInTime.HasValue)
+    //        .Select(e => new
+    //        {
+    //            type = "TableRow",
+    //            cells = new[]
+    //            {
+    //                new { type = "TableCell", items = new[] { new { type = "TextBlock", text = e.Name } } },
+    //                new { type = "TableCell", items = new[] { new { type = "TextBlock", text = e.EmployeeNumber.ToString() } } },
+    //                new { type = "TableCell", items = new[] { new { type = "TextBlock", text = e.SignInTime?.ToString("HH:mm") ?? "No Sign In" } } },
+    //                new { type = "TableCell", items = new[] { new { type = "TextBlock", text = e.SignOutTime?.ToString("HH:mm") ?? "No Sign Out" } } }
+    //            }
+    //        })
+    //        .ToArray();
+
+    //    var notSignedInEmployees = employeeDict.Values
+    //        .Where(e => e.ShiftType == shiftType && !e.SignInTime.HasValue)
+    //        .Select(e => new
+    //        {
+    //            type = "TableRow",
+    //            cells = new[]
+    //            {
+    //                new { type = "TableCell", items = new[] { new { type = "TextBlock", text = e.Name } } },
+    //                new { type = "TableCell", items = new[] { new { type = "TextBlock", text = e.EmployeeNumber.ToString() } } },
+    //                new { type = "TableCell", items = new[] { new { type = "TextBlock", text = "No Sign In" } } },
+    //                new { type = "TableCell", items = new[] { new { type = "TextBlock", text = "No Sign Out" } } }
+    //            }
+    //        })
+    //        .ToArray();
+
+    //    var card = new
+    //    {
+    //        type = "message",
+    //        attachments = new[]
+    //        {
+    //            new
+    //            {
+    //                contentType = "application/vnd.microsoft.card.adaptive",
+    //                content = new
+    //                {
+    //                    msteams = new { width = "Full" },
+    //                    schema = "http://adaptivecards.io/schemas/adaptive-card.json",
+    //                    type = "AdaptiveCard",
+    //                    version = "1.5",
+    //                    body = new object[]
+    //                    {
+    //                        new { type = "TextBlock", size = "Medium", weight = "Bolder", text = "Attendance Report" },
+    //                        new { type = "TextBlock", text = "Signed In", wrap = true },
+    //                        new
+    //                        {
+    //                            type = "Table",
+    //                            columns = new[]
+    //                            {
+    //                                new { width = 2 },
+    //                                new { width = 1 },
+    //                                new { width = 1 },
+    //                                new { width = 1 }
+    //                            },
+    //                            rows = signedInEmployees
+    //                        },
+    //                        new { type = "TextBlock", text = "Not Signed In", wrap = true },
+    //                        new
+    //                        {
+    //                            type = "Table",
+    //                            columns = new[]
+    //                            {
+    //                                new { width = 2 },
+    //                                new { width = 1 },
+    //                                new { width = 1 },
+    //                                new { width = 1 }
+    //                            },
+    //                            rows = notSignedInEmployees
+    //                        }
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    };
+
+    //    return JsonSerializer.Serialize(card);
+    //}
+    
+    //public static async Task<bool> SendAdaptiveCardAsync(Dictionary<int, Employee> employeeDict, string shiftType, string url)
+    //{
+    //    try
+    //    {
+    //        var adaptiveCardJson = CreateAdaptiveCard(employeeDict, shiftType);
+    //        using var client = new HttpClient();
+    //        var content = new StringContent(adaptiveCardJson, Encoding.UTF8, "application/json");
+    //        var response = await client.PostAsync(url, content);
+    //        return response.IsSuccessStatusCode;
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        Log.Error(ex, "Failed to send adaptive card");
+    //        return false;
+    //    }
+    //}
+
+
 
     // Retired
     //public static string ExportDayShiftLog(Dictionary<int, Employee> employeeDict)

@@ -18,12 +18,14 @@ public static class ConsoleService
 
     public static void WriteLine(string text)
     {
-        if (_consoleOutput != null)
+        if (_consoleOutput == null)
         {
-            //_consoleOutput.Text += text + Environment.NewLine;
-            _consoleOutput.Text = text + Environment.NewLine + _consoleOutput.Text;
-            _consoleOutput.SelectionStart = _consoleOutput.Text.Length;
-            _consoleOutput.SelectionLength = 0;
+            return;
         }
+
+        //_consoleOutput.Text += text + Environment.NewLine;
+        _consoleOutput.Text = text + Environment.NewLine + _consoleOutput.Text;
+        _consoleOutput.SelectionStart = _consoleOutput.Text.Length;
+        _consoleOutput.SelectionLength = 0;
     }
 }

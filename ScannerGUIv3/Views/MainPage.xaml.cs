@@ -8,6 +8,8 @@ using Microsoft.UI.Xaml.Controls;
 using ScannerGUIv3.Definitions;
 using Serilog;
 using System.Net.Mail;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace ScannerGUIv3.Views;
 
@@ -74,14 +76,9 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         Console.ForegroundColor = ConsoleColor.Blue;
         Console.WriteLine("\nExport Log Button");
 
-        var dayShiftLog = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, "DS");
-        _ = LogImportExportService.ExportToWeb(LogImportExportService.TeamsUrl, new
-        {
-            email = "",
-            message = dayShiftLog
-        });
-
-        Console.WriteLine(dayShiftLog);
+        CardService.CreateAdaptiveCardFromTemplate($"https://prod-31.australiaeast.logic.azure.com:443/workflows/212c98481a9642aba8db911f9a4b230a/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Ct06peZb9klgAGg0pMNihNl9vhydcyVLbhZagdrUMLk", App.EmployeeDict);
+        
+        //Console.WriteLine(dayShiftLog);
         Console.ResetColor();
         Console.WriteLine("");
     }
