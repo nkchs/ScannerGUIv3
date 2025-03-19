@@ -74,31 +74,32 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
     private void exportLogButton_Click(object sender, RoutedEventArgs e)
     {
         Console.ForegroundColor = ConsoleColor.Blue;
-        Console.WriteLine("\nExport Log Button");
+        Console.WriteLine();
+        Console.WriteLine(@"Export Log Button");
 
-        //CardService.CreateAdaptiveCardFromTemplate($"https://prod-31.australiaeast.logic.azure.com:443/workflows/212c98481a9642aba8db911f9a4b230a/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Ct06peZb9klgAGg0pMNihNl9vhydcyVLbhZagdrUMLk", App.EmployeeDict);
-        LogImportExportService.ExportAdaptiveCardFromTemplateAsync("", App.EmployeeDict, "DS");
+        LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "DS");
         //Console.WriteLine(dayShiftLog);
         Console.ResetColor();
-        Console.WriteLine("");
+        Console.WriteLine();
     }
 
     private async void debugButton_Click(object sender, RoutedEventArgs e)
     {
         try
         {
-            var dayshifttable = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, "DS");
-            Console.WriteLine(dayshifttable);
-            var success = await LogImportExportService.ExportToWeb(LogImportExportService.TeamsUrl,
-                new
-                {
-                    message = dayshifttable
-                });
+            //var dayshifttable = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, "DS");
+            //Console.WriteLine(dayshifttable);
+            //var success = await LogImportExportService.ExportToWeb(LogImportExportService.TeamsUrl,
+            //    new
+            //    {
+            //        message = dayshifttable
+            //    });
 
-            Console.WriteLine();
+            //Console.WriteLine();
 
-            var nightshifttable = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, "NS");
-            Console.WriteLine(nightshifttable);
+            //var nightshifttable = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, "NS");
+            //Console.WriteLine(nightshifttable);
+
             //await ExcelService.NightShiftCrossoverAsync();
             //Console.ForegroundColor = ConsoleColor.Red;
             //Console.WriteLine("\nDebug");
@@ -122,7 +123,7 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
             //}
             //Console.WriteLine(@"Maintenance Codes End");
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             throw; // TODO handle exception
         }

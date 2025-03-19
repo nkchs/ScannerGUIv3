@@ -7,48 +7,48 @@
     mc:Ignorable="d">
 
     <Grid Margin="20">
-      <Grid.RowDefinitions>
-        <RowDefinition Height="Auto"/>
-        <!-- Header -->
-        <RowDefinition Height="Auto"/>
-        <!-- Email address label -->
-        <RowDefinition Height="Auto"/>
-        <!-- Email address textbox -->
-        <RowDefinition Height="Auto"/>
-        <!-- Export options -->
-        <RowDefinition Height="Auto"/>
-        <!-- Button -->
-        <RowDefinition Height="Auto"/>
-        <!-- Button -->
-      </Grid.RowDefinitions>
-      
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="Auto"/>
-        <!-- Labels -->
-        <ColumnDefinition Width="Auto"/>
-        <!-- Inputs -->
-        <ColumnDefinition Width="Auto"/>
-        <!-- Buttons -->
-      </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Header -->
+            <RowDefinition Height="Auto"/>
+            <!-- Email address label -->
+            <RowDefinition Height="Auto"/>
+            <!-- Email address textbox -->
+            <RowDefinition Height="Auto"/>
+            <!-- Export options -->
+            <RowDefinition Height="Auto"/>
+            <!-- Shift dropdown -->
+            <RowDefinition Height="Auto"/>
+            <!-- Buttons -->
+        </Grid.RowDefinitions>
 
-      <!-- Header -->
-      <TextBlock
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <!-- Labels -->
+            <ColumnDefinition Width="Auto"/>
+            <!-- Inputs -->
+            <ColumnDefinition Width="Auto"/>
+            <!-- Buttons -->
+        </Grid.ColumnDefinitions>
+
+        <!-- Header -->
+        <TextBlock
           Grid.Row="0"
           Grid.ColumnSpan="3"
           Style="{ThemeResource SubtitleTextBlockStyle}"
-          Text="Export Staff Logs"
+          Text="Export Roster"
           Margin="0,0,0,10"/>
 
-      <!-- Email Address Label -->
-      <TextBlock
+        <!-- Email Address Label -->
+        <TextBlock
           Grid.Row="1"
           Grid.Column="0"
           Text="Email Address"
           Margin="0,0,10,10"
           VerticalAlignment="Center"/>
-      
-      <!-- Email Address TextBox -->
-      <TextBox
+
+        <!-- Email Address TextBox -->
+        <TextBox
           Grid.Row="1"
           Grid.Column="1"
           x:Name="EmailAddressTextBox"
@@ -57,26 +57,43 @@
           HorizontalAlignment="Left"
           Margin="0,0,0,10"/>
 
-      <!-- Export Options -->
-      <TextBlock
+        <!-- Export Options -->
+        <TextBlock
           Grid.Row="2"
           Grid.Column="0"
           Text="Export to"
           Margin="0,0,10,10"
           VerticalAlignment="Center"/>
-      <ComboBox
+        <ComboBox
           Grid.Row="2"
           Grid.Column="1"
           x:Name="ExportOptionsGroup"
           Margin="0,0,0,10"
           SelectedIndex="0">
-          <ComboBoxItem Content="Email"/>
-          <ComboBoxItem Content="Teams"/>
-          <ComboBoxItem Content="File"/>
-      </ComboBox>
+            <ComboBoxItem Content="Email"/>
+            <ComboBoxItem Content="Teams"/>
+            <ComboBoxItem Content="File"/>
+        </ComboBox>
 
-      <!-- Export Button -->
-      <Button
+        <!-- Shift Dropdown -->
+        <TextBlock
+          Grid.Row="3"
+          Grid.Column="0"
+          Text="Shift:"
+          Margin="0,0,10,10"
+          VerticalAlignment="Center"/>
+        <ComboBox
+          Grid.Row="3"
+          Grid.Column="1"
+          x:Name="ShiftOptionsGroup"
+          Margin="0,0,0,10"
+          SelectedIndex="0">
+            <ComboBoxItem Content="Day"/>
+            <ComboBoxItem Content="Night"/>
+        </ComboBox>
+
+        <!-- Export Button -->
+        <Button
           Grid.Row="2"
           Grid.Column="1"
           x:Name="exportButton"
@@ -85,14 +102,15 @@
           Margin="10,0,0,10"
           HorizontalAlignment="Right"/>
 
-      <!-- Test Button -->
-      <Button
+        <!-- Test Button -->
+        <Button
           Grid.Row="5"
-          Grid.ColumnSpan="3"
+          Grid.Column="1"
           x:Name="testButton"
           Content="Test"
           Click="testButton_Click"
-          HorizontalAlignment="Left"/>
-      
+          HorizontalAlignment="Right"
+          Margin="10,0,0,0"/>
+
     </Grid>
 </Page>

@@ -23,61 +23,101 @@ public sealed partial class ExportPage : Page
 
     private async void exportButton_Click(object sender, RoutedEventArgs e)
     {
-        var shiftType = ""; // TODO capture from UI
-        var selectedOption = ExportOptionsGroup.SelectedItem as ComboBoxItem;
-        if (selectedOption == null)
+        try
         {
-            await ShowMessage("Error", "Please select an export option.");
-            return;
+            if (!TryGetSelectedOptions(out var exportOption, out var shiftType))
+            {
+                return;
+            }
+
+            var shiftLog = GetShiftLog(exportOption, shiftType);
+
+            var success = await ProcessExport(exportOption, shiftLog);
+
+            await ShowMessage(
+                success ? "Success" : "Error",
+                success ? $"Exported successfully via {exportOption}." : $"Failed to export via {exportOption}.");
+        }
+        catch (Exception ex)
+        {
+            await ShowMessage("Error", $"An unexpected error occurred: {ex.Message}");
+        }
+    }
+
+    private bool TryGetSelectedOptions(out string exportOption, out string shiftType)
+    {
+        exportOption = (ExportOptionsGroup.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? string.Empty;
+        shiftType = (ShiftOptionsGroup.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? string.Empty;
+
+        if (string.IsNullOrEmpty(exportOption))
+        {
+            ShowMessage("Error", "Please select an export option.").GetAwaiter().GetResult();
+            return false;
         }
 
-        //var shiftLog = LogImportExportService.ExportDayShiftLog(App.EmployeeDict);
-        var shiftLog = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, "DS");
-        bool success;
-        var option = selectedOption.Content.ToString();
-
-        switch (option)
+        if (!string.IsNullOrEmpty(shiftType))
         {
-            case "Email":
-                var emailAddress = EmailAddressTextBox.Text;
+            return true;
+        }
+
+        ShowMessage("Error", "Please select a shift option.").GetAwaiter().GetResult();
+        return false;
+
+    }
+
+    private string GetShiftLog(string exportOption, string shiftType)
+    {
+        var shiftLog = shiftType.Equals("Night", StringComparison.OrdinalIgnoreCase) ? "NS" : "DS";
+
+        if (!exportOption.Equals("Teams", StringComparison.OrdinalIgnoreCase))
+        {
+            shiftLog = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, shiftType);
+        }
+
+        return shiftLog;
+    }
+
+    private async Task<bool> ProcessExport(string exportOption, string shiftLog)
+    {
+        switch (exportOption.ToLowerInvariant())
+        {
+            case "email":
+                if (EmailAddressTextBox == null)
+                {
+                    await ShowMessage("Error", "Email input control not found.");
+                    return false;
+                }
+
+                var emailAddress = EmailAddressTextBox.Text?.Trim();
                 if (string.IsNullOrWhiteSpace(emailAddress))
                 {
                     await ShowMessage("Error", "Please enter an email address.");
-                    return;
+                    return false;
                 }
-                success = await LogImportExportService.ExportToWeb(LogImportExportService.EmailUrl,
+
+                var success = await LogImportExportService.ExportToWeb(
+                    LogImportExportService.EmailUrl,
                     new
                     {
                         email = emailAddress,
                         message = shiftLog
                     });
-                EmailAddressTextBox.Text = "";
-                break;
 
-            case "Teams":
-                success = await LogImportExportService.ExportToWeb(LogImportExportService.TeamsUrl,
-                    new
-                    {
-                        message = shiftLog
-                    });
-                break;
+                if (success)
+                {
+                    EmailAddressTextBox.Text = string.Empty;
+                }
+                return success;
 
-            case "File":
-                success = await SaveToFile(shiftLog);
-                break;
+            case "teams":
+                return await LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, shiftLog);
+
+            case "file":
+                return await SaveToFile(shiftLog);
 
             default:
                 await ShowMessage("Error", "Invalid export option.");
-                return;
-        }
-
-        if (success)
-        {
-            await ShowMessage("Success", $"Exported successfully via {option}.");
-        }
-        else
-        {
-            await ShowMessage("Error", $"Failed to export via {option}.");
+                return false;
         }
     }
 
@@ -134,3 +174,89 @@ public sealed partial class ExportPage : Page
         }
     }
 }
+
+// Retired
+//private async void exportButton_Click(object sender, RoutedEventArgs e)
+//{
+//    try
+//    {
+//        //var shiftType = "DS"; // TODO capture from UI
+//        var shiftLog = "DS";
+//        bool success;
+
+//        if (ExportOptionsGroup?.SelectedItem is not ComboBoxItem selectedOption)
+//        {
+//            await ShowMessage("Error", "Please select an export option.");
+//            return;
+//        }
+
+//        if (ShiftOptionsGroup?.SelectedItem is not ComboBoxItem selectedShift)
+//        {
+//            await ShowMessage("Error", "Please select a shift option.");
+//            return;
+//        }
+
+//        var option = selectedOption.Content?.ToString() ?? "";
+//        var shiftType = selectedShift.Content?.ToString();
+
+//        if (string.IsNullOrEmpty(option))
+//        {
+//            await ShowMessage("Error", "Invalid export option selected.");
+//            return;
+//        }
+
+//        if (selectedShift.Content?.ToString() == "Night")
+//        {
+//            shiftLog = "NS";
+//        }
+
+//        if (!string.Equals(option, "Teams", StringComparison.OrdinalIgnoreCase))
+//        {
+//            shiftLog = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, shiftType);
+//        }
+
+//        switch (option.ToLowerInvariant())
+//        {
+//            case "email":
+//                if (EmailAddressTextBox == null)
+//                {
+//                    await ShowMessage("Error", "Email input control not found.");
+//                    return;
+//                }
+//                var emailAddress = EmailAddressTextBox.Text;
+//                if (string.IsNullOrWhiteSpace(emailAddress))
+//                {
+//                    await ShowMessage("Error", "Please enter an email address.");
+//                    return;
+//                }
+
+//                success = await LogImportExportService.ExportToWeb(LogImportExportService.EmailUrl,
+//                    new
+//                    {
+//                        email = emailAddress,
+//                        message = shiftLog
+//                    });
+//                EmailAddressTextBox.Text = "";
+//                break;
+
+//            case "teams":
+//                success = await LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, shiftType);
+//                break;
+
+//            case "file":
+//                success = await SaveToFile(shiftLog);
+//                break;
+
+//            default:
+//                await ShowMessage("Error", "Invalid export option.");
+//                return;
+//        }
+
+//        await ShowMessage(success ? "Success" : "Error",
+//            success ? $"Exported successfully via {option}." : $"Failed to export via {option}.");
+//    }
+//    catch (Exception ex)
+//    {
+//        await ShowMessage("Error", $"An unexpected error occurred: {ex.Message}");
+//    }
+//}

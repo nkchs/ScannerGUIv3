@@ -18,12 +18,12 @@ public class ActivationService(ActivationHandler<LaunchActivatedEventArgs> defau
     public async Task ActivateAsync(object activationArgs)
     {
         //Log.Information("ActivateAsync() from ActivationService.cs");
-        if (App.MainWindow == null)
-        {
+        //if (App.MainWindow == null)
+        //{
             //Log.Information("MainWindow == null | from ActivationService.cs");
-            App.MainWindow = new MainWindow();
-            App.MainWindow.Activate(); // Check if Activation needs to occur here.
-        }
+        App.MainWindow = new MainWindow();
+        App.MainWindow.Activate(); // Check if Activation needs to occur here.
+        //}
 
         // Execute tasks before activation.
         await InitializeAsync();

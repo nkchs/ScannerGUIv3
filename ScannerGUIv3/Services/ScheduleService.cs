@@ -198,60 +198,52 @@ namespace ScannerGUIv3.Services
         private static async Task Task2() // 6:10 AM
         {
             Log.Verbose(@"Task 2 Executed");
+            LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "NS");
 
             // Generate the shiftLog for the concluding night shift
-            var shiftLog = LogImportExportService.ExportShiftLog(EmployeeDict, "NS");
-            // Export the shiftLog to Teams
-            var success = await LogImportExportService.ExportToWeb(LogImportExportService.TeamsUrl, shiftLog);
-            Log.Verbose(success ? @"Task 2 Completed" : @"Task 2 Failed");
+            //var shiftLog = LogImportExportService.ExportShiftLog(EmployeeDict, "NS");
+            //// Export the shiftLog to Teams
+            //var success = await LogImportExportService.ExportToWeb(LogImportExportService.TeamsUrl, shiftLog);
+            //Log.Verbose(success ? @"Task 2 Completed" : @"Task 2 Failed");
         }
 
         private static async Task Task3() // 7:00 am
         {
             Log.Verbose(@"Task 3 Executed");
-            // This is a good time to get the nightshift staff for that night.
-        }
-
-        private static async Task Task4() // 6:10 PM
-        {
-            Log.Verbose(@"Task 4 Executed");
-
-            // Generate the shiftLog for the concluding night shift
-            var shiftLog = LogImportExportService.ExportShiftLog(EmployeeDict, "DS");
-            // Export the shiftLog to Teams
-            var success = await LogImportExportService.ExportToWeb(LogImportExportService.TeamsUrl, shiftLog);
-            // Generate the crossover shiftLog
-            await ExcelService.NightShiftCrossoverAsync();
-            // Create a function that:
-            // 1. Empties the employeeDict
-            // 2. Moves the CrossoverDict to EmployeeDict
-            App.EmployeeDict = App.EmployeeCrossoverDict;
-
-            Log.Verbose(success ? @"Task 4 Completed" : @"Task 4 Failed");
-        }
-
-        private static async Task Task5() // 7:00 PM
-        {
-            Log.Verbose(@"Task 5 Executed");
+            LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "DS");
+            Log.Verbose(@"Task 6 Completed");
         }
 
         private static async Task Task6() // 10:30 AM
         {
             Log.Verbose(@"Task 6 Executed");
-
-            LogImportExportService.ExportAdaptiveCardFromTemplateAsync("", App.EmployeeDict, "DS");
-
-
-            // Generate the shiftLog
-            //var shiftLog = LogImportExportService.ExportShiftLog(EmployeeDict, "DS");
-            // TODO replace /n with <br>
-            // Export the shiftLog to Teams
-            //var success = await LogImportExportService.ExportToWeb(LogImportExportService.TeamsUrl, new
-            //{
-            //    email = "",
-            //    message = shiftLog
-            //});
+            LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "DS");
             Log.Verbose(@"Task 6 Completed");
+        }
+
+        private static async Task Task4() // 6:10 PM
+        {
+            Log.Verbose(@"Task 4 Executed");
+            LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "NS");
+
+            // Generate the shiftLog for the concluding night shift
+            //var shiftLog = LogImportExportService.ExportShiftLog(EmployeeDict, "DS");
+            // Export the shiftLog to Teams
+            //var success = await LogImportExportService.ExportToWeb(LogImportExportService.TeamsUrl, shiftLog);
+
+            // Generate the crossover shiftLog
+            await ExcelService.NightShiftCrossoverAsync();
+            // TODO Create a function that:
+            // TODO 1. Empties the employeeDict
+            // TODO 2. Moves the CrossoverDict to EmployeeDict
+            App.EmployeeDict = App.EmployeeCrossoverDict;
+
+            //Log.Verbose(success ? @"Task 4 Completed" : @"Task 4 Failed");
+        }
+
+        private static async Task Task5() // 7:00 PM
+        {
+            Log.Verbose(@"Task 5 Executed");
         }
     }
 }
