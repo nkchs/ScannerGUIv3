@@ -76,8 +76,8 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         Console.ForegroundColor = ConsoleColor.Blue;
         Console.WriteLine("\nExport Log Button");
 
-        CardService.CreateAdaptiveCardFromTemplate($"https://prod-31.australiaeast.logic.azure.com:443/workflows/212c98481a9642aba8db911f9a4b230a/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Ct06peZb9klgAGg0pMNihNl9vhydcyVLbhZagdrUMLk", App.EmployeeDict);
-        
+        //CardService.CreateAdaptiveCardFromTemplate($"https://prod-31.australiaeast.logic.azure.com:443/workflows/212c98481a9642aba8db911f9a4b230a/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Ct06peZb9klgAGg0pMNihNl9vhydcyVLbhZagdrUMLk", App.EmployeeDict);
+        LogImportExportService.ExportAdaptiveCardFromTemplateAsync("", App.EmployeeDict, "DS");
         //Console.WriteLine(dayShiftLog);
         Console.ResetColor();
         Console.WriteLine("");

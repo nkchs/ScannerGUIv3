@@ -238,15 +238,19 @@ namespace ScannerGUIv3.Services
         private static async Task Task6() // 10:30 AM
         {
             Log.Verbose(@"Task 6 Executed");
+
+            LogImportExportService.ExportAdaptiveCardFromTemplateAsync("", App.EmployeeDict, "DS");
+
+
             // Generate the shiftLog
-            var shiftLog = LogImportExportService.ExportShiftLog(EmployeeDict, "DS");
+            //var shiftLog = LogImportExportService.ExportShiftLog(EmployeeDict, "DS");
             // TODO replace /n with <br>
             // Export the shiftLog to Teams
-            var success = await LogImportExportService.ExportToWeb(LogImportExportService.TeamsUrl, new
-            {
-                email = "",
-                message = shiftLog
-            });
+            //var success = await LogImportExportService.ExportToWeb(LogImportExportService.TeamsUrl, new
+            //{
+            //    email = "",
+            //    message = shiftLog
+            //});
             Log.Verbose(@"Task 6 Completed");
         }
     }

@@ -90,7 +90,7 @@ public partial class App : Application
                 // File Handling
                 services.AddSingleton<LogImportExportService>();
                 services.AddSingleton<ExcelService>();
-                services.AddSingleton<CardService>();
+                //services.AddSingleton<CardService>();
 
                 // Scheduling
                 services.AddSingleton<ScheduleService>();

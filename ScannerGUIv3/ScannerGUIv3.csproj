@@ -21,6 +21,7 @@
     <Compile Remove="Helpers\ExcelHandling.cs" />
     <Compile Remove="Helpers\ScheduledFuncs__.cs" />
     <Compile Remove="Reference.cs" />
+    <Compile Remove="Services\CardService.cs" />
     <Compile Remove="Views\BlankPage - Copy.xaml.cs" />
     <Compile Remove="Views\BlankPage.xaml.cs" />
   </ItemGroup>
