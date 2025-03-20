@@ -1,4 +1,6 @@
-﻿namespace ScannerGUIv3.Core;
+﻿using System.Net.NetworkInformation;
+
+namespace ScannerGUIv3.Core;
 
 public class AppState
 {
@@ -52,15 +54,14 @@ public class AppState
         get; private set;
     }
 
-
     // Bool flags
     public static bool StartUpFunctionsComplete = false;
     public static bool MaintenanceCodesLoaded
     {
-        get => _MaintenanceCodesLoaded;
+        get => _maintenanceCodesLoaded;
         set
         {
-            _MaintenanceCodesLoaded = value;
+            _maintenanceCodesLoaded = value;
             if (!Logging)
             {
                 return;
@@ -70,8 +71,7 @@ public class AppState
             Console.ResetColor();
         }
     }
-
-    private static bool _MaintenanceCodesLoaded;
+    private static bool _maintenanceCodesLoaded;
 
     public static bool EmployeeDictionaryLoaded
     {
@@ -88,7 +88,6 @@ public class AppState
             Console.ResetColor();
         }
     }
-
     private static bool _employeeDictionaryLoaded;
 
     public static bool EmployeeDictionaryTrimmed
@@ -106,7 +105,6 @@ public class AppState
             Console.ResetColor();
         }
     }
-
     private static bool _employeeDictionaryTrimmed;
 
     public static bool EmployeeDictionaryRefreshed
@@ -124,8 +122,16 @@ public class AppState
             Console.ResetColor();
         }
     }
-
     private static bool _employeeDictionaryRefreshed;
+
+    public static bool TrimShiftRequired = true; // Whether or not trim is required
+
+    // Task Variables
+    public static int TaskOneAttempt = 0;
+    public static int TaskTwoAttempt = 0;
+    public static int TaskThreeAttempt = 0;
+    public static int TaskFourAttempt = 0;
+    public static int TaskFiveAttempt = 0;
 
     // Private constructor to prevent instantiation
     private AppState()

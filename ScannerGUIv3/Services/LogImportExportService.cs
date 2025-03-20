@@ -12,15 +12,15 @@ public class LogImportExportService
     public const string TeamsUrl = "https://prod-03.australiaeast.logic.azure.com:443/workflows/dcd41880b0ab49b5a56f15e03fa3fbd7/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=PtCPW3Ch2ijFDjByU6dx1pUx_u1splgZFLQ2qwk1pjs";
     private const string TeamsTableUrl = "https://prod-31.australiaeast.logic.azure.com:443/workflows/212c98481a9642aba8db911f9a4b230a/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Ct06peZb9klgAGg0pMNihNl9vhydcyVLbhZagdrUMLk";
 
-    public const string MasterProfileUrl =
+    private const string RosterDateUrl =
         "https://prod-39.australiasoutheast.logic.azure.com:443/workflows/77439615022643799f39a62f6d6704b6/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=tBbbMYRU4lAzKJZsVILQnA1BT4WooIvvWekVziKEhNw";
     
-    public static async Task<bool> GetMasterProfileDate()
+    public static async Task<bool> GetRosterDate()
     {
         try
         {
             using var client = new HttpClient();
-            using var response = await client.GetAsync(MasterProfileUrl, HttpCompletionOption.ResponseContentRead);
+            using var response = await client.GetAsync(RosterDateUrl, HttpCompletionOption.ResponseContentRead);
 
             // Ensure the response is successful
             response.EnsureSuccessStatusCode();
@@ -45,11 +45,11 @@ public class LogImportExportService
                 // Compare dates (ignoring time)
                 if (waDateTime.Date == waToday)
                 {
-                    Log.Debug("Master Profile Has Been Updated");
+                    Log.Debug("Roster Has Been Updated");
                     return true;
                 }
             }
-            Log.Error("Master Profile Has NOT Been Updated");
+            Log.Error("Roster Has NOT Been Updated");
             return false;
         }
         catch (Exception ex)
@@ -59,24 +59,22 @@ public class LogImportExportService
         }
     }
 
-
-public static async Task<bool> DownloadExcelFileAsync(string filePath, string fileName)
+    public static async Task<bool> DownloadExcelFileAsync(string filePath, string fileName)
     {
         Log.Information("Attempting to download Excel file to {FilePath} with file name {FileName}", filePath, fileName);
-
         try
         {
             // Validate inputs
             if (string.IsNullOrWhiteSpace(filePath))
             {
                 Log.Error("Validation failed: File path is null or empty.");
-                throw new ArgumentException("File path cannot be null or empty.", nameof(filePath));
+                throw new ArgumentException(@"File path cannot be null or empty.", nameof(filePath));
             }
 
             if (string.IsNullOrWhiteSpace(fileName))
             {
                 Log.Error("Validation failed: File name is null or empty.");
-                throw new ArgumentException("File name cannot be null or empty.", nameof(fileName));
+                throw new ArgumentException(@"File name cannot be null or empty.", nameof(fileName));
             }
 
             // Ensure the directory exists
@@ -125,22 +123,6 @@ public static async Task<bool> DownloadExcelFileAsync(string filePath, string fi
             Log.Error(ex, "Unexpected error occurred: {Message}", ex.Message);
             return false;
         }
-    }
-
-    public static string ExportShiftLog(Dictionary<int, Employee> employeeDict, string shiftType)
-    {
-        var csvBuilder = new StringBuilder();
-        foreach (var employee in employeeDict.Values)
-        {
-            if (employee.ShiftType != shiftType)
-            {
-                continue;
-            }
-
-            var line = $"{employee.Name}, {employee.EmployeeNumber}, {employee.FormattedSignInTime}, {employee.FormattedSignOutTime}<br>";
-            csvBuilder.AppendLine(line);
-        }
-        return csvBuilder.ToString();
     }
 
     public static async Task<bool> ExportToWeb(string url, object payload)
@@ -305,10 +287,13 @@ public static async Task<bool> DownloadExcelFileAsync(string filePath, string fi
         return rows.ToArray();
     }
 
-    public static async Task<bool> ExportAdaptiveCardFromTemplateAsync(Dictionary<int, Employee> employeeDict, string shiftType)
+    public static async Task<bool> ExportAdaptiveCardFromTemplateAsync(Dictionary<int, Employee> employeeDict, string shiftType, string message = "")
     {
         try
         {
+            // Determine the shift title based on shiftType
+            var shiftTitle = shiftType == "DS" ? "Dayshift" : shiftType == "NS" ? "Nightshift" : "Unknown Shift";
+
             // Log the start of the method
             Log.Information("ExportAdaptiveCardFromTemplateAsync started with shiftType: {ShiftType}", shiftType);
 
@@ -318,63 +303,63 @@ public static async Task<bool> DownloadExcelFileAsync(string filePath, string fi
                 type = "message",
                 attachments = new object[]
                 {
-                new
-                {
-                    contentType = "application/vnd.microsoft.card.adaptive",
-                    content = new
+                    new
                     {
-                        type = "AdaptiveCard",
-                        schema = "http://adaptivecards.io/schemas/adaptive-card.json",
-                        version = "1.6",
-                        msteams = new { width = "Full" },
-                        body = new object[]
+                        contentType = "application/vnd.microsoft.card.adaptive",
+                        content = new
                         {
-                            new
+                            type = "AdaptiveCard",
+                            schema = "http://adaptivecards.io/schemas/adaptive-card.json",
+                            version = "1.6",
+                            msteams = new { width = "Full" },
+                            body = new object[]
                             {
-                                type = "TextBlock",
-                                size = "Medium",
-                                weight = "Bolder",
-                                text = "Attendance Report"
-                            },
-                            new
-                            {
-                                type = "TextBlock",
-                                text = "Signed In",
-                                wrap = true
-                            },
-                            new
-                            {
-                                type = "Table",
-                                columns = new object[]
+                                new
                                 {
-                                    new { width = 2 },
-                                    new { width = 1 },
-                                    new { width = 1 },
-                                    new { width = 1 }
+                                    type = "TextBlock",
+                                    size = "Medium",
+                                    weight = "Bolder",
+                                    text = $"Attendance Report - {shiftTitle}"
                                 },
-                                rows = GetEmployeeRows(employeeDict, shiftType)
-                            },
-                            new
-                            {
-                                type = "TextBlock",
-                                text = "Not Signed In",
-                                wrap = true
-                            },
-                            new
-                            {
-                                type = "Table",
-                                columns = new object[]
+                                new
                                 {
-                                    new { width = 2 },
-                                    new { width = 1 },
-                                    new { width = 1 },
-                                    new { width = 1 }
+                                    type = "TextBlock",
+                                    text = "Signed In",
+                                    wrap = true
                                 },
-                                rows = GetEmployeeRows(employeeDict, shiftType, false)
+                                new
+                                {
+                                    type = "Table",
+                                    columns = new object[]
+                                    {
+                                        new { width = 2 },
+                                        new { width = 1 },
+                                        new { width = 1 },
+                                        new { width = 1 }
+                                    },
+                                    rows = GetEmployeeRows(employeeDict, shiftType)
+                                },
+                                new
+                                {
+                                    type = "TextBlock",
+                                    text = "Not Signed In",
+                                    wrap = true
+                                },
+                                new
+                                {
+                                    type = "Table",
+                                    columns = new object[]
+                                    {
+                                        new { width = 2 },
+                                        new { width = 1 },
+                                        new { width = 1 },
+                                        new { width = 1 }
+                                    },
+                                    rows = GetEmployeeRows(employeeDict, shiftType, false)
+                                }
                             }
                         }
                     }
-                }
                 }
             };
 
@@ -386,7 +371,7 @@ public static async Task<bool> DownloadExcelFileAsync(string filePath, string fi
             });
 
             // Log the serialized JSON
-            Log.Debug("Serialized Teams message JSON: {Json}", json);
+            //Log.Debug("Serialized Teams message JSON: {Json}", json);
 
             // Send to the URL
             using var client = new HttpClient();
@@ -407,4 +392,20 @@ public static async Task<bool> DownloadExcelFileAsync(string filePath, string fi
         }
     }
 
+    // RETIRED
+    public static string ExportShiftLog(Dictionary<int, Employee> employeeDict, string shiftType)
+    {
+        var csvBuilder = new StringBuilder();
+        foreach (var employee in employeeDict.Values)
+        {
+            if (employee.ShiftType != shiftType)
+            {
+                continue;
+            }
+
+            var line = $"{employee.Name}, {employee.EmployeeNumber}, {employee.FormattedSignInTime}, {employee.FormattedSignOutTime}<br>";
+            csvBuilder.AppendLine(line);
+        }
+        return csvBuilder.ToString();
+    }
 }

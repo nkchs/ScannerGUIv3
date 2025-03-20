@@ -21,6 +21,7 @@ namespace ScannerGUIv3;
 
 public partial class App : Application
 {
+    // ====================================================================================================================
     public App()
     {
         // Settings
@@ -52,8 +53,7 @@ public partial class App : Application
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
         Configuration = builder.Build(); // CONFIG Setup END
 
-
-        Log.Information("+++ Initializing App +++");
+        Log.Information("++++++++++ INITIALIZING APP ++++++++++");
         InitializeComponent();
 
         Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder().UseContentRoot(AppContext.BaseDirectory)
@@ -90,7 +90,6 @@ public partial class App : Application
                 // File Handling
                 services.AddSingleton<LogImportExportService>();
                 services.AddSingleton<ExcelService>();
-                //services.AddSingleton<CardService>();
 
                 // Scheduling
                 services.AddSingleton<ScheduleService>();
@@ -108,75 +107,57 @@ public partial class App : Application
         // Exceptions
         UnhandledException += App_UnhandledException; // From the default generator.
     }
+    // ====================================================================================================================
 
-
-    public static UIElement? AppTitlebar { get; set; }
-
-    // Variable Declarations
+    // Variable Declarations ==============================================================================================
     public static readonly List<int> MaintenanceCodes = [];
 
     private static readonly List<string> DebugEmployeeNumbers =
     [
-        "20898", "24781", "22388", "24410", "24065", "11356", "27065", "5565", "15734", "3264", "23485", "22794", "4870"
+        "20898", "24781", "22388", "24410", "24065", "11356", "27065", "5565", "15734", "3264", "23485", "22794", "4870",
+        "4092", "20304", "18062", "23650", "22280", "23672", "20136328", "22139", "5793", "24687", "22483", "3413", "27048"
     ];
-
+    // Dictionaries Start =================================================================================================
     public static Dictionary<int, Employee> EmployeeDict { get; set; } = [];
     public static Dictionary<int, Employee> EmployeeCrossoverDict { get; set; } = [];
-    public static WindowEx MainWindow { get; set; } = new MainWindow();
-    public IConfiguration Configuration { get; }
-    private IHost Host { get; }
-    public static T GetService<T>()
-        where T : class
-    {
-        if ((App.Current as App)!.Host.Services.GetService(typeof(T)) is not T service)
-        {
-            throw new ArgumentException($"{typeof(T)} needs to be registered in ConfigureServices within App.xaml.cs.");
-        }
-        return service;
-    }
+    public static Dictionary<int, Employee> PrevNightShiftDict { get; set; } = [];
+    public static Dictionary<int, Employee> NextNightShiftDict { get; set; } = [];
+    // Dictionaries End ===================================================================================================
 
-    // ########## Management FUNCS ########## //
-    protected async override void OnLaunched(LaunchActivatedEventArgs args)
-    {
-        base.OnLaunched(args);
-
-        await App.GetService<IActivationService>().ActivateAsync(args);
-    }
-
-    private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
-    {
-        // TODO: Log and handle exceptions as appropriate.
-        // https://docs.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.application.unhandledexception.
-    }
-
-    // ########## Startup FUNCS ########## //
+    // Startup FUNCS ======================================================================================================
     private static async Task StartUpAsync()
     {
-        Log.Warning("STARTUP FUNCTIONS BEGIN");
-        //await MainWindow.ShowMessageDialogAsync("Initialization", "Please wait while the application is initializing...");
+        Log.Warning("========== STARTUP FUNCTIONS BEGIN ==========");
 
         AppState.MaintenanceCodesLoaded = false;
         AppState.EmployeeDictionaryLoaded = false;
         AppState.EmployeeDictionaryTrimmed = false;
         AppState.EmployeeDictionaryRefreshed = false;
-
+        
         // Download the roster  
         await Task.Run(() => LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath, "Roster"));
         // Download the Maintenance codes  
         await Task.Run(() => ExcelService.InitializeMaintenanceCodesHttp(AppState.ResourcesMasterExcelPath));
         // Populate the dictionary  
-        await Task.Run(() => ExcelService.PopulateEmployeeDictionaryUsingXml(EmployeeDict, AppState.ResourcesOnSiteExcelPath));
-        // Trim the dictionary of Maintenance codes  
-        await Task.Run(() => ExcelService.TrimEmployeeDictionaryAsync(EmployeeDict, MaintenanceCodes));
-        // Trim the dictionary of shift types  
-        await Task.Run(ExcelService.TrimEmployeeDictionaryShiftType);
+        await Task.Run(() => ExcelService.PopulateEmployeeDictionaryUsingXml(AppState.ResourcesOnSiteExcelPath));
+
+        if (AppState.TrimShiftRequired)
+        {
+            // Trim the dictionary of Maintenance codes  
+            await Task.Run(ExcelService.TrimEmployeeDictionaryCodesAsync);
+            // Trim the dictionary of shift types  
+            await Task.Run(ExcelService.TrimEmployeeDictionaryShiftType);
+        }
+
+        AppState.TrimShiftRequired = true;
 
         SignInEmployees(DebugEmployeeNumbers);
 
-        Log.Warning("STARTUP FUNCTIONS END");
+        Log.Warning("========== STARTUP FUNCTIONS END ==========");
         AppState.StartUpFunctionsComplete = true;
     }
 
+    // Sign in for debugging
     private static void SignInEmployees(List<string> employeeNumbers)
     {
         Log.Information("Sign In DEBUG Employees");
@@ -192,7 +173,7 @@ public partial class App : Application
                     }
                     else
                     {
-                        Log.Warning($"Employee with number {employeeNumber} not found.");
+                        //Log.Warning($"Employee with number {employeeNumber} not found.");
                     }
                 }
                 else
@@ -205,5 +186,42 @@ public partial class App : Application
                 // Pass if the number isn't found
             }
         }
+    }
+
+    // SYSTEM FUNCS =======================================================================================================
+    public static WindowEx MainWindow { get; set; } = new MainWindow();
+    public IConfiguration Configuration
+    {
+        get;
+    }
+    private IHost Host
+    {
+        get;
+    }
+    public static T GetService<T>()
+        where T : class
+    {
+        if ((App.Current as App)!.Host.Services.GetService(typeof(T)) is not T service)
+        {
+            throw new ArgumentException($"{typeof(T)} needs to be registered in ConfigureServices within App.xaml.cs.");
+        }
+        return service;
+    }
+
+    // Management FUNCS ===================================================================================================
+    protected async override void OnLaunched(LaunchActivatedEventArgs args)
+    {
+        base.OnLaunched(args);
+
+        await App.GetService<IActivationService>().ActivateAsync(args);
+    }
+    private static void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+    {
+        // TODO: Log and handle exceptions as appropriate.
+        // https://docs.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.application.unhandledexception.
+    }
+    public static UIElement? AppTitlebar
+    {
+        get; set;
     }
 }

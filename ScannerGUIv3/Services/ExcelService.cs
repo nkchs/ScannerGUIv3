@@ -13,7 +13,6 @@ public class ExcelService
 {
     // VARIABLES
 
-
     // MAIN FUNCTIONS
     public static async Task InitializeMaintenanceCodesHttp(string resourcesMasterExcel)
     {
@@ -108,7 +107,6 @@ public class ExcelService
         }
     }
 
-
     //public static async Task InitializeMaintenanceCodesHttp(string resourcesMasterExcel)
     //{
     //    Log.Verbose("Employee Code DL Start");
@@ -190,40 +188,39 @@ public class ExcelService
         });
     }
 
-    public static async Task TrimEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, List<int> maintenanceCodes)
+    public static async Task TrimEmployeeDictionaryCodesAsync()
     {
+        
+        Log.Verbose($"Trim Codes Start [Length: {App.EmployeeDict.Count}]");
         if (AppState.EmployeeDictionaryLoaded && AppState.MaintenanceCodesLoaded && !AppState.EmployeeDictionaryTrimmed)
         {
             await Task.Run(() =>
             {
-                //Log.Verbose("Trim Start");
-
                 var maintenanceCodeset = new HashSet<int>(App.MaintenanceCodes);
-                var keysToRemove = employeeDict.Keys.Where(key => !maintenanceCodeset.Contains(key)).ToList();
+                var keysToRemove = App.EmployeeDict.Keys.Where(key => !maintenanceCodeset.Contains(key)).ToList();
                 foreach (var key in keysToRemove)
                 {
-                    employeeDict.Remove(key);
+                    App.EmployeeDict.Remove(key);
                 }
                 AppState.EmployeeDictionaryTrimmed = true;
             });
         }
-        //Log.Verbose("Trim End");
-        Log.Information($"Trimmed Employee Dict [Length: {App.EmployeeDict.Count}]");
+        Log.Verbose($"Trim Codes End [Length: {App.EmployeeDict.Count}]");
+        //Log.Information($"Trimmed Employee Dict [Length: {App.EmployeeDict.Count}]");
     }
 
     public static async Task TrimEmployeeDictionaryShiftType()
     {
         await Task.Run(() =>
         {
-            //Log.Verbose("Trim Shift Type Start");
+            Log.Verbose($"Trim Shift Type Start [Length: {App.EmployeeDict.Count}]");
 
             var keysToRemove = App.EmployeeDict.Where(e => e.Value.ShiftType == "OS").Select(e => e.Key).ToList();
             foreach (var key in keysToRemove)
             {
                 App.EmployeeDict.Remove(key);
             }
-            //Log.Verbose("Trim Shift Type End");
-            Log.Information($"Trimmed Employee Dict [Length: {App.EmployeeDict.Count}]");
+            Log.Verbose($"Trim Shift Type End [Length: {App.EmployeeDict.Count}]");
         });
     }
 
@@ -252,22 +249,10 @@ public class ExcelService
         });
     }
 
-
-
-
-
     // RETIRED
-    public static async Task InitializeEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, string resourcesOnSiteExcel)
+    public static void PopulateEmployeeDictionaryUsingXml(string excelPath, bool trimShiftTypes = true)
     {
-        Log.Verbose("Populate Employee Dictionary ASYNC [Using XML]");
-        // Populate the dictionary using XML
-        await Task.Run(() => PopulateEmployeeDictionaryUsingXml(employeeDict, resourcesOnSiteExcel));
-        // Trim the employee dictionary
-        await Task.Run(() => TrimEmployeeDictionaryAsync(employeeDict, App.MaintenanceCodes));
-    }
-
-    public static void PopulateEmployeeDictionaryUsingXml(Dictionary<int, Employee> employeeDict, string excelPath)
-    {
+        var validShiftTypes = new HashSet<string> { "NS", "DS", "D1", "D2" };
         Log.Information($"Populate Employee Dict Start");
         try
         {
@@ -298,8 +283,18 @@ public class ExcelService
                 {
                     continue;
                 }
-
                 var firstName = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(0), workbookPart);
+                if (trimShiftTypes)
+                {
+                    var firstShiftValue = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(3), workbookPart);
+                    //Console.WriteLine(firstName + @" " + firstShiftValue);
+                    if (!validShiftTypes.Contains(firstShiftValue))
+                    {
+                        continue;
+                    }
+                }
+
+                //var firstName = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(0), workbookPart);
                 var surname = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(1), workbookPart);
                 var employee = new Employee(personnelCode, firstName + " " + surname);
 
@@ -315,8 +310,9 @@ public class ExcelService
                 }
                 App.EmployeeDict[personnelCode] = employee;
             }
+            AppState.TrimShiftRequired = !trimShiftTypes;
             AppState.EmployeeDictionaryLoaded = true;
-            
+
         }
         catch (Exception ex)
         {
@@ -324,7 +320,6 @@ public class ExcelService
         }
         Log.Information($"Populated Employee Dict [Length: {App.EmployeeDict.Count}]");
     }
-
 
     // EXCEL HANDLERS & MINOR FUNCTIONS
     private static string GetCellValue(Cell cell, WorkbookPart workbookPart)
@@ -385,6 +380,75 @@ public class ExcelService
         Console.WriteLine("D1 could not be converted to a valid date.");
         return DateTime.MinValue;
     }
+    
+    public static async Task GeneratePreviousNightShiftAsync()
+    {
+        await Task.Run(() =>
+        {
+            Log.Verbose("Generate Current Night Shift Dict Start");
+            // Iterate through the employee dictionary and add entries with ShiftType "NS" to the new dictionary
+            foreach (var employee in App.EmployeeDict.Values.Where(employee => employee.ShiftType == "NS"))
+            {
+                App.PrevNightShiftDict[employee.EmployeeNumber] = employee;
+            }
 
+            Log.Verbose("Generate Current Night Shift Dict End");
+            Log.Information($"Copied Night Shift Entries [Length: {App.PrevNightShiftDict.Count}]");
+        });
+    }
 
+    public static async Task GenerateNextNightShiftAsync()
+    {
+        await Task.Run(() =>
+        {
+            Log.Verbose("Generate Next Night Shift Dict Start");
+            // Iterate through the employee dictionary and add entries with ShiftType "NS" to the new dictionary
+            foreach (var employee in App.EmployeeDict.Values.Where(employee => employee.ShiftType == "NS"))
+            {
+                App.NextNightShiftDict[employee.EmployeeNumber] = employee;
+            }
+
+            Log.Verbose("Generate Next Night Shift Dict End");
+            Log.Information($"Copied Night Shift Entries [Length: {App.NextNightShiftDict.Count}]");
+        });
+    }
+
+    public static async Task InsertNightShiftAsync()
+    {
+        Log.Verbose("Insert Night Shift Start");
+        // Ensure this runs on a background thread to avoid blocking UI
+        await Task.Run(() =>
+        {
+            // Insert all entries from PrevNightShiftDict into EmployeeDict
+            foreach (var employee in App.PrevNightShiftDict)
+            {
+                // If the key already exists, this will overwrite the existing entry
+                App.EmployeeDict[employee.Key] = employee.Value;
+            }
+        });
+
+        // Sort EmployeeDict by Employee.Name and convert to a list
+        var sortedEmployees = App.EmployeeDict.OrderBy(employee => employee.Value.Name).ToList();
+
+        // Optional: Update EmployeeDict with sorted order (though Dictionary doesn't maintain order)
+        App.EmployeeDict.Clear();
+        foreach (var employee in sortedEmployees)
+        {
+            App.EmployeeDict[employee.Key] = employee.Value;
+        }
+        Log.Verbose("Insert Night Shift End");
+        //Console.WriteLine();
+    }
+
+    // Retired
+    //public static async Task InitializeEmployeeDictionaryAsync(Dictionary<int, Employee> employeeDict, string resourcesOnSiteExcel)
+    //{
+    //    Log.Verbose("Populate Employee Dictionary ASYNC [Using XML]");
+    //    // Populate the dictionary using XML
+    //    await Task.Run(() => PopulateEmployeeDictionaryUsingXml(employeeDict, resourcesOnSiteExcel));
+    //    // Trim the employee dictionary
+    //    await Task.Run(() => TrimEmployeeDictionaryCodesAsync(employeeDict, App.MaintenanceCodes));
+    //}
 }
+
+

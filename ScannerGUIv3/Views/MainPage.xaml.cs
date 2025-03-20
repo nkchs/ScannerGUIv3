@@ -5,11 +5,11 @@ using Windows.System;
 using ScannerGUIv3.Services;
 using ScannerGUIv3.Core;
 using Microsoft.UI.Xaml.Controls;
-using ScannerGUIv3.Definitions;
+//using ScannerGUIv3.Definitions;
 using Serilog;
-using System.Net.Mail;
-using System.Text;
-using Newtonsoft.Json;
+//using System.Net.Mail;
+//using System.Text;
+//using Newtonsoft.Json;
 
 namespace ScannerGUIv3.Views;
 
@@ -71,25 +71,14 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         PersonnelNumberTextBox.Text = "";
     }
 
-    private void exportLogButton_Click(object sender, RoutedEventArgs e)
-    {
-        Console.ForegroundColor = ConsoleColor.Blue;
-        Console.WriteLine();
-        Console.WriteLine(@"Export Log Button");
-
-        LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "DS");
-        //Console.WriteLine(dayShiftLog);
-        Console.ResetColor();
-        Console.WriteLine();
-    }
-
-    private async void debugButton_Click(object sender, RoutedEventArgs e)
+    private async void debugOneButton_Click(object sender, RoutedEventArgs e)
     {
         try
         {
-            var success = await LogImportExportService.GetMasterProfileDate();
-            Console.WriteLine(success);
-            
+            //var success = await LogImportExportService.GetRosterDate();
+            //Console.WriteLine(success);
+
+            _ = ScheduleService.Task1();
             //Console.WriteLine();
 
             //var nightshifttable = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, "NS");
@@ -117,13 +106,104 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
             //    Console.WriteLine(code);
             //}
             //Console.WriteLine(@"Maintenance Codes End");
-            Console.WriteLine();
+            //Console.WriteLine();
         }
         catch (Exception ex)
         {
             throw; // TODO handle exception
         }
     }
+    private void debugTwoButton_Click(object sender, RoutedEventArgs e)
+    {
+        Console.ForegroundColor = ConsoleColor.Blue;
+        Console.WriteLine();
+        Console.WriteLine(@"Export Log Button");
+
+        LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "DS");
+        //Console.WriteLine(dayShiftLog);
+        Console.ResetColor();
+        Console.WriteLine();
+    }
+
+    // ================================ TASK BUTTONS ================================
+   private async void taskOneButton_Click(object sender, RoutedEventArgs e)
+    {
+        Console.WriteLine(@"========== 5:00 AM ==========");
+        try
+        {
+            _ = ScheduleService.Task1();
+        }
+        catch (Exception ex)
+        {
+            throw; // TODO handle exception
+        }
+    }
+
+    private void taskTwoButton_Click(object sender, RoutedEventArgs e)
+    {
+        Console.WriteLine(@"========== 6:10 AM ==========");
+        try
+        {
+            _ = ScheduleService.Task2();
+        }
+        catch (Exception ex)
+        {
+            throw; // TODO handle exception
+        }
+    }
+
+    private void taskThreeButton_Click(object sender, RoutedEventArgs e)
+    {
+        Console.WriteLine(@"========== 7:00 AM ==========");
+        try
+        {
+            _ = ScheduleService.Task3();
+        }
+        catch (Exception ex)
+        {
+            throw; // TODO handle exception
+        }
+    }
+    
+    private void taskFourButton_Click(object sender, RoutedEventArgs e)
+    {
+        Console.WriteLine(@"========== 6:10 PM ==========");
+        try
+        {
+            _ = ScheduleService.Task4();
+        }
+        catch (Exception ex)
+        {
+            throw; // TODO handle exception
+        }
+    }
+
+    private void taskFiveButton_Click(object sender, RoutedEventArgs e)
+    {
+        Console.WriteLine(@"========== 7:PM AM ==========");
+        try
+        {
+            _ = ScheduleService.Task5();
+        }
+        catch (Exception ex)
+        {
+            throw; // TODO handle exception
+        }
+    }
+
+    private void taskSixButton_Click(object sender, RoutedEventArgs e)
+    {
+        Console.WriteLine(@"========== 10:30 AM ==========");
+        try
+        {
+            _ = ScheduleService.Task6();
+        }
+        catch (Exception ex)
+        {
+            throw; // TODO handle exception
+        }
+    }
+    // ================================ TASK BUTTONS ================================
 
     private async Task ShowMessage(string title, string message)
     {
