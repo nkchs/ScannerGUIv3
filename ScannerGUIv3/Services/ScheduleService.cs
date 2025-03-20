@@ -93,8 +93,6 @@ namespace ScannerGUIv3.Services
             }
         }
 
-
-
         // Method to calculate the time until the next scheduled task
         private TimeSpan GetNextScheduledTime(DateTime now)
         {
@@ -178,27 +176,56 @@ namespace ScannerGUIv3.Services
             };
             _timer.Start();
         }
-        // Example tasks
-        private async Task Task1() // 4:10 AM
+
+        // TASKS
+        private async Task Task1()
         {
             Log.Verbose(@"Task 1 Executed");
 
-            // Download the roster
-            await Task.Run(() => LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath, "Roster"));
-            // Initialize the employee codes from HTTP
-            await Task.Run(() => ExcelService.InitializeMaintenanceCodesHttp(AppState.ResourcesMasterExcelPath));
-            // Populate the dictionary
-            await Task.Run(() => ExcelService.PopulateEmployeeDictionaryUsingXml(EmployeeDict, AppState.ResourcesOnSiteExcelPath));
-            // Trim the dictionary
-            await Task.Run(() => ExcelService.TrimEmployeeDictionaryAsync(EmployeeDict, App.MaintenanceCodes));
+            const int maxRetryAttempts = 3; // Maximum number of retry attempts
+            const int retryDelayMilliseconds = 5000; // Delay between retries (in milliseconds)
+            var attempt = 0;
+            var downloadSuccess = false;
 
-            Log.Verbose(@"Task 1 Completed");
+            // Retry mechanism
+            while (attempt < maxRetryAttempts && !downloadSuccess)
+            {
+                attempt++;
+                downloadSuccess = await LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath, "Roster");
+
+                if (downloadSuccess)
+                {
+                    Log.Information($"Download succeeded on attempt {attempt}.");
+                }
+                else
+                {
+                    Log.Warning($"Download failed on attempt {attempt}. Retrying in {retryDelayMilliseconds / 1000} seconds...");
+                    await Task.Delay(retryDelayMilliseconds);
+                }
+            }
+
+            if (downloadSuccess)
+            {
+                // Continue with the remaining tasks if the download was successful
+                await Task.Run(() => ExcelService.InitializeMaintenanceCodesHttp(AppState.ResourcesMasterExcelPath));
+                await Task.Run(() => ExcelService.PopulateEmployeeDictionaryUsingXml(EmployeeDict, AppState.ResourcesOnSiteExcelPath));
+                await Task.Run(() => ExcelService.TrimEmployeeDictionaryAsync(EmployeeDict, App.MaintenanceCodes));
+
+                Log.Verbose(@"Task 1 Completed");
+            }
+            else
+            {
+                // Handle the case where all retry attempts fail
+                Log.Error("Failed to download the roster after maximum retry attempts.");
+                // Add fallback or recovery logic here (e.g., notifying the user, alternative actions, etc.)
+            }
         }
+
 
         private static async Task Task2() // 6:10 AM
         {
             Log.Verbose(@"Task 2 Executed");
-            LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "NS");
+            await LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "NS");
 
             // Generate the shiftLog for the concluding night shift
             //var shiftLog = LogImportExportService.ExportShiftLog(EmployeeDict, "NS");
@@ -210,21 +237,21 @@ namespace ScannerGUIv3.Services
         private static async Task Task3() // 7:00 am
         {
             Log.Verbose(@"Task 3 Executed");
-            LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "DS");
+            await LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "DS");
             Log.Verbose(@"Task 6 Completed");
         }
 
         private static async Task Task6() // 10:30 AM
         {
             Log.Verbose(@"Task 6 Executed");
-            LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "DS");
+            await LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "DS");
             Log.Verbose(@"Task 6 Completed");
         }
 
         private static async Task Task4() // 6:10 PM
         {
             Log.Verbose(@"Task 4 Executed");
-            LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "NS");
+            await LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "NS");
 
             // Generate the shiftLog for the concluding night shift
             //var shiftLog = LogImportExportService.ExportShiftLog(EmployeeDict, "DS");

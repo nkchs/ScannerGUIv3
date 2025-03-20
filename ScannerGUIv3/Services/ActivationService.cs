@@ -17,13 +17,8 @@ public class ActivationService(ActivationHandler<LaunchActivatedEventArgs> defau
 
     public async Task ActivateAsync(object activationArgs)
     {
-        //Log.Information("ActivateAsync() from ActivationService.cs");
-        //if (App.MainWindow == null)
-        //{
-            //Log.Information("MainWindow == null | from ActivationService.cs");
         App.MainWindow = new MainWindow();
-        App.MainWindow.Activate(); // Check if Activation needs to occur here.
-        //}
+        App.MainWindow.Activate();
 
         // Execute tasks before activation.
         await InitializeAsync();
@@ -40,7 +35,7 @@ public class ActivationService(ActivationHandler<LaunchActivatedEventArgs> defau
         await HandleActivationAsync(activationArgs);
 
         // Activate the MainWindow.
-        App.MainWindow.Activate(); // Check if activation needs to occur here.
+        App.MainWindow.Activate();
 
         //App.MainWindow.MoveAndResize(App.MainWindow.Bounds.X, App.MainWindow.Bounds.Y, 700, 700);
         //App.MainWindow.MoveAndResize(2000, 700, 700, 700);

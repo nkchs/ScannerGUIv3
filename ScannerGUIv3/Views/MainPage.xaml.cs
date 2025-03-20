@@ -87,14 +87,9 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
     {
         try
         {
-            //var dayshifttable = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, "DS");
-            //Console.WriteLine(dayshifttable);
-            //var success = await LogImportExportService.ExportToWeb(LogImportExportService.TeamsUrl,
-            //    new
-            //    {
-            //        message = dayshifttable
-            //    });
-
+            var success = await LogImportExportService.GetMasterProfileDate();
+            Console.WriteLine(success);
+            
             //Console.WriteLine();
 
             //var nightshifttable = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, "NS");
@@ -122,6 +117,7 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
             //    Console.WriteLine(code);
             //}
             //Console.WriteLine(@"Maintenance Codes End");
+            Console.WriteLine();
         }
         catch (Exception ex)
         {

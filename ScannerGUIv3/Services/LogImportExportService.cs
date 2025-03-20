@@ -12,7 +12,55 @@ public class LogImportExportService
     public const string TeamsUrl = "https://prod-03.australiaeast.logic.azure.com:443/workflows/dcd41880b0ab49b5a56f15e03fa3fbd7/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=PtCPW3Ch2ijFDjByU6dx1pUx_u1splgZFLQ2qwk1pjs";
     private const string TeamsTableUrl = "https://prod-31.australiaeast.logic.azure.com:443/workflows/212c98481a9642aba8db911f9a4b230a/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Ct06peZb9klgAGg0pMNihNl9vhydcyVLbhZagdrUMLk";
 
-    public static async Task<bool> DownloadExcelFileAsync(string filePath, string fileName)
+    public const string MasterProfileUrl =
+        "https://prod-39.australiasoutheast.logic.azure.com:443/workflows/77439615022643799f39a62f6d6704b6/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=tBbbMYRU4lAzKJZsVILQnA1BT4WooIvvWekVziKEhNw";
+    
+    public static async Task<bool> GetMasterProfileDate()
+    {
+        try
+        {
+            using var client = new HttpClient();
+            using var response = await client.GetAsync(MasterProfileUrl, HttpCompletionOption.ResponseContentRead);
+
+            // Ensure the response is successful
+            response.EnsureSuccessStatusCode();
+            Log.Debug("Response received. Status Code: {StatusCode}", response.StatusCode);
+
+            // Read the response as a string
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            // Trim any extra whitespace or newline characters from the response
+            responseBody = responseBody.Trim();
+
+            // Parse the response into a DateTime object
+            if (DateTime.TryParse(responseBody, out var responseDateTime))
+            {
+                // Convert the response date to Western Australia time
+                TimeZoneInfo waTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Australia/Perth");
+                var waDateTime = TimeZoneInfo.ConvertTimeFromUtc(responseDateTime, waTimeZone);
+
+                // Get today's date in Western Australia time
+                var waToday = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, waTimeZone).Date;
+
+                // Compare dates (ignoring time)
+                if (waDateTime.Date == waToday)
+                {
+                    Log.Debug("Master Profile Has Been Updated");
+                    return true;
+                }
+            }
+            Log.Error("Master Profile Has NOT Been Updated");
+            return false;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return false;
+        }
+    }
+
+
+public static async Task<bool> DownloadExcelFileAsync(string filePath, string fileName)
     {
         Log.Information("Attempting to download Excel file to {FilePath} with file name {FileName}", filePath, fileName);
 

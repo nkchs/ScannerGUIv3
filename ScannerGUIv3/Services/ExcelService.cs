@@ -18,47 +18,141 @@ public class ExcelService
     public static async Task InitializeMaintenanceCodesHttp(string resourcesMasterExcel)
     {
         Log.Verbose("Employee Code DL Start");
+        Log.Debug($"Input parameter resourcesMasterExcel: {resourcesMasterExcel}");
 
         try
         {
             await Task.Run(async () =>
             {
                 using var httpClient = new HttpClient();
-                var response = await httpClient.GetStringAsync("https://prod-18.australiasoutheast.logic.azure.com:443/workflows/7d90dc45ba274d86992b23406da6a420/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=fbi68AVQta0kznlTwHvggUqjoSuLZar2MME9iTklucY&action=SEND_MT_CODES");
+                httpClient.Timeout = TimeSpan.FromSeconds(60); // Add timeout
+                Log.Debug("Starting HTTP request to fetch maintenance codes");
 
-                if (!string.IsNullOrEmpty(response) && response.Contains("Code") && response.EndsWith("Code_End"))
+                string response;
+                try
+                {
+                    response = await httpClient.GetStringAsync("https://prod-18.australiasoutheast.logic.azure.com:443/workflows/7d90dc45ba274d86992b23406da6a420/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=fbi68AVQta0kznlTwHvggUqjoSuLZar2MME9iTklucY&action=SEND_MT_CODES");
+                    Log.Debug($"HTTP request completed. Response length: {response?.Length}");
+                }
+                catch (TaskCanceledException ex)
+                {
+                    Log.Error($"HTTP request timed out: {ex.Message}");
+                    throw;
+                }
+                catch (HttpRequestException ex)
+                {
+                    Log.Error($"HTTP request failed: {ex.Message}", ex);
+                    throw;
+                }
+
+                if (string.IsNullOrEmpty(response))
+                {
+                    Log.Warning("Received empty response from server");
+                    throw new Exception("Empty response received");
+                }
+
+                if (!response.Contains("Code") || !response.EndsWith("Code_End"))
+                {
+                    Log.Warning($"Invalid response format. Contains 'Code': {response.Contains("Code")}, Ends with 'Code_End': {response.EndsWith("Code_End")}");
+                    throw new Exception($"Invalid response format: {response}");
+                }
+
+                try
                 {
                     var codes = response.Split(new[] { "Code", "Code_End" }, StringSplitOptions.RemoveEmptyEntries)[1].Trim().Split('\n');
+                    Log.Debug($"Found {codes.Length} potential codes in response");
+
                     foreach (var code in codes)
                     {
-                        if (int.TryParse(code, out var personnelCode))
+                        if (string.IsNullOrWhiteSpace(code))
                         {
-                            //App.MaintenanceCodes.Add(code.Trim());
-                            App.MaintenanceCodes.Add(personnelCode);
+                            Log.Debug("Skipping empty code entry");
+                            continue;
+                        }
 
+                        if (int.TryParse(code.Trim(), out var personnelCode))
+                        {
+                            App.MaintenanceCodes.Add(personnelCode);
+                            //Log.Verbose($"Added maintenance code: {personnelCode}");
+                        }
+                        else
+                        {
+                            Log.Warning($"Failed to parse code: {code.Trim()}");
                         }
                     }
                     AppState.MaintenanceCodesLoaded = true;
                 }
-                else
+                catch (IndexOutOfRangeException ex)
                 {
-                    throw new Exception("Invalid response format");
+                    Log.Error($"Response parsing failed - invalid split result: {ex.Message}", ex);
+                    throw new Exception("Failed to parse response structure");
                 }
             });
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
         {
-            Log.Error($"HTTP request failed: {ex.Message}");
+            Log.Error($"Network-related error occurred: {ex.Message}", ex);
+            Log.Information("Falling back to XML initialization");
             await Task.Run(() => InitializeMaintenanceCodesXml(resourcesMasterExcel));
         }
         catch (Exception ex)
         {
-            Log.Error($"An error occurred: {ex.Message}");
+            Log.Error($"Unexpected error occurred: {ex.Message}", ex);
+            Log.Information("Falling back to XML initialization");
             await Task.Run(() => InitializeMaintenanceCodesXml(resourcesMasterExcel));
         }
-        Log.Verbose("Employee Code DL End");
-        Log.Information($"Populated Maintenance Codes [Length: {App.MaintenanceCodes.Count}]");
+        finally
+        {
+            Log.Information($"Populated Maintenance Codes [Length: {App.MaintenanceCodes.Count}]");
+            Log.Verbose("Employee Code DL End");
+        }
     }
+
+
+    //public static async Task InitializeMaintenanceCodesHttp(string resourcesMasterExcel)
+    //{
+    //    Log.Verbose("Employee Code DL Start");
+
+    //    try
+    //    {
+    //        await Task.Run(async () =>
+    //        {
+    //            using var httpClient = new HttpClient();
+    //            var response = await httpClient.GetStringAsync("https://prod-18.australiasoutheast.logic.azure.com:443/workflows/7d90dc45ba274d86992b23406da6a420/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=fbi68AVQta0kznlTwHvggUqjoSuLZar2MME9iTklucY&action=SEND_MT_CODES");
+
+    //            if (!string.IsNullOrEmpty(response) && response.Contains("Code") && response.EndsWith("Code_End"))
+    //            {
+    //                var codes = response.Split(new[] { "Code", "Code_End" }, StringSplitOptions.RemoveEmptyEntries)[1].Trim().Split('\n');
+    //                foreach (var code in codes)
+    //                {
+    //                    if (int.TryParse(code, out var personnelCode))
+    //                    {
+    //                        //App.MaintenanceCodes.Add(code.Trim());
+    //                        App.MaintenanceCodes.Add(personnelCode);
+
+    //                    }
+    //                }
+    //                AppState.MaintenanceCodesLoaded = true;
+    //            }
+    //            else
+    //            {
+    //                throw new Exception("Invalid response format");
+    //            }
+    //        });
+    //    }
+    //    catch (HttpRequestException ex)
+    //    {
+    //        Log.Error($"HTTP request failed: {ex.Message}");
+    //        await Task.Run(() => InitializeMaintenanceCodesXml(resourcesMasterExcel));
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        Log.Error($"An error occurred: {ex.Message}");
+    //        await Task.Run(() => InitializeMaintenanceCodesXml(resourcesMasterExcel));
+    //    }
+    //    Log.Verbose("Employee Code DL End");
+    //    Log.Information($"Populated Maintenance Codes [Length: {App.MaintenanceCodes.Count}]");
+    //}
 
     public static async Task InitializeMaintenanceCodesXml(string filePath)
     {
