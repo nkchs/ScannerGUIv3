@@ -77,8 +77,8 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         {
             //var success = await LogImportExportService.GetRosterDate();
             //Console.WriteLine(success);
-
-            _ = ScheduleService.Task1();
+            LogImportExportService.GetRosterDate();
+            //_ = ScheduleService.Task1();
             //Console.WriteLine();
 
             //var nightshifttable = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, "NS");

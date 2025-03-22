@@ -6,8 +6,6 @@ public class AppState
 {
     public static bool Logging;
 
-    //private static readonly AppState Instance = new();
-
     // ########## Variable Declarations ########## //
     // Time variables //
     public static DateTime CurrentDate = DateTime.Now;

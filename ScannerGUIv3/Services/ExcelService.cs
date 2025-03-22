@@ -397,6 +397,28 @@ public class ExcelService
         });
     }
 
+    public static async Task RemovePreviousNightShiftAsync()
+    {
+        await Task.Run(() =>
+        {
+            Log.Verbose("Remove Previous Night Shift Start");
+            // Create a list of employees to remove (to avoid modifying dictionary during iteration)
+            var employeesToRemove = App.EmployeeDict.Values
+                .Where(employee => employee.ShiftType == "NS")
+                .Select(employee => employee.EmployeeNumber)
+                .ToList();
+
+            // Remove the identified employees
+            foreach (var employeeNumber in employeesToRemove)
+            {
+                App.EmployeeDict.Remove(employeeNumber);
+            }
+
+            Log.Verbose("Remove Previous Night Shift End");
+            Log.Information($"Removed Night Shift Entries [Count: {employeesToRemove.Count}]");
+        });
+    }
+
     public static async Task GenerateNextNightShiftAsync()
     {
         await Task.Run(() =>
@@ -413,9 +435,9 @@ public class ExcelService
         });
     }
 
-    public static async Task InsertNightShiftAsync()
+    public static async Task InsertCurrentNightShiftAsync()
     {
-        Log.Verbose("Insert Night Shift Start");
+        Log.Verbose("Insert Current Night Shift Start");
         // Ensure this runs on a background thread to avoid blocking UI
         await Task.Run(() =>
         {
@@ -436,8 +458,33 @@ public class ExcelService
         {
             App.EmployeeDict[employee.Key] = employee.Value;
         }
-        Log.Verbose("Insert Night Shift End");
-        //Console.WriteLine();
+        Log.Verbose("Insert Current Night Shift End");
+    }
+
+    public static async Task InsertNextNightShiftAsync()
+    {
+        Log.Verbose("Insert Next Night Shift Start");
+        // Ensure this runs on a background thread to avoid blocking UI
+        await Task.Run(() =>
+        {
+            // Insert all entries from PrevNightShiftDict into EmployeeDict
+            foreach (var employee in App.NextNightShiftDict)
+            {
+                // If the key already exists, this will overwrite the existing entry
+                App.EmployeeDict[employee.Key] = employee.Value;
+            }
+        });
+
+        // Sort EmployeeDict by Employee.Name and convert to a list
+        var sortedEmployees = App.EmployeeDict.OrderBy(employee => employee.Value.Name).ToList();
+
+        // Optional: Update EmployeeDict with sorted order (though Dictionary doesn't maintain order)
+        App.EmployeeDict.Clear();
+        foreach (var employee in sortedEmployees)
+        {
+            App.EmployeeDict[employee.Key] = employee.Value;
+        }
+        Log.Verbose("Insert Next Night Shift End");
     }
 
     // Retired

@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+//using Newtonsoft.Json;
 using ScannerGUIv3.Definitions;
 using Serilog;
 
@@ -11,10 +12,10 @@ public class LogImportExportService
     public const string EmailUrl = "https://prod-02.australiasoutheast.logic.azure.com:443/workflows/94e6d29eed054a53b89b8448102a3ead/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ufoRVxP9dOGh8OP5VtuwYZAW3n25kYV8HN9_L8qnlGw";
     public const string TeamsUrl = "https://prod-03.australiaeast.logic.azure.com:443/workflows/dcd41880b0ab49b5a56f15e03fa3fbd7/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=PtCPW3Ch2ijFDjByU6dx1pUx_u1splgZFLQ2qwk1pjs";
     private const string TeamsTableUrl = "https://prod-31.australiaeast.logic.azure.com:443/workflows/212c98481a9642aba8db911f9a4b230a/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Ct06peZb9klgAGg0pMNihNl9vhydcyVLbhZagdrUMLk";
-
     private const string RosterDateUrl =
         "https://prod-39.australiasoutheast.logic.azure.com:443/workflows/77439615022643799f39a62f6d6704b6/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=tBbbMYRU4lAzKJZsVILQnA1BT4WooIvvWekVziKEhNw";
-    
+    private const string EmailTableUrl = "https://prod-19.australiaeast.logic.azure.com:443/workflows/512e71742dcc42a18aadc445eaad070d/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=s5AoSnzv_rwQgYo-b5uucsmHcTdB-QlOoyIyRnu20LU";
+
     public static async Task<bool> GetRosterDate()
     {
         try
@@ -35,17 +36,14 @@ public class LogImportExportService
             // Parse the response into a DateTime object
             if (DateTime.TryParse(responseBody, out var responseDateTime))
             {
-                // Convert the response date to Western Australia time
+                // Since response is already in WA time, get today's date in WA time
                 TimeZoneInfo waTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Australia/Perth");
-                var waDateTime = TimeZoneInfo.ConvertTimeFromUtc(responseDateTime, waTimeZone);
-
-                // Get today's date in Western Australia time
                 var waToday = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, waTimeZone).Date;
 
                 // Compare dates (ignoring time)
-                if (waDateTime.Date == waToday)
+                if (responseDateTime.Date == waToday)
                 {
-                    Log.Debug("Roster Has Been Updated");
+                    Log.Debug($"Roster Has Been Updated @ {responseDateTime}");
                     return true;
                 }
             }
@@ -287,12 +285,90 @@ public class LogImportExportService
         return rows.ToArray();
     }
 
+    public static async Task<bool> SendEmployeeDataAsync(string email, string shiftType)
+    {
+        // Prepare the JSON string
+        var jsonData = PrepareJsonForEmail(email, shiftType);
+
+        // Create HttpClient instance
+        using var client = new HttpClient();
+
+        // Create StringContent with JSON data
+        var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+        try
+        {
+            // Send POST request to EmailTableUrl
+            var response = await client.PostAsync(EmailTableUrl, content);
+
+            // Ensure the request was successful and return true
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
+        catch (HttpRequestException)
+        {
+            // Return false on HTTP-related errors instead of throwing
+            return false;
+        }
+    }
+
+    private static string PrepareJsonForEmail(string email, string shiftType)
+    {
+        var signedInList = GetEmployeeDataForJson(shiftType, true);  // Changed "DS" to shiftType
+        var notSignedInList = GetEmployeeDataForJson(shiftType, false);
+
+        var message = new
+        {
+            email = email,
+            signedIn = signedInList,    // Already an array, no need for ToArray()
+            notSignedIn = notSignedInList  // Already an array, no need for ToArray()
+        };
+        return JsonSerializer.Serialize(message);  // Assuming you want to return JSON string
+    }
+
+    private static object[] GetEmployeeDataForJson(string shiftType, bool signedIn = true)
+    {
+        var employeeList = new List<object>();
+
+        foreach (var employee in App.EmployeeDict.Values.Where(employee => employee.SignInTime.HasValue == signedIn && employee.ShiftType == shiftType))
+        {
+            employeeList.Add(new
+            {
+                employeeID = employee.EmployeeNumber.ToString(),
+                name = employee.Name,
+                signIn = employee.FormattedSignInTime,
+                signOut = employee.FormattedSignOutTime ?? "No Sign Out"
+            });
+        }
+
+        return employeeList.ToArray();
+    }
+
+    public static string PrepareJsonMessageForPowerAutomate(string shiftType)
+    {
+        var signedInRows = GetEmployeeRows(App.EmployeeDict, shiftType);
+        var notSignedInRows = GetEmployeeRows(App.EmployeeDict, shiftType, false);
+
+        var message = new
+        {
+            signedIn = signedInRows,
+            notSignedIn = notSignedInRows
+        };
+
+        return System.Text.Json.JsonSerializer.Serialize(message, new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
+        ;
+    }
+
     public static async Task<bool> ExportAdaptiveCardFromTemplateAsync(Dictionary<int, Employee> employeeDict, string shiftType, string message = "")
     {
         try
         {
             // Determine the shift title based on shiftType
-            var shiftTitle = shiftType == "DS" ? "Dayshift" : shiftType == "NS" ? "Nightshift" : "Unknown Shift";
+            var shiftTitle = shiftType == "DS" ? "Day Shift" : shiftType == "NS" ? "Night Shift" : "Unknown Shift";
 
             // Log the start of the method
             Log.Information("ExportAdaptiveCardFromTemplateAsync started with shiftType: {ShiftType}", shiftType);
@@ -408,4 +484,5 @@ public class LogImportExportService
         }
         return csvBuilder.ToString();
     }
+
 }

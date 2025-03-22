@@ -29,11 +29,7 @@ public sealed partial class ExportPage : Page
             {
                 return;
             }
-
-            var shiftLog = GetShiftLog(exportOption, shiftType);
-
-            var success = await ProcessExport(exportOption, shiftLog);
-
+            var success = await ProcessExport(exportOption, shiftType);
             await ShowMessage(
                 success ? "Success" : "Error",
                 success ? $"Exported successfully via {exportOption}." : $"Failed to export via {exportOption}.");
@@ -47,7 +43,9 @@ public sealed partial class ExportPage : Page
     private bool TryGetSelectedOptions(out string exportOption, out string shiftType)
     {
         exportOption = (ExportOptionsGroup.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? string.Empty;
-        shiftType = (ShiftOptionsGroup.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? string.Empty;
+        var shiftTypeInput = (ShiftOptionsGroup.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? string.Empty;
+
+        shiftType = shiftTypeInput == "Day" ? "DS" : shiftTypeInput == "Night" ? "NS" : shiftTypeInput;
 
         if (string.IsNullOrEmpty(exportOption))
         {
@@ -62,22 +60,9 @@ public sealed partial class ExportPage : Page
 
         ShowMessage("Error", "Please select a shift option.").GetAwaiter().GetResult();
         return false;
-
     }
 
-    private string GetShiftLog(string exportOption, string shiftType)
-    {
-        var shiftLog = shiftType.Equals("Night", StringComparison.OrdinalIgnoreCase) ? "NS" : "DS";
-
-        if (!exportOption.Equals("Teams", StringComparison.OrdinalIgnoreCase))
-        {
-            shiftLog = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, shiftType);
-        }
-
-        return shiftLog;
-    }
-
-    private async Task<bool> ProcessExport(string exportOption, string shiftLog)
+    private async Task<bool> ProcessExport(string exportOption, string shiftType)
     {
         switch (exportOption.ToLowerInvariant())
         {
@@ -95,13 +80,8 @@ public sealed partial class ExportPage : Page
                     return false;
                 }
 
-                var success = await LogImportExportService.ExportToWeb(
-                    LogImportExportService.EmailUrl,
-                    new
-                    {
-                        email = emailAddress,
-                        message = shiftLog
-                    });
+                // Call SendEmployeeDataAsync directly with email and shiftType
+                var success = await LogImportExportService.SendEmployeeDataAsync(emailAddress, shiftType);
 
                 if (success)
                 {
@@ -110,9 +90,13 @@ public sealed partial class ExportPage : Page
                 return success;
 
             case "teams":
-                return await LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, shiftLog);
+                // For teams, we'll call ExportAdaptiveCardFromTemplateAsync directly
+                return await LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, shiftType);
 
             case "file":
+                // Only "file" option uses shiftLog concept
+                //var shiftLog = shiftType.Equals("Night", StringComparison.OrdinalIgnoreCase) ? "NS" : "DS";
+                var shiftLog = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, shiftType);
                 return await SaveToFile(shiftLog);
 
             default:
@@ -258,5 +242,64 @@ public sealed partial class ExportPage : Page
 //    catch (Exception ex)
 //    {
 //        await ShowMessage("Error", $"An unexpected error occurred: {ex.Message}");
+//    }
+//}
+
+
+//private string GetShiftLog(string exportOption, string shiftType)
+//{
+//    var shiftLog = shiftType.Equals("Night", StringComparison.OrdinalIgnoreCase) ? "NS" : "DS";
+
+//    if (!exportOption.Equals("Teams", StringComparison.OrdinalIgnoreCase))
+//    {
+//        shiftLog = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, shiftType);
+//    }
+
+//    return shiftLog;
+//}
+
+//private async Task<bool> ProcessExport(string exportOption, string shiftLog)
+//{
+//    switch (exportOption.ToLowerInvariant())
+//    {
+//        case "email":
+//            if (EmailAddressTextBox == null)
+//            {
+//                await ShowMessage("Error", "Email input control not found.");
+//                return false;
+//            }
+
+//            var emailAddress = EmailAddressTextBox.Text?.Trim();
+//            if (string.IsNullOrWhiteSpace(emailAddress))
+//            {
+//                await ShowMessage("Error", "Please enter an email address.");
+//                return false;
+//            }
+
+//            var success = await LogImportExportService.SendEmployeeDataAsync(emailAddress, shiftType);
+
+//            //var success = await LogImportExportService.ExportToWeb(
+//            //    LogImportExportService.EmailUrl,
+//            //    new
+//            //    {
+//            //        email = emailAddress,
+//            //        message = shiftLog
+//            //    });
+
+//            if (success)
+//            {
+//                EmailAddressTextBox.Text = string.Empty;
+//            }
+//            return success;
+
+//        case "teams":
+//            return await LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, shiftLog);
+
+//        case "file":
+//            return await SaveToFile(shiftLog);
+
+//        default:
+//            await ShowMessage("Error", "Invalid export option.");
+//            return false;
 //    }
 //}

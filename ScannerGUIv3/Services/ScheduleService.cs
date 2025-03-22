@@ -11,7 +11,8 @@ namespace ScannerGUIv3.Services
     public class ScheduleService
     {
         // Constructor to initialize the scheduleTimes array
-        private readonly TimeSpan[] _scheduleTimes;
+        //private readonly TimeSpan[] _scheduleTimes;
+        private static TimeSpan[]? _scheduleTimes;
 
         // Timer to schedule tasks
         private readonly Timer _timer;
@@ -195,7 +196,7 @@ namespace ScannerGUIv3.Services
                     // Remove the UPCOMING night shift employees from the dictionary
                     await Task.Run(ExcelService.GenerateNextNightShiftAsync);
                     // Insert the PREVIOUS night shift employees into the dictionary
-                    await Task.Run(ExcelService.InsertNightShiftAsync);
+                    await Task.Run(ExcelService.InsertCurrentNightShiftAsync);
 
                     Log.Information("Maintenance Codes & Dictionary & Trim & Next Night Shift");
                 }
@@ -224,7 +225,6 @@ namespace ScannerGUIv3.Services
             else
             {
                 Log.Error("Roster Has Not Been Updated");
-
             }
             Log.Verbose(@"============= TASK 1 COMPLETED ============");
             Console.WriteLine();
@@ -234,6 +234,13 @@ namespace ScannerGUIv3.Services
         {
             Log.Verbose(@"Task 2 Executed");
             var success = await LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "NS");
+            if (success)
+            {
+                // Remove the previous Night Shift
+                await Task.Run(ExcelService.RemovePreviousNightShiftAsync);
+                // Insert the next Night Shift
+                await Task.Run(ExcelService.InsertNextNightShiftAsync);
+            }
             Log.Verbose(success ? @"Task 2 Completed" : @"Task 2 Failed");
         }
 
@@ -288,71 +295,9 @@ namespace ScannerGUIv3.Services
             }
         }
 
-        //public static async Task Task4() // 6:10 PM
-        //{
-        //    Log.Verbose(@"Task 4 Executed");
-        //    try
-        //    {
-        //        var success = await LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "NS");
-        //        // Generate the crossover shiftLog
-        //        await ExcelService.NightShiftCrossoverAsync();
-        //        App.EmployeeDict = App.EmployeeCrossoverDict;
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine(ex);
-        //        throw;
-        //    }
-
-        //    // TODO Create a function that:
-        //    // TODO 1. Empties the employeeDict
-        //    // TODO 2. Moves the CrossoverDict to EmployeeDict
-        //    //Log.Verbose(success ? @"Task 4 Completed" : @"Task 4 Failed");
-        //}
-
         public static async Task Task5() // 7:00 PM
         {
             Log.Verbose(@"Task 5 Executed");
         }
-
-
-        // Retired
-        // Method to perform the scheduled operation
-        //private void PerformScheduledOperation()
-        //{
-        //    var now = DateTime.Now.TimeOfDay;
-        //    foreach (var time in scheduleTimes)
-        //    {
-        //        if (now >= time && now < time.Add(TimeSpan.FromMinutes(1)))
-        //        {
-        //            if (time == new TimeSpan(4, 10, 0))
-        //            {
-        //                Task.Run(Task1);
-        //            }
-        //            else if (time == new TimeSpan(6, 10, 0))
-        //            {
-        //                Task.Run(Task2);
-        //            }
-        //            else if (time == new TimeSpan(7, 0, 0))
-        //            {
-        //                Task.Run(Task3);
-        //            }
-        //            else if (time == new TimeSpan(18, 10, 0))
-        //            {
-        //                Task.Run(Task4);
-        //            }
-        //            else if (time == new TimeSpan(19, 0, 0))
-        //            {
-        //                Task.Run(Task5);
-        //            }
-        //            else
-        //            {
-        //                Log.Verbose("Alternative Task");
-        //            }
-        //            break;
-        //        }
-        //    }
-        //}
     }
 }
