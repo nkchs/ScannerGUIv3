@@ -29,8 +29,8 @@ public class AppState
             _resourcesExcelFolderPath = value;
             ResourcesOnSiteExcelPath = _resourcesExcelFolderPath + @"/Roster.xlsx";
             ResourcesMasterExcelPath = _resourcesExcelFolderPath + @"/SRF195 Profile Master.xlsx";
-            LogFolder = _resourcesExcelFolderPath; // + @"/Logs";
-            StateFolder = _resourcesExcelFolderPath; // + @"/State"; 
+            LogFolder = _resourcesExcelFolderPath; // + @"/Logs/";
+            StateFolder = _resourcesExcelFolderPath + @"/State/"; 
         }
     }
     public static string ResourcesOnSiteExcelPath
@@ -42,6 +42,10 @@ public class AppState
         get; private set;
     }
 
+    //public static string RosterStateFilePath => StateFolder + "/" + ;
+    //public static string RosterFileName => $"Roster_{DateTime.Now:ddMM}.json";
+    public static string RosterFileName => $"Roster_{DateTime.Now:ddMMHHmm}.json";
+    public static string RosterStateFullPath => StateFolder + RosterFileName;
     public static string LogFolder
     {
         get;

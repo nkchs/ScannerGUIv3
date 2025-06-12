@@ -21,6 +21,20 @@ public sealed partial class ExportPage : Page
         InitializeComponent();
     }
 
+    // ======================================== Buttons ========================================
+    private async void testButton_Click(object sender, RoutedEventArgs e)
+    {
+        var success = await LogImportExportService.DownloadExcelFileAsync("C:/Users/Public/Documents", "Roster");
+        if (success)
+        {
+            await ShowMessage("Success", "Roster downloaded and saved successfully.");
+        }
+        else
+        {
+            await ShowMessage("Error", "Failed to download and save roster.");
+        }
+    }
+
     private async void exportButton_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -40,11 +54,13 @@ public sealed partial class ExportPage : Page
         }
     }
 
+    // ======================================== Functions ========================================
     private bool TryGetSelectedOptions(out string exportOption, out string shiftType)
     {
+        // Get the selected export option and shift type from the UI
         exportOption = (ExportOptionsGroup.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? string.Empty;
         var shiftTypeInput = (ShiftOptionsGroup.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? string.Empty;
-
+        // Select the short shift type based on the input
         shiftType = shiftTypeInput == "Day" ? "DS" : shiftTypeInput == "Night" ? "NS" : shiftTypeInput;
 
         if (string.IsNullOrEmpty(exportOption))
@@ -143,19 +159,6 @@ public sealed partial class ExportPage : Page
             XamlRoot = this.XamlRoot // Set the XamlRoot to the current page's XamlRoot
         };
         await dialog.ShowAsync();
-    }
-
-    private async void testButton_Click(object sender, RoutedEventArgs e)
-    {
-        var success = await LogImportExportService.DownloadExcelFileAsync("C:/Users/Public/Documents", "Roster");
-        if (success)
-        {
-            await ShowMessage("Success", "Roster downloaded and saved successfully.");
-        }
-        else
-        {
-            await ShowMessage("Error", "Failed to download and save roster.");
-        }
     }
 }
 

@@ -48,7 +48,8 @@ public sealed partial class MainWindow : WindowEx
     {
         try
         {
-            await LogImportExportService.SaveEmployeeDictionaryAsync(AppState.StateFolder + @"/EmployeeDict.json");
+            //await LogImportExportService.SaveEmployeeDictionaryAsync(AppState.StateFolder + @"/EmployeeDict.json");
+            await LogImportExportService.SaveEmployeeDictionaryAsync(AppState.RosterStateFullPath);
             Log.Information("MainWindow is closing.");
         }
         catch (Exception ex)

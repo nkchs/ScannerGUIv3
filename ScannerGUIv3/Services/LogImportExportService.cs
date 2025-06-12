@@ -143,7 +143,8 @@ public class LogImportExportService
     {
         try
         {
-            var json = JsonSerializer.Serialize(App.EmployeeDict);
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            var json = JsonSerializer.Serialize(App.EmployeeDict, options);
             await File.WriteAllTextAsync(filePath, json);
             Log.Information("Employee Dictionary Saved: {FilePath}", filePath);
         }
@@ -439,15 +440,27 @@ public class LogImportExportService
                 }
             };
 
+            var firstAttachment = ((dynamic)teamsMessage).attachments[0];
+            //var firstItemInAttachment = firstAttachment.content.body[0];
+
+            // Calculate the number of bytes
+            string firstAttachmentJson = JsonSerializer.Serialize(firstAttachment, new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                PropertyNamingPolicy = null // Ensures property names match exactly as defined));
+            });
+
+            var byteCount = Encoding.UTF8.GetByteCount(firstAttachmentJson);
+            Log.Information("The JSON string is {ByteCount} bytes long.", byteCount);
+            //var kiloByteCount = byteCount / 1024.0; // Use 1024.0 to ensure floating-point division
+            //Log.Information("The JSON string is {KiloByteCount:F2} kB long.", kiloByteCount);
+            
             // Serialize to JSON using System.Text.Json
             var json = JsonSerializer.Serialize(teamsMessage, new JsonSerializerOptions
             {
                 WriteIndented = true,
                 PropertyNamingPolicy = null // Ensures property names match exactly as defined
             });
-
-            // Log the serialized JSON
-            //Log.Debug("Serialized Teams message JSON: {Json}", json);
 
             // Send to the URL
             using var client = new HttpClient();
@@ -484,5 +497,4 @@ public class LogImportExportService
         }
         return csvBuilder.ToString();
     }
-
 }

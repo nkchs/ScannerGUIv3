@@ -5,11 +5,8 @@ using Windows.System;
 using ScannerGUIv3.Services;
 using ScannerGUIv3.Core;
 using Microsoft.UI.Xaml.Controls;
-//using ScannerGUIv3.Definitions;
 using Serilog;
-//using System.Net.Mail;
-//using System.Text;
-//using Newtonsoft.Json;
+using FileHandling = ScannerGUIv3.Services.FileHandling;
 
 namespace ScannerGUIv3.Views;
 
@@ -113,13 +110,22 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
             throw; // TODO handle exception
         }
     }
-    private void debugTwoButton_Click(object sender, RoutedEventArgs e)
+    private async void debugTwoButton_Click(object sender, RoutedEventArgs e)
     {
         Console.ForegroundColor = ConsoleColor.Blue;
         Console.WriteLine();
-        Console.WriteLine(@"Export Log Button");
+        //Console.WriteLine(@"Export Log Button");
+        
+        await LogImportExportService.SaveEmployeeDictionaryAsync(AppState.RosterStateFullPath);
 
-        LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "DS");
+        var files = FileHandling.GetFilesInFolder(AppState.StateFolder);
+        var mostRecentRoster = FileHandling.GetMostRecentValidRosterFile(files);
+        foreach (var file in files)
+        {
+            Console.WriteLine(file);
+        }
+        Console.WriteLine(mostRecentRoster);
+        //LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "DS");
         //Console.WriteLine(dayShiftLog);
         Console.ResetColor();
         Console.WriteLine();

@@ -15,7 +15,9 @@ using ScannerGUIv3.ViewModels;
 using ScannerGUIv3.Views;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
-using Microsoft.UI.Xaml.Controls;
+using FileHandling = ScannerGUIv3.Services.FileHandling;
+
+//using Microsoft.UI.Xaml.Controls;
 
 namespace ScannerGUIv3;
 
@@ -73,7 +75,7 @@ public partial class App : Application
                 services.AddSingleton<INavigationService, NavigationService>();
 
                 // Core Services
-                services.AddSingleton<IFileService, FileService>();
+                services.AddSingleton<IFileService, Core.Services.FileService>();
 
                 // Views and ViewModels
                 services.AddTransient<ExportViewModel>();
@@ -90,6 +92,7 @@ public partial class App : Application
                 // File Handling
                 services.AddSingleton<LogImportExportService>();
                 services.AddSingleton<ExcelService>();
+                services.AddSingleton<FileHandling>();
 
                 // Scheduling
                 services.AddSingleton<ScheduleService>();

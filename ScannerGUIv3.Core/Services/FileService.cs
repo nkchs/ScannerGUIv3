@@ -1,5 +1,4 @@
 ﻿using System.Text;
-
 using Newtonsoft.Json;
 
 using ScannerGUIv3.Core.Contracts.Services;
@@ -8,6 +7,7 @@ namespace ScannerGUIv3.Core.Services;
 
 public class FileService : IFileService
 {
+    // ============================== SYSTEM ==============================
     public T Read<T>(string folderPath, string fileName)
     {
         var path = Path.Combine(folderPath, fileName);
