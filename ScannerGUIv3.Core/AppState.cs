@@ -127,7 +127,6 @@ public class AppState
     }
     private static bool _employeeDictionaryRefreshed;
 
-    //public static bool TrimShiftRequired = true; // Whether or not trim is required
 
     // Task Variables
     public static int TaskOneAttempt = 0;
