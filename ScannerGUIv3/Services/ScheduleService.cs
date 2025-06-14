@@ -177,22 +177,24 @@ namespace ScannerGUIv3.Services
                 if (downloadSuccess)    // Continue with the remaining tasks if the download was successful
                 {
                     // Initialize the maintenance codes
-                    await Task.Run(() =>
-                        ExcelService.InitializeMaintenanceCodesHttp(AppState.ResourcesMasterExcelPath));
+                    //await Task.Run(() =>
+                    //    ExcelService.InitializeMaintenanceCodesHttp(AppState.ResourcesMasterExcelPath));
                     // Populate the employee dictionary
                     await Task.Run(() =>
-                        ExcelService.PopulateEmployeeDictionaryUsingXml(AppState.ResourcesOnSiteExcelPath, AppState.TrimShiftRequired));
+                        ExcelService.PopulateEmployeeDictionaryUsingXml(AppState.ResourcesOnSiteExcelPath));
 
-                    if (AppState.TrimShiftRequired)
-                    {
-                        Console.WriteLine($@"===== Trim Shift Required: {AppState.TrimShiftRequired} =====");
-                        // Trim the dictionary of maintenance codes
-                        await Task.Run(ExcelService.TrimEmployeeDictionaryCodesAsync);
-                        // Trim the dictionary of shift types
-                        await Task.Run(ExcelService.TrimEmployeeDictionaryShiftType);
-                    }
 
-                    AppState.TrimShiftRequired = true;
+                    //if (AppState.TrimShiftRequired)
+                    //{
+                    //    Console.WriteLine($@"===== Trim Shift Required: {AppState.TrimShiftRequired} =====");
+                    //    // Trim the dictionary of maintenance codes
+                    //    //await Task.Run(ExcelService.TrimEmployeeDictionaryCodesAsync);
+                    //    // Trim the dictionary of shift types
+                    //    await Task.Run(ExcelService.TrimEmployeeDictionaryShiftType);
+                    //}
+
+
+                    //AppState.TrimShiftRequired = true;
                     // Remove the UPCOMING night shift employees from the dictionary
                     await Task.Run(ExcelService.GenerateNextNightShiftAsync);
                     // Insert the PREVIOUS night shift employees into the dictionary

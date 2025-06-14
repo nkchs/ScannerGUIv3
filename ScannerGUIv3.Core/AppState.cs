@@ -58,22 +58,23 @@ public class AppState
 
     // Bool flags
     public static bool StartUpFunctionsComplete = false;
-    public static bool MaintenanceCodesLoaded
-    {
-        get => _maintenanceCodesLoaded;
-        set
-        {
-            _maintenanceCodesLoaded = value;
-            if (!Logging)
-            {
-                return;
-            }
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"MaintenanceCodesLoaded set to: {value}");
-            Console.ResetColor();
-        }
-    }
-    private static bool _maintenanceCodesLoaded;
+
+    //public static bool MaintenanceCodesLoaded
+    //{
+    //    get => _maintenanceCodesLoaded;
+    //    set
+    //    {
+    //        _maintenanceCodesLoaded = value;
+    //        if (!Logging)
+    //        {
+    //            return;
+    //        }
+    //        Console.ForegroundColor = ConsoleColor.Yellow;
+    //        Console.WriteLine($"MaintenanceCodesLoaded set to: {value}");
+    //        Console.ResetColor();
+    //    }
+    //}
+    //private static bool _maintenanceCodesLoaded;
 
     public static bool EmployeeDictionaryLoaded
     {
@@ -126,7 +127,7 @@ public class AppState
     }
     private static bool _employeeDictionaryRefreshed;
 
-    public static bool TrimShiftRequired = true; // Whether or not trim is required
+    //public static bool TrimShiftRequired = true; // Whether or not trim is required
 
     // Task Variables
     public static int TaskOneAttempt = 0;

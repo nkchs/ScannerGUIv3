@@ -113,7 +113,7 @@ public partial class App : Application
     // ====================================================================================================================
 
     // Variable Declarations ==============================================================================================
-    public static readonly List<int> MaintenanceCodes = [];
+    //public static readonly List<int> MaintenanceCodes = [];
 
     private static readonly List<string> DebugEmployeeNumbers =
     [
@@ -132,32 +132,35 @@ public partial class App : Application
     {
         Log.Warning("========== STARTUP FUNCTIONS BEGIN ==========");
 
-        AppState.MaintenanceCodesLoaded = false;
+        //AppState.MaintenanceCodesLoaded = false;
         AppState.EmployeeDictionaryLoaded = false;
         AppState.EmployeeDictionaryTrimmed = false;
         AppState.EmployeeDictionaryRefreshed = false;
-        
+
         // Download the roster  
-        await Task.Run(() => LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath, "Roster"));
+        await Task.Run(() =>
+            LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath, "Roster"));
         // Download the Maintenance codes  
-        await Task.Run(() => ExcelService.InitializeMaintenanceCodesHttp(AppState.ResourcesMasterExcelPath));
+        //await Task.Run(() => ExcelService.InitializeMaintenanceCodesHttp(AppState.ResourcesMasterExcelPath));
         // Populate the dictionary  
         await Task.Run(() => ExcelService.PopulateEmployeeDictionaryUsingXml(AppState.ResourcesOnSiteExcelPath));
 
-        if (AppState.TrimShiftRequired)
-        {
-            // Trim the dictionary of Maintenance codes  
-            await Task.Run(ExcelService.TrimEmployeeDictionaryCodesAsync);
-            // Trim the dictionary of shift types  
-            await Task.Run(ExcelService.TrimEmployeeDictionaryShiftType);
-        }
+        //if (AppState.TrimShiftRequired)
+        //{
+        //    // Trim the dictionary of Maintenance codes  
+        //    //await Task.Run(ExcelService.TrimEmployeeDictionaryCodesAsync);
+        //    // Trim the dictionary of shift types  
+        //    //await Task.Run(ExcelService.TrimEmployeeDictionaryShiftType);
+            
+        //    AppState.TrimShiftRequired = true;
 
-        AppState.TrimShiftRequired = true;
+        //    //SignInEmployees(DebugEmployeeNumbers);
 
-        SignInEmployees(DebugEmployeeNumbers);
-
-        Log.Warning("========== STARTUP FUNCTIONS END ==========");
+        //    //Log.Warning("========== STARTUP FUNCTIONS END ==========");
+        //    AppState.StartUpFunctionsComplete = true;
+        //}
         AppState.StartUpFunctionsComplete = true;
+        Log.Warning("========== STARTUP FUNCTIONS END ==========");
     }
 
     // Sign in for debugging

@@ -13,202 +13,9 @@ public class ExcelService
 {
     // VARIABLES
 
+
     // MAIN FUNCTIONS
-    public static async Task InitializeMaintenanceCodesHttp(string resourcesMasterExcel)
-    {
-        Log.Verbose("Employee Code DL Start");
-        Log.Debug($"Input parameter resourcesMasterExcel: {resourcesMasterExcel}");
-
-        try
-        {
-            await Task.Run(async () =>
-            {
-                using var httpClient = new HttpClient();
-                httpClient.Timeout = TimeSpan.FromSeconds(60); // Add timeout
-                Log.Debug("Starting HTTP request to fetch maintenance codes");
-
-                string response;
-                try
-                {
-                    response = await httpClient.GetStringAsync("https://prod-18.australiasoutheast.logic.azure.com:443/workflows/7d90dc45ba274d86992b23406da6a420/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=fbi68AVQta0kznlTwHvggUqjoSuLZar2MME9iTklucY&action=SEND_MT_CODES");
-                    Log.Debug($"HTTP request completed. Response length: {response?.Length}");
-                }
-                catch (TaskCanceledException ex)
-                {
-                    Log.Error($"HTTP request timed out: {ex.Message}");
-                    throw;
-                }
-                catch (HttpRequestException ex)
-                {
-                    Log.Error($"HTTP request failed: {ex.Message}", ex);
-                    throw;
-                }
-
-                if (string.IsNullOrEmpty(response))
-                {
-                    Log.Warning("Received empty response from server");
-                    throw new Exception("Empty response received");
-                }
-
-                if (!response.Contains("Code") || !response.EndsWith("Code_End"))
-                {
-                    Log.Warning($"Invalid response format. Contains 'Code': {response.Contains("Code")}, Ends with 'Code_End': {response.EndsWith("Code_End")}");
-                    throw new Exception($"Invalid response format: {response}");
-                }
-
-                try
-                {
-                    var codes = response.Split(new[] { "Code", "Code_End" }, StringSplitOptions.RemoveEmptyEntries)[1].Trim().Split('\n');
-                    Log.Debug($"Found {codes.Length} potential codes in response");
-
-                    foreach (var code in codes)
-                    {
-                        if (string.IsNullOrWhiteSpace(code))
-                        {
-                            Log.Debug("Skipping empty code entry");
-                            continue;
-                        }
-
-                        if (int.TryParse(code.Trim(), out var personnelCode))
-                        {
-                            App.MaintenanceCodes.Add(personnelCode);
-                            //Log.Verbose($"Added maintenance code: {personnelCode}");
-                        }
-                        else
-                        {
-                            Log.Warning($"Failed to parse code: {code.Trim()}");
-                        }
-                    }
-                    AppState.MaintenanceCodesLoaded = true;
-                }
-                catch (IndexOutOfRangeException ex)
-                {
-                    Log.Error($"Response parsing failed - invalid split result: {ex.Message}", ex);
-                    throw new Exception("Failed to parse response structure");
-                }
-            });
-        }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
-        {
-            Log.Error($"Network-related error occurred: {ex.Message}", ex);
-            Log.Information("Falling back to XML initialization");
-            await Task.Run(() => InitializeMaintenanceCodesXml(resourcesMasterExcel));
-        }
-        catch (Exception ex)
-        {
-            Log.Error($"Unexpected error occurred: {ex.Message}", ex);
-            Log.Information("Falling back to XML initialization");
-            await Task.Run(() => InitializeMaintenanceCodesXml(resourcesMasterExcel));
-        }
-        finally
-        {
-            Log.Information($"Populated Maintenance Codes [Length: {App.MaintenanceCodes.Count}]");
-            Log.Verbose("Employee Code DL End");
-        }
-    }
-
-    //public static async Task InitializeMaintenanceCodesHttp(string resourcesMasterExcel)
-    //{
-    //    Log.Verbose("Employee Code DL Start");
-
-    //    try
-    //    {
-    //        await Task.Run(async () =>
-    //        {
-    //            using var httpClient = new HttpClient();
-    //            var response = await httpClient.GetStringAsync("https://prod-18.australiasoutheast.logic.azure.com:443/workflows/7d90dc45ba274d86992b23406da6a420/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=fbi68AVQta0kznlTwHvggUqjoSuLZar2MME9iTklucY&action=SEND_MT_CODES");
-
-    //            if (!string.IsNullOrEmpty(response) && response.Contains("Code") && response.EndsWith("Code_End"))
-    //            {
-    //                var codes = response.Split(new[] { "Code", "Code_End" }, StringSplitOptions.RemoveEmptyEntries)[1].Trim().Split('\n');
-    //                foreach (var code in codes)
-    //                {
-    //                    if (int.TryParse(code, out var personnelCode))
-    //                    {
-    //                        //App.MaintenanceCodes.Add(code.Trim());
-    //                        App.MaintenanceCodes.Add(personnelCode);
-
-    //                    }
-    //                }
-    //                AppState.MaintenanceCodesLoaded = true;
-    //            }
-    //            else
-    //            {
-    //                throw new Exception("Invalid response format");
-    //            }
-    //        });
-    //    }
-    //    catch (HttpRequestException ex)
-    //    {
-    //        Log.Error($"HTTP request failed: {ex.Message}");
-    //        await Task.Run(() => InitializeMaintenanceCodesXml(resourcesMasterExcel));
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        Log.Error($"An error occurred: {ex.Message}");
-    //        await Task.Run(() => InitializeMaintenanceCodesXml(resourcesMasterExcel));
-    //    }
-    //    Log.Verbose("Employee Code DL End");
-    //    Log.Information($"Populated Maintenance Codes [Length: {App.MaintenanceCodes.Count}]");
-    //}
-
-    public static async Task InitializeMaintenanceCodesXml(string filePath)
-    {
-        await Task.Run(() =>
-        {
-            try
-            {
-                using var doc = SpreadsheetDocument.Open(filePath, false);
-                var workbookPart = doc.WorkbookPart;
-                var sheet = workbookPart?.Workbook.Descendants<Sheet>().FirstOrDefault();
-                if (sheet == null || sheet.Id == null) throw new Exception("Sheet not found in the Excel file.");
-
-                var worksheetPart = workbookPart.GetPartById(sheet.Id) as WorksheetPart ?? throw new Exception("Worksheet part not found in the Excel file.");
-                var sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault() ?? throw new Exception("Sheet data not found in the Excel file.");
-                foreach (var row in sheetData.Elements<Row>().Where(r => r.RowIndex >= 10))
-                {
-                    var personnelCodeStr = GetCellValue(row, "B", workbookPart);
-                    var department = GetCellValue(row, "G", workbookPart);
-                    var activeStatus = GetCellValue(row, "O", workbookPart);
-
-                    if (int.TryParse(personnelCodeStr, out var personnelCode) &&
-                        !string.IsNullOrEmpty(department) && department.StartsWith("MT", StringComparison.OrdinalIgnoreCase) &&
-                        activeStatus.Equals("Yes", StringComparison.OrdinalIgnoreCase))
-                    {
-                        App.MaintenanceCodes.Add(personnelCode);
-                    }
-                }
-                AppState.MaintenanceCodesLoaded = true;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Failed to populate employee codes from local Excel file.");
-                AppState.MaintenanceCodesLoaded = false;
-            }
-        });
-    }
-
-    public static async Task TrimEmployeeDictionaryCodesAsync()
-    {
-        
-        Log.Verbose($"Trim Codes Start [Length: {App.EmployeeDict.Count}]");
-        if (AppState.EmployeeDictionaryLoaded && AppState.MaintenanceCodesLoaded && !AppState.EmployeeDictionaryTrimmed)
-        {
-            await Task.Run(() =>
-            {
-                var maintenanceCodeset = new HashSet<int>(App.MaintenanceCodes);
-                var keysToRemove = App.EmployeeDict.Keys.Where(key => !maintenanceCodeset.Contains(key)).ToList();
-                foreach (var key in keysToRemove)
-                {
-                    App.EmployeeDict.Remove(key);
-                }
-                AppState.EmployeeDictionaryTrimmed = true;
-            });
-        }
-        Log.Verbose($"Trim Codes End [Length: {App.EmployeeDict.Count}]");
-        //Log.Information($"Trimmed Employee Dict [Length: {App.EmployeeDict.Count}]");
-    }
-
+    
     public static async Task TrimEmployeeDictionaryShiftType()
     {
         await Task.Run(() =>
@@ -274,19 +81,17 @@ public class ExcelService
 
             foreach (var row in sheetData.Elements<Row>().Where(r => r.RowIndex >= 10))
             {
-                var maintenanceCodestr = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(2), workbookPart);
+                var maintenanceCodestr = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(3), workbookPart);
 
                 if (string.IsNullOrEmpty(maintenanceCodestr) ||
-                    App.MaintenanceCodes.Count == 0 ||
-                    !int.TryParse(maintenanceCodestr, out var personnelCode) ||
-                    !App.MaintenanceCodes.Contains(personnelCode))
+                    !int.TryParse(maintenanceCodestr, out var personnelCode) )
                 {
                     continue;
                 }
                 var firstName = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(0), workbookPart);
                 if (trimShiftTypes)
                 {
-                    var firstShiftValue = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(3), workbookPart);
+                    var firstShiftValue = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(4), workbookPart);
                     //Console.WriteLine(firstName + @" " + firstShiftValue);
                     if (!validShiftTypes.Contains(firstShiftValue))
                     {
@@ -300,7 +105,7 @@ public class ExcelService
 
                 for (var i = 0; i < 8; i++)
                 {
-                    var shiftValue = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(i + 3), workbookPart);
+                    var shiftValue = GetCellValue(row.Elements<Cell>().ElementAtOrDefault(i + 4), workbookPart);
 
                     if (i == 0)
                     {
@@ -310,8 +115,8 @@ public class ExcelService
                 }
                 App.EmployeeDict[personnelCode] = employee;
             }
-            AppState.TrimShiftRequired = !trimShiftTypes;
-            AppState.EmployeeDictionaryLoaded = true;
+            //AppState.TrimShiftRequired = !trimShiftTypes;
+            //AppState.EmployeeDictionaryLoaded = true;
 
         }
         catch (Exception ex)
@@ -360,7 +165,7 @@ public class ExcelService
 
     private static DateTime GetRosterStartDate(WorksheetPart worksheetPart)
     {
-        var cell = worksheetPart.Worksheet.Descendants<Cell>().FirstOrDefault(c => c.CellReference == "D1");
+        var cell = worksheetPart.Worksheet.Descendants<Cell>().FirstOrDefault(c => c.CellReference == "E1");
         if (cell == null || cell.CellValue == null)
         {
             Console.WriteLine("D1 is empty or not found.");
@@ -495,6 +300,201 @@ public class ExcelService
     //    await Task.Run(() => PopulateEmployeeDictionaryUsingXml(employeeDict, resourcesOnSiteExcel));
     //    // Trim the employee dictionary
     //    await Task.Run(() => TrimEmployeeDictionaryCodesAsync(employeeDict, App.MaintenanceCodes));
+    //}
+
+    //public static async Task InitializeMaintenanceCodesHttp(string resourcesMasterExcel)
+    //{
+    //    Log.Verbose("Employee Code DL Start");
+    //    Log.Debug($"Input parameter resourcesMasterExcel: {resourcesMasterExcel}");
+
+    //    try
+    //    {
+    //        await Task.Run(async () =>
+    //        {
+    //            using var httpClient = new HttpClient();
+    //            httpClient.Timeout = TimeSpan.FromSeconds(60); // Add timeout
+    //            Log.Debug("Starting HTTP request to fetch maintenance codes");
+
+    //            string response;
+    //            try
+    //            {
+    //                response = await httpClient.GetStringAsync("https://prod-18.australiasoutheast.logic.azure.com:443/workflows/7d90dc45ba274d86992b23406da6a420/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=fbi68AVQta0kznlTwHvggUqjoSuLZar2MME9iTklucY&action=SEND_MT_CODES");
+    //                Log.Debug($"HTTP request completed. Response length: {response?.Length}");
+    //            }
+    //            catch (TaskCanceledException ex)
+    //            {
+    //                Log.Error($"HTTP request timed out: {ex.Message}");
+    //                throw;
+    //            }
+    //            catch (HttpRequestException ex)
+    //            {
+    //                Log.Error($"HTTP request failed: {ex.Message}", ex);
+    //                throw;
+    //            }
+
+    //            if (string.IsNullOrEmpty(response))
+    //            {
+    //                Log.Warning("Received empty response from server");
+    //                throw new Exception("Empty response received");
+    //            }
+
+    //            if (!response.Contains("Code") || !response.EndsWith("Code_End"))
+    //            {
+    //                Log.Warning($"Invalid response format. Contains 'Code': {response.Contains("Code")}, Ends with 'Code_End': {response.EndsWith("Code_End")}");
+    //                throw new Exception($"Invalid response format: {response}");
+    //            }
+
+    //            try
+    //            {
+    //                var codes = response.Split(new[] { "Code", "Code_End" }, StringSplitOptions.RemoveEmptyEntries)[1].Trim().Split('\n');
+    //                Log.Debug($"Found {codes.Length} potential codes in response");
+
+    //                foreach (var code in codes)
+    //                {
+    //                    if (string.IsNullOrWhiteSpace(code))
+    //                    {
+    //                        Log.Debug("Skipping empty code entry");
+    //                        continue;
+    //                    }
+
+    //                    if (int.TryParse(code.Trim(), out var personnelCode))
+    //                    {
+    //                        App.MaintenanceCodes.Add(personnelCode);
+    //                        //Log.Verbose($"Added maintenance code: {personnelCode}");
+    //                    }
+    //                    else
+    //                    {
+    //                        Log.Warning($"Failed to parse code: {code.Trim()}");
+    //                    }
+    //                }
+    //                AppState.MaintenanceCodesLoaded = true;
+    //            }
+    //            catch (IndexOutOfRangeException ex)
+    //            {
+    //                Log.Error($"Response parsing failed - invalid split result: {ex.Message}", ex);
+    //                throw new Exception("Failed to parse response structure");
+    //            }
+    //        });
+    //    }
+    //    catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+    //    {
+    //        Log.Error($"Network-related error occurred: {ex.Message}", ex);
+    //        Log.Information("Falling back to XML initialization");
+    //        await Task.Run(() => InitializeMaintenanceCodesXml(resourcesMasterExcel));
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        Log.Error($"Unexpected error occurred: {ex.Message}", ex);
+    //        Log.Information("Falling back to XML initialization");
+    //        await Task.Run(() => InitializeMaintenanceCodesXml(resourcesMasterExcel));
+    //    }
+    //    finally
+    //    {
+    //        Log.Information($"Populated Maintenance Codes [Length: {App.MaintenanceCodes.Count}]");
+    //        Log.Verbose("Employee Code DL End");
+    //    }
+    //}
+
+    //public static async Task InitializeMaintenanceCodesHttp(string resourcesMasterExcel)
+    //{
+    //    Log.Verbose("Employee Code DL Start");
+
+    //    try
+    //    {
+    //        await Task.Run(async () =>
+    //        {
+    //            using var httpClient = new HttpClient();
+    //            var response = await httpClient.GetStringAsync("https://prod-18.australiasoutheast.logic.azure.com:443/workflows/7d90dc45ba274d86992b23406da6a420/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=fbi68AVQta0kznlTwHvggUqjoSuLZar2MME9iTklucY&action=SEND_MT_CODES");
+
+    //            if (!string.IsNullOrEmpty(response) && response.Contains("Code") && response.EndsWith("Code_End"))
+    //            {
+    //                var codes = response.Split(new[] { "Code", "Code_End" }, StringSplitOptions.RemoveEmptyEntries)[1].Trim().Split('\n');
+    //                foreach (var code in codes)
+    //                {
+    //                    if (int.TryParse(code, out var personnelCode))
+    //                    {
+    //                        //App.MaintenanceCodes.Add(code.Trim());
+    //                        App.MaintenanceCodes.Add(personnelCode);
+
+    //                    }
+    //                }
+    //                AppState.MaintenanceCodesLoaded = true;
+    //            }
+    //            else
+    //            {
+    //                throw new Exception("Invalid response format");
+    //            }
+    //        });
+    //    }
+    //    catch (HttpRequestException ex)
+    //    {
+    //        Log.Error($"HTTP request failed: {ex.Message}");
+    //        await Task.Run(() => InitializeMaintenanceCodesXml(resourcesMasterExcel));
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        Log.Error($"An error occurred: {ex.Message}");
+    //        await Task.Run(() => InitializeMaintenanceCodesXml(resourcesMasterExcel));
+    //    }
+    //    Log.Verbose("Employee Code DL End");
+    //    Log.Information($"Populated Maintenance Codes [Length: {App.MaintenanceCodes.Count}]");
+    //}
+
+    //public static async Task InitializeMaintenanceCodesXml(string filePath)
+    //{
+    //    await Task.Run(() =>
+    //    {
+    //        try
+    //        {
+    //            using var doc = SpreadsheetDocument.Open(filePath, false);
+    //            var workbookPart = doc.WorkbookPart;
+    //            var sheet = workbookPart?.Workbook.Descendants<Sheet>().FirstOrDefault();
+    //            if (sheet == null || sheet.Id == null) throw new Exception("Sheet not found in the Excel file.");
+
+    //            var worksheetPart = workbookPart.GetPartById(sheet.Id) as WorksheetPart ?? throw new Exception("Worksheet part not found in the Excel file.");
+    //            var sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault() ?? throw new Exception("Sheet data not found in the Excel file.");
+    //            foreach (var row in sheetData.Elements<Row>().Where(r => r.RowIndex >= 10))
+    //            {
+    //                var personnelCodeStr = GetCellValue(row, "B", workbookPart);
+    //                var department = GetCellValue(row, "G", workbookPart);
+    //                var activeStatus = GetCellValue(row, "O", workbookPart);
+
+    //                if (int.TryParse(personnelCodeStr, out var personnelCode) &&
+    //                    !string.IsNullOrEmpty(department) && department.StartsWith("MT", StringComparison.OrdinalIgnoreCase) &&
+    //                    activeStatus.Equals("Yes", StringComparison.OrdinalIgnoreCase))
+    //                {
+    //                    App.MaintenanceCodes.Add(personnelCode);
+    //                }
+    //            }
+    //            AppState.MaintenanceCodesLoaded = true;
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            Log.Error(ex, "Failed to populate employee codes from local Excel file.");
+    //            AppState.MaintenanceCodesLoaded = false;
+    //        }
+    //    });
+    //}
+
+    //public static async Task TrimEmployeeDictionaryCodesAsync()
+    //{
+
+    //    Log.Verbose($"Trim Codes Start [Length: {App.EmployeeDict.Count}]");
+    //    if (AppState.EmployeeDictionaryLoaded && AppState.MaintenanceCodesLoaded && !AppState.EmployeeDictionaryTrimmed)
+    //    {
+    //        await Task.Run(() =>
+    //        {
+    //            var maintenanceCodeset = new HashSet<int>(App.MaintenanceCodes);
+    //            var keysToRemove = App.EmployeeDict.Keys.Where(key => !maintenanceCodeset.Contains(key)).ToList();
+    //            foreach (var key in keysToRemove)
+    //            {
+    //                App.EmployeeDict.Remove(key);
+    //            }
+    //            AppState.EmployeeDictionaryTrimmed = true;
+    //        });
+    //    }
+    //    Log.Verbose($"Trim Codes End [Length: {App.EmployeeDict.Count}]");
+    //    //Log.Information($"Trimmed Employee Dict [Length: {App.EmployeeDict.Count}]");
     //}
 }
 
