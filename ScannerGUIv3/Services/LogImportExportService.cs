@@ -11,12 +11,13 @@ public class LogImportExportService
     //private const string DownloadRosterUrl = "https://prod-29.australiasoutheast.logic.azure.com:443/workflows/293376f5258e440588acf2deed6bbe93/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dIh-XwF7tJQL-zKPEiqu8wY3HhuLg26zrLDHAjtFlC8";
     private const string DownloadRosterUrl = "https://prod-31.australiaeast.logic.azure.com:443/workflows/632911e333f54280b5f23c1fdad9039b/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=PB6P68kCxrWk2PYPYqenD1hY2fHPiWQhUPKfJ0x6vbc";
     public const string EmailUrl = "https://prod-02.australiasoutheast.logic.azure.com:443/workflows/94e6d29eed054a53b89b8448102a3ead/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ufoRVxP9dOGh8OP5VtuwYZAW3n25kYV8HN9_L8qnlGw";
-    public const string TeamsUrl = "https://prod-03.australiaeast.logic.azure.com:443/workflows/dcd41880b0ab49b5a56f15e03fa3fbd7/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=PtCPW3Ch2ijFDjByU6dx1pUx_u1splgZFLQ2qwk1pjs";
-    private const string TeamsTableUrl = "https://prod-31.australiaeast.logic.azure.com:443/workflows/212c98481a9642aba8db911f9a4b230a/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Ct06peZb9klgAGg0pMNihNl9vhydcyVLbhZagdrUMLk";
+    //public const string TeamsUrl = "https://prod-03.australiaeast.logic.azure.com:443/workflows/dcd41880b0ab49b5a56f15e03fa3fbd7/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=PtCPW3Ch2ijFDjByU6dx1pUx_u1splgZFLQ2qwk1pjs";
+    private const string TeamsTableUrl = "https://prod-06.australiaeast.logic.azure.com:443/workflows/55864becb65844baa48749bf029985df/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9VFdB_qY9-fdrAcS-lbiBqYKNZjaRZqBe3oQxvOiZ40";
+    //private const string TeamsTableUrl = "https://prod-31.australiaeast.logic.azure.com:443/workflows/212c98481a9642aba8db911f9a4b230a/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Ct06peZb9klgAGg0pMNihNl9vhydcyVLbhZagdrUMLk";
     private const string RosterDateUrl =
         "https://prod-39.australiasoutheast.logic.azure.com:443/workflows/77439615022643799f39a62f6d6704b6/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=tBbbMYRU4lAzKJZsVILQnA1BT4WooIvvWekVziKEhNw";
     private const string EmailTableUrl = "https://prod-19.australiaeast.logic.azure.com:443/workflows/512e71742dcc42a18aadc445eaad070d/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=s5AoSnzv_rwQgYo-b5uucsmHcTdB-QlOoyIyRnu20LU";
-
+        
     public static async Task<bool> GetRosterDate()
     {
         try
@@ -124,21 +125,21 @@ public class LogImportExportService
         }
     }
 
-    public static async Task<bool> ExportToWeb(string url, object payload)
-    {
-        try
-        {
-            using var client = new HttpClient();
-            var json = JsonSerializer.Serialize(payload);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await client.PostAsync(url, content);
-            return response.IsSuccessStatusCode;
-        }
-        catch (Exception ex)
-        {
-            return false;
-        }
-    }
+    //public static async Task<bool> ExportToWeb(string url, object payload)
+    //{
+    //    try
+    //    {
+    //        using var client = new HttpClient();
+    //        var json = JsonSerializer.Serialize(payload);
+    //        var content = new StringContent(json, Encoding.UTF8, "application/json");
+    //        var response = await client.PostAsync(url, content);
+    //        return response.IsSuccessStatusCode;
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        return false;
+    //    }
+    //}
 
     public static async Task SaveEmployeeDictionaryAsync(string filePath)
     {
@@ -156,21 +157,21 @@ public class LogImportExportService
         }
     }
 
-    public static async Task<Dictionary<int, Employee>> LoadEmployeeDictionaryAsync(string filePath)
-    {
-        try
-        {
-            var json = await File.ReadAllTextAsync(filePath);
-            var employeeDict = JsonSerializer.Deserialize<Dictionary<int, Employee>>(json);
-            Log.Information("Employee Dictionary Loaded: {FilePath}", filePath);
-            return employeeDict ?? new Dictionary<int, Employee>();
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Employee Dictionary NOT Loaded {FilePath}", filePath);
-            return new Dictionary<int, Employee>();
-        }
-    }
+    //public static async Task<Dictionary<int, Employee>> LoadEmployeeDictionaryAsync(string filePath)
+    //{
+    //    try
+    //    {
+    //        var json = await File.ReadAllTextAsync(filePath);
+    //        var employeeDict = JsonSerializer.Deserialize<Dictionary<int, Employee>>(json);
+    //        Log.Information("Employee Dictionary Loaded: {FilePath}", filePath);
+    //        return employeeDict ?? new Dictionary<int, Employee>();
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        Log.Error(ex, "Employee Dictionary NOT Loaded {FilePath}", filePath);
+    //        return new Dictionary<int, Employee>();
+    //    }
+    //}
 
     public static string ExportShiftLogWithSignInStatus(Dictionary<int, Employee> employeeDict, string shiftType)
     {
@@ -346,24 +347,24 @@ public class LogImportExportService
         return employeeList.ToArray();
     }
 
-    public static string PrepareJsonMessageForPowerAutomate(string shiftType)
-    {
-        var signedInRows = GetEmployeeRows(App.EmployeeDict, shiftType);
-        var notSignedInRows = GetEmployeeRows(App.EmployeeDict, shiftType, false);
+    //public static string PrepareJsonMessageForPowerAutomate(string shiftType)
+    //{
+    //    var signedInRows = GetEmployeeRows(App.EmployeeDict, shiftType);
+    //    var notSignedInRows = GetEmployeeRows(App.EmployeeDict, shiftType, false);
 
-        var message = new
-        {
-            signedIn = signedInRows,
-            notSignedIn = notSignedInRows
-        };
+    //    var message = new
+    //    {
+    //        signedIn = signedInRows,
+    //        notSignedIn = notSignedInRows
+    //    };
 
-        return System.Text.Json.JsonSerializer.Serialize(message, new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
-        ;
-    }
+    //    return System.Text.Json.JsonSerializer.Serialize(message, new JsonSerializerOptions
+    //    {
+    //        WriteIndented = true,
+    //        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    //    });
+    //    ;
+    //}
 
     public static async Task<bool> ExportAdaptiveCardFromTemplateAsync(Dictionary<int, Employee> employeeDict, string shiftType, string message = "")
     {
@@ -483,19 +484,19 @@ public class LogImportExportService
     }
 
     // RETIRED
-    public static string ExportShiftLog(Dictionary<int, Employee> employeeDict, string shiftType)
-    {
-        var csvBuilder = new StringBuilder();
-        foreach (var employee in employeeDict.Values)
-        {
-            if (employee.ShiftType != shiftType)
-            {
-                continue;
-            }
+    //public static string ExportShiftLog(Dictionary<int, Employee> employeeDict, string shiftType)
+    //{
+    //    var csvBuilder = new StringBuilder();
+    //    foreach (var employee in employeeDict.Values)
+    //    {
+    //        if (employee.ShiftType != shiftType)
+    //        {
+    //            continue;
+    //        }
 
-            var line = $"{employee.Name}, {employee.EmployeeNumber}, {employee.FormattedSignInTime}, {employee.FormattedSignOutTime}<br>";
-            csvBuilder.AppendLine(line);
-        }
-        return csvBuilder.ToString();
-    }
+    //        var line = $"{employee.Name}, {employee.EmployeeNumber}, {employee.FormattedSignInTime}, {employee.FormattedSignOutTime}<br>";
+    //        csvBuilder.AppendLine(line);
+    //    }
+    //    return csvBuilder.ToString();
+    //}
 }

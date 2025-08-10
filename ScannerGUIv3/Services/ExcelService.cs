@@ -56,7 +56,6 @@ public class ExcelService
         });
     }
 
-    // RETIRED
     public static void PopulateEmployeeDictionaryUsingXml(string excelPath, bool trimShiftTypes = true)
     {
         var validShiftTypes = new HashSet<string> { "NS", "DS", "D1", "D2" };

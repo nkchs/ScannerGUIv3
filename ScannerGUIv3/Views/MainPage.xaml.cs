@@ -110,6 +110,7 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
             throw; // TODO handle exception
         }
     }
+    
     private async void debugTwoButton_Click(object sender, RoutedEventArgs e)
     {
         Console.ForegroundColor = ConsoleColor.Blue;

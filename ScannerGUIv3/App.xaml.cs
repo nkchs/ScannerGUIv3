@@ -113,13 +113,14 @@ public partial class App : Application
     // ====================================================================================================================
 
     // Variable Declarations ==============================================================================================
-    //public static readonly List<int> MaintenanceCodes = [];
-
+    
     private static readonly List<string> DebugEmployeeNumbers =
     [
         "20898", "24781", "22388", "24410", "24065", "11356", "27065", "5565", "15734", "3264", "23485", "22794", "4870",
-        "4092", "20304", "18062", "23650", "22280", "23672", "20136328", "22139", "5793", "24687", "22483", "3413", "27048"
+        "4092", "20304", "18062", "23650", "22280", "23672", "20136328", "22139", "5793", "24687", "22483", "3413", "27048",
+        "24719","90117936", "5478", "18680"
     ];
+
     // Dictionaries Start =================================================================================================
     public static Dictionary<int, Employee> EmployeeDict { get; set; } = [];
     public static Dictionary<int, Employee> EmployeeCrossoverDict { get; set; } = [];
@@ -144,6 +145,9 @@ public partial class App : Application
         await Task.Run(() => ExcelService.PopulateEmployeeDictionaryUsingXml(AppState.ResourcesOnSiteExcelPath));
 
         AppState.StartUpFunctionsComplete = true;
+
+        SignInEmployees(DebugEmployeeNumbers);
+
         Log.Warning("========== STARTUP FUNCTIONS END ==========");
     }
 
