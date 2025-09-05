@@ -217,10 +217,13 @@ namespace ScannerGUIv3.Services
             Console.WriteLine();
         }
 
+        // TODO Update these to email service.
+        // UPDATE email service so that it returns success or not?
         public static async Task Task2() // 6:10 AM Export the concluding night shift
         {
             Log.Verbose(@"Task 2 Executed");
-            var success = await LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "NS");
+            //var success = await LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "NS");
+            var success = await LogImportExportService.SendEmployeeDataAsync("nic.chase@greatland.com.au", "NS"); // This is the email export option.
             if (success)
             {
                 // Remove the previous Night Shift
@@ -234,14 +237,16 @@ namespace ScannerGUIv3.Services
         public static async Task Task3() // 7:00 am Export the starting dayshift
         {
             Log.Verbose(@"Task 3 Executed");
-            var success = await LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "DS");
+            //var success = await LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "DS");
+            var success = await LogImportExportService.SendEmployeeDataAsync("nic.chase@greatland.com.au", "DS"); // This is the email export option.
             Log.Verbose(success ? @"Task 3 Completed" : @"Task 3 Failed");
         }
 
         public static async Task Task6() // 10:30 AM Export the current dayshift to capture flights in
         {
             Log.Verbose(@"Task 6 Executed");
-            var success = await LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "DS");
+            //var success = await LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "DS");
+            var success = await LogImportExportService.SendEmployeeDataAsync("nic.chase@greatland.com.au", "DS"); // This is the email export option.
             Log.Verbose(success ? @"Task 6 Completed" : @"Task 6 Failed");
         }
 
@@ -250,7 +255,8 @@ namespace ScannerGUIv3.Services
             Log.Verbose(@"Task 4 Executed");
             try
             {
-                var success = await LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "NS");
+                //var success = await LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "NS");
+                var success = await LogImportExportService.SendEmployeeDataAsync("nic.chase@greatland.com.au", "NS"); // This is the email export option.
                 // Generate the crossover shiftLog
                 if (success)
                 {

@@ -72,25 +72,25 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
     {
         try
         {
+            _ = await LogImportExportService.CheckMostRecentReportDate(LogImportExportService.WorkforceJobUrl, LogImportExportService.bearerToken);
+            
+            //LogImportExportService.GetRosterDate(); // This was the active line 05/09/25 | Everything else was commented out.
+
+
+            // RETIRED RETIRED RETIRED
             //var success = await LogImportExportService.GetRosterDate();
             //Console.WriteLine(success);
-            LogImportExportService.GetRosterDate();
             //_ = ScheduleService.Task1();
             //Console.WriteLine();
-
             //var nightshifttable = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, "NS");
             //Console.WriteLine(nightshifttable);
-
             //await ExcelService.NightShiftCrossoverAsync();
             //Console.ForegroundColor = ConsoleColor.Red;
             //Console.WriteLine("\nDebug");
-
             //Console.WriteLine(AppState.CurrentDate);
             //Console.WriteLine(AppState.Today);
-
             //Console.WriteLine(AppState.DayShiftStart);
             //Console.WriteLine(AppState.DayShiftEnd);
-
             //Console.WriteLine(AppState.NightShiftStart);
             //Console.WriteLine(AppState.NightShiftEnd);
 

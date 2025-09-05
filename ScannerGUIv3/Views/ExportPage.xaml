@@ -71,9 +71,10 @@
           Margin="0,0,0,10"
           SelectedIndex="0">
             <ComboBoxItem Content="Email"/>
-            <ComboBoxItem Content="Teams"/>
             <ComboBoxItem Content="File"/>
         </ComboBox>
+
+        <!--   <ComboBoxItem Content="Teams"/> Place this inbetween   -->
 
         <!-- Shift Dropdown -->
         <TextBlock

@@ -1,9 +1,13 @@
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
+using Microsoft.MarkedNet;
+
+
 //using Newtonsoft.Json;
 using ScannerGUIv3.Definitions;
 using Serilog;
-
 namespace ScannerGUIv3.Services;
 
 public class LogImportExportService
@@ -17,7 +21,10 @@ public class LogImportExportService
     private const string RosterDateUrl =
         "https://prod-39.australiasoutheast.logic.azure.com:443/workflows/77439615022643799f39a62f6d6704b6/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=tBbbMYRU4lAzKJZsVILQnA1BT4WooIvvWekVziKEhNw";
     private const string EmailTableUrl = "https://prod-19.australiaeast.logic.azure.com:443/workflows/512e71742dcc42a18aadc445eaad070d/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=s5AoSnzv_rwQgYo-b5uucsmHcTdB-QlOoyIyRnu20LU";
-        
+    public const string WorkforceJobUrl = "https://reportingtel.vixresources.com/api/external/saved-reports/FPM%20Roster%20Dataset%20SRF175%20Roster%20to%20Excel%20Today_Plus_14days";
+    public const string bearerToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZWwucHJvZCIsImlhdCI6MTc1Njk3NTM4NSwiZXhwIjoxNzg4NTExMzg1LCJhdWQiOiJodHRwczovL3JlcG9ydGluZ3RlbC52aXhyZXNvdXJjZXMuY29tIiwiaXNzIjoiaW54c29mdHdhcmUuY29tIn0.b3laHNksViAmp_tsIcHfYevm4J501mtj1u_tLDZbgg4";
+
+
     public static async Task<bool> GetRosterDate()
     {
         try
@@ -125,22 +132,6 @@ public class LogImportExportService
         }
     }
 
-    //public static async Task<bool> ExportToWeb(string url, object payload)
-    //{
-    //    try
-    //    {
-    //        using var client = new HttpClient();
-    //        var json = JsonSerializer.Serialize(payload);
-    //        var content = new StringContent(json, Encoding.UTF8, "application/json");
-    //        var response = await client.PostAsync(url, content);
-    //        return response.IsSuccessStatusCode;
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        return false;
-    //    }
-    //}
-
     public static async Task SaveEmployeeDictionaryAsync(string filePath)
     {
         try
@@ -156,22 +147,6 @@ public class LogImportExportService
             Log.Error(ex, "Employee Dictionary NOT Saved");
         }
     }
-
-    //public static async Task<Dictionary<int, Employee>> LoadEmployeeDictionaryAsync(string filePath)
-    //{
-    //    try
-    //    {
-    //        var json = await File.ReadAllTextAsync(filePath);
-    //        var employeeDict = JsonSerializer.Deserialize<Dictionary<int, Employee>>(json);
-    //        Log.Information("Employee Dictionary Loaded: {FilePath}", filePath);
-    //        return employeeDict ?? new Dictionary<int, Employee>();
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        Log.Error(ex, "Employee Dictionary NOT Loaded {FilePath}", filePath);
-    //        return new Dictionary<int, Employee>();
-    //    }
-    //}
 
     public static string ExportShiftLogWithSignInStatus(Dictionary<int, Employee> employeeDict, string shiftType)
     {
@@ -347,25 +322,6 @@ public class LogImportExportService
         return employeeList.ToArray();
     }
 
-    //public static string PrepareJsonMessageForPowerAutomate(string shiftType)
-    //{
-    //    var signedInRows = GetEmployeeRows(App.EmployeeDict, shiftType);
-    //    var notSignedInRows = GetEmployeeRows(App.EmployeeDict, shiftType, false);
-
-    //    var message = new
-    //    {
-    //        signedIn = signedInRows,
-    //        notSignedIn = notSignedInRows
-    //    };
-
-    //    return System.Text.Json.JsonSerializer.Serialize(message, new JsonSerializerOptions
-    //    {
-    //        WriteIndented = true,
-    //        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    //    });
-    //    ;
-    //}
-
     public static async Task<bool> ExportAdaptiveCardFromTemplateAsync(Dictionary<int, Employee> employeeDict, string shiftType, string message = "")
     {
         try
@@ -483,7 +439,86 @@ public class LogImportExportService
         }
     }
 
+
+    public static async Task<bool> CheckMostRecentReportDate(string urlForWorkforceJobs, string authToken)
+    {
+        var todaysDate = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fff");
+
+        try
+        {
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            if (!string.IsNullOrEmpty(authToken))
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
+            }
+            HttpResponseMessage response = await client.GetAsync(urlForWorkforceJobs);
+            response.EnsureSuccessStatusCode();
+
+            var responseBody = await response.Content.ReadAsStringAsync();
+            using var jsonDocument = JsonDocument.Parse(responseBody);
+            var mostRecentReportArray = jsonDocument.RootElement.EnumerateArray().ToArray();
+            Console.WriteLine($"mostRecentReportArray contains {mostRecentReportArray.Length} report(s).");
+
+            // Optional: Inspect the first report
+            if (mostRecentReportArray.Length > 0)
+            {
+                var report = mostRecentReportArray[0];
+                var savedReportId = report.GetProperty("savedReportId").GetString();
+                var mostRecentEventDate = report.GetProperty("eventDate").GetString();
+
+                //Console.WriteLine($"First report ID: {savedReportId}");
+                Console.WriteLine($"Most Recent Event Date: {mostRecentEventDate}");
+
+                if (todaysDate.Substring(0, 10) == mostRecentEventDate.Substring(0, 10))
+                {
+                    Console.WriteLine("Match: The most recent report is from today.");
+                }
+
+                Console.WriteLine("Debug");
+            }
+
+            Console.WriteLine("Debug");
+            return true;
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"Request failed: {ex.Message}");
+            return false;
+        }
+    }
+
+
+
+
+
+
     // RETIRED
+
+
+    //public static string PrepareJsonMessageForPowerAutomate(string shiftType)
+    //{
+    //    var signedInRows = GetEm+
+    //    ployeeRows(App.EmployeeDict, shiftType);
+    //    var notSignedInRows = GetEmployeeRows(App.EmployeeDict, shiftType, false);
+
+    //    var message = new
+    //    {
+    //        signedIn = signedInRows,
+    //        notSignedIn = notSignedInRows
+    //    };
+
+    //    return System.Text.Json.JsonSerializer.Serialize(message, new JsonSerializerOptions
+    //    {
+    //        WriteIndented = true,
+    //        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    //    });
+    //    ;
+    //}
+
+
     //public static string ExportShiftLog(Dictionary<int, Employee> employeeDict, string shiftType)
     //{
     //    var csvBuilder = new StringBuilder();
@@ -498,5 +533,39 @@ public class LogImportExportService
     //        csvBuilder.AppendLine(line);
     //    }
     //    return csvBuilder.ToString();
+    //}
+
+
+    //public static async Task<bool> ExportToWeb(string url, object payload)
+    //{
+    //    try
+    //    {
+    //        using var client = new HttpClient();
+    //        var json = JsonSerializer.Serialize(payload);
+    //        var content = new StringContent(json, Encoding.UTF8, "application/json");
+    //        var response = await client.PostAsync(url, content);
+    //        return response.IsSuccessStatusCode;
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        return false;
+    //    }
+    //}
+
+
+    //public static async Task<Dictionary<int, Employee>> LoadEmployeeDictionaryAsync(string filePath)
+    //{
+    //    try
+    //    {
+    //        var json = await File.ReadAllTextAsync(filePath);
+    //        var employeeDict = JsonSerializer.Deserialize<Dictionary<int, Employee>>(json);
+    //        Log.Information("Employee Dictionary Loaded: {FilePath}", filePath);
+    //        return employeeDict ?? new Dictionary<int, Employee>();
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        Log.Error(ex, "Employee Dictionary NOT Loaded {FilePath}", filePath);
+    //        return new Dictionary<int, Employee>();
+    //    }
     //}
 }

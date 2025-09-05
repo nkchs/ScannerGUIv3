@@ -19,41 +19,42 @@ public sealed partial class SettingsPage : Page
     {
         ViewModel = App.GetService<SettingsViewModel>();
         InitializeComponent();
+
     }
 
-    private async void PickFolderButton_Click(object sender, RoutedEventArgs e)
-    {
-        // Clear previous returned file name, if it exists, between iterations of this scenario
-        PickFolderOutputTextBlock.Text = "";
+    //private async void PickFolderButton_Click(object sender, RoutedEventArgs e)
+    //{
+    //    // Clear previous returned file name, if it exists, between iterations of this scenario
+    //    PickFolderOutputTextBlock.Text = "";
 
-        // Create a folder picker
-        var openPicker = new Windows.Storage.Pickers.FolderPicker();
+    //    // Create a folder picker
+    //    var openPicker = new Windows.Storage.Pickers.FolderPicker();
 
-        // See the sample code below for how to make the window accessible from the App class.
-        var window = App.MainWindow;
+    //    // See the sample code below for how to make the window accessible from the App class.
+    //    var window = App.MainWindow;
 
-        // Retrieve the window handle (HWND) of the current WinUI 3 window.
-        var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
+    //    // Retrieve the window handle (HWND) of the current WinUI 3 window.
+    //    var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
 
-        // Initialize the folder picker with the window handle (HWND).
-        WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hWnd);
+    //    // Initialize the folder picker with the window handle (HWND).
+    //    WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hWnd);
 
-        // Set options for your folder picker
-        openPicker.SuggestedStartLocation = PickerLocationId.Desktop;
-        openPicker.FileTypeFilter.Add("*");
+    //    // Set options for your folder picker
+    //    openPicker.SuggestedStartLocation = PickerLocationId.Desktop;
+    //    openPicker.FileTypeFilter.Add("*");
 
-        // Open the picker for the user to pick a folder
-        var folder = await openPicker.PickSingleFolderAsync();
-        if (folder != null)
-        {
-            StorageApplicationPermissions.FutureAccessList.AddOrReplace("PickedFolderToken", folder);
-            PickFolderOutputTextBlock.Text = "Picked folder: " + folder.Name;
-        }
-        else
-        {
-            PickFolderOutputTextBlock.Text = "Operation cancelled.";
-        }
-        Console.WriteLine(folder.Path);
-        Console.WriteLine("Debug.");
-    }
+    //    // Open the picker for the user to pick a folder
+    //    var folder = await openPicker.PickSingleFolderAsync();
+    //    if (folder != null)
+    //    {
+    //        StorageApplicationPermissions.FutureAccessList.AddOrReplace("PickedFolderToken", folder);
+    //        PickFolderOutputTextBlock.Text = "Picked folder: " + folder.Name;
+    //    }
+    //    else
+    //    {
+    //        PickFolderOutputTextBlock.Text = "Operation cancelled.";
+    //    }
+    //    Console.WriteLine(folder.Path);
+    //    Console.WriteLine("Debug.");
+    //}
 }

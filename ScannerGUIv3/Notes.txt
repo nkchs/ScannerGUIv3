@@ -1,0 +1,22 @@
+
+
+
+
+RETIRED
+
+<style>
+  th, td {
+    border: 1px solid black;
+    padding: 6px;
+    spacing: 0px;
+  }
+</style>
+
+<p class="editor-paragraph">
+<b><strong class="editor-text-bold">Signed In</strong></b>
+@{outputs('Compose_(signIn)')}
+
+
+<b><strong class="editor-text-bold">Not Signed In</strong></b>
+@{outputs('Compose_(notSignIn)')}
+</p>
