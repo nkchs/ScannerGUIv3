@@ -23,7 +23,7 @@ public class LogImportExportService
     private const string EmailTableUrl = "https://prod-19.australiaeast.logic.azure.com:443/workflows/512e71742dcc42a18aadc445eaad070d/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=s5AoSnzv_rwQgYo-b5uucsmHcTdB-QlOoyIyRnu20LU";
     public const string WorkforceJobUrl = "https://reportingtel.vixresources.com/api/external/saved-reports/FPM%20Roster%20Dataset%20SRF175%20Roster%20to%20Excel%20Today_Plus_14days";
     public const string bearerToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZWwucHJvZCIsImlhdCI6MTc1Njk3NTM4NSwiZXhwIjoxNzg4NTExMzg1LCJhdWQiOiJodHRwczovL3JlcG9ydGluZ3RlbC52aXhyZXNvdXJjZXMuY29tIiwiaXNzIjoiaW54c29mdHdhcmUuY29tIn0.b3laHNksViAmp_tsIcHfYevm4J501mtj1u_tLDZbgg4";
-
+    public static string WorkforceReportDownloadUri = "";
 
     public static async Task<bool> GetRosterDate()
     {
@@ -150,11 +150,11 @@ public class LogImportExportService
 
     public static string ExportShiftLogWithSignInStatus(Dictionary<int, Employee> employeeDict, string shiftType)
     {
-        const string singleline =       "+---------------------------------------------------------------------+";
-        const string generaltitle =     "| Name                         | ID       | Sign In     | Sign Out    |";
-        const string signedintitle =    "|                              Signed In                              |";
+        const string singleline = "+---------------------------------------------------------------------+";
+        const string generaltitle = "| Name                         | ID       | Sign In     | Sign Out    |";
+        const string signedintitle = "|                              Signed In                              |";
         const string notsignedintitle = "|                            Not Signed In                            |";
-        const string tabledivider =     "+------------------------------+----------+-------------+-------------+";
+        const string tabledivider = "+------------------------------+----------+-------------+-------------+";
 
         var csvBuilder = new StringBuilder();
         csvBuilder.AppendLine(singleline);
@@ -412,7 +412,7 @@ public class LogImportExportService
             Log.Information("The JSON string is {ByteCount} bytes long.", byteCount);
             //var kiloByteCount = byteCount / 1024.0; // Use 1024.0 to ensure floating-point division
             //Log.Information("The JSON string is {KiloByteCount:F2} kB long.", kiloByteCount);
-            
+
             // Serialize to JSON using System.Text.Json
             var json = JsonSerializer.Serialize(teamsMessage, new JsonSerializerOptions
             {
@@ -439,133 +439,334 @@ public class LogImportExportService
         }
     }
 
+    //public static async Task<bool> CheckMostRecentReportDate(string urlForWorkforceJobs, string authToken)
+    //{
+    //    try
+    //    {
+    //        using var client = new HttpClient();
+    //        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+    //        if (!string.IsNullOrEmpty(authToken))
+    //        {
+    //            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
+    //        }
+
+    //        HttpResponseMessage response = await client.GetAsync(urlForWorkforceJobs);
+    //        response.EnsureSuccessStatusCode();
+
+    //        var responseBody = await response.Content.ReadAsStringAsync();
+    //        using var jsonDocument = JsonDocument.Parse(responseBody);
+
+    //        // Check if the root element is an array
+    //        if (jsonDocument.RootElement.ValueKind != JsonValueKind.Array)
+    //        {
+    //            Console.WriteLine("Error: Response is not a JSON array.");
+    //            return false;
+    //        }
+
+    //        var mostRecentReportArray = jsonDocument.RootElement.EnumerateArray().ToArray();
+    //        Console.WriteLine($"Found {mostRecentReportArray.Length} report(s).");
+
+    //        if (mostRecentReportArray.Length == 0)
+    //        {
+    //            Console.WriteLine("No reports found in the response.");
+    //            return false;
+    //        }
+
+    //        // Process the first report
+    //        var report = mostRecentReportArray[0];
+
+
+    //        if (!report.TryGetProperty("files", out var filesElement) || filesElement.ValueKind != JsonValueKind.Array)
+    //        {
+    //            Console.WriteLine("Error: 'files' property is missing or not an array.");
+    //            return false;
+    //        }
+
+    //        var filesArray = filesElement.EnumerateArray().ToArray();
+
+    //        // Safely check for required properties
+    //        if (!report.TryGetProperty("eventDate", out var eventDateElement) || eventDateElement.ValueKind != JsonValueKind.String)
+    //        {
+    //            Console.WriteLine("Error: 'eventDate' property is missing or invalid.");
+    //            return false;
+    //        }
+
+    //        var mostRecentEventDate = eventDateElement.GetString();
+    //        if (!DateTime.TryParse(mostRecentEventDate, out var eventDate))
+    //        {
+    //            Console.WriteLine($"Error: Invalid date format for eventDate: {mostRecentEventDate}");
+    //            return false;
+    //        }
+
+    //        var today = DateTime.Today;
+    //        if (eventDate.Date == today)
+    //        {
+    //            Console.WriteLine($"Match: The most recent report date ({eventDate:yyyy-MM-dd}) is today.");
+    //            return true;
+    //        }
+
+    //        Console.WriteLine($"No match: The most recent report date ({eventDate:yyyy-MM-dd}) is not today.");
+    //        return false;
+    //    }
+    //    catch (HttpRequestException ex)
+    //    {
+    //        Console.WriteLine($"HTTP request failed: {ex.Message}");
+    //        return false;
+    //    }
+    //    catch (JsonException ex)
+    //    {
+    //        Console.WriteLine($"JSON parsing failed: {ex.Message}");
+    //        return false;
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        Console.WriteLine($"Unexpected error: {ex.Message}");
+    //        return false;
+    //    }
+    //}
+
+
+    //public static async Task<bool> CheckMostRecentReportDate(string urlForWorkforceJobs, string authToken)
+    //{
+    //    try
+    //    {
+    //        using var client = new HttpClient();
+    //        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+    //        if (!string.IsNullOrEmpty(authToken))
+    //        {
+    //            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
+    //        }
+
+    //        HttpResponseMessage response = await client.GetAsync(urlForWorkforceJobs);
+    //        response.EnsureSuccessStatusCode();
+
+    //        var responseBody = await response.Content.ReadAsStringAsync();
+    //        using var jsonDocument = JsonDocument.Parse(responseBody);
+
+    //        // Check if the root element is an array
+    //        if (jsonDocument.RootElement.ValueKind != JsonValueKind.Array)
+    //        {
+    //            Console.WriteLine("Error: Response is not a JSON array.");
+    //            return false;
+    //        }
+
+    //        var mostRecentReportArray = jsonDocument.RootElement.EnumerateArray().ToArray();
+    //        Console.WriteLine($"Found {mostRecentReportArray.Length} report(s).");
+
+    //        if (mostRecentReportArray.Length == 0)
+    //        {
+    //            Console.WriteLine("No reports found in the response.");
+    //            return false;
+    //        }
+
+    //        // Process the first report
+    //        var report = mostRecentReportArray[0];
+
+    //        // Validate required properties
+    //        if (!report.TryGetProperty("savedReportId", out var savedReportIdElement) || savedReportIdElement.ValueKind != JsonValueKind.String)
+    //        {
+    //            Console.WriteLine("Error: 'savedReportId' property is missing or invalid.");
+    //            return false;
+    //        }
+
+    //        if (!report.TryGetProperty("eventDate", out var eventDateElement) || eventDateElement.ValueKind != JsonValueKind.String)
+    //        {
+    //            Console.WriteLine("Error: 'eventDate' property is missing or invalid.");
+    //            return false;
+    //        }
+
+    //        if (!report.TryGetProperty("files", out var filesElement) || filesElement.ValueKind != JsonValueKind.Array)
+    //        {
+    //            Console.WriteLine("Error: 'files' property is missing or not an array.");
+    //            return false;
+    //        }
+
+    //        var savedReportId = savedReportIdElement.GetString();
+    //        var mostRecentEventDate = eventDateElement.GetString();
+    //        var filesArray = filesElement.EnumerateArray().ToArray();
+
+    //        Console.WriteLine($"Report ID: {savedReportId}");
+    //        Console.WriteLine($"Event Date: {mostRecentEventDate}");
+    //        Console.WriteLine($"Files Count: {filesArray.Length}");
+
+    //        // Validate files subarray
+    //        if (filesArray.Length == 0)
+    //        {
+    //            Console.WriteLine("Warning: 'files' subarray is empty.");
+    //            // Optionally return false if empty files is a failure condition
+    //            // return false;
+    //        }
+
+    //        // Validate each file in the files subarray
+    //        foreach (var file in filesArray)
+    //        {
+    //            if (!file.TryGetProperty("fileId", out var fileIdElement) || fileIdElement.ValueKind != JsonValueKind.String ||
+    //                !file.TryGetProperty("fileName", out var fileNameElement) || fileNameElement.ValueKind != JsonValueKind.String ||
+    //                !file.TryGetProperty("fileUri", out var fileUriElement) || fileUriElement.ValueKind != JsonValueKind.String)
+    //            {
+    //                Console.WriteLine("Error: A file in the 'files' subarray is missing required properties (fileId, fileName, or fileUri).");
+    //                return false;
+    //            }
+
+    //            Console.WriteLine($"File: {fileNameElement.GetString()} (ID: {fileIdElement.GetString()})");
+    //        }
+
+    //        // Validate and parse eventDate
+    //        if (!DateTime.TryParse(mostRecentEventDate, out var eventDate))
+    //        {
+    //            Console.WriteLine($"Error: Invalid date format for eventDate: {mostRecentEventDate}");
+    //            return false;
+    //        }
+
+    //        // Compare dates in AWST (today is September 6, 2025)
+    //        var today = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("W. Australia Standard Time")).Date;
+    //        if (eventDate.Date == today)
+    //        {
+    //            Console.WriteLine($"Match: The most recent report date ({eventDate:yyyy-MM-dd}) is today in AWST.");
+    //            WorkforceReportDownloadUri = "";
+    //            return true;
+    //        }
+
+    //        Console.WriteLine($"No match: The most recent report date ({eventDate:yyyy-MM-dd}) is not today in AWST.");
+    //        return false;
+    //    }
+    //    catch (HttpRequestException ex)
+    //    {
+    //        Console.WriteLine($"HTTP request failed: {ex.Message}");
+    //        return false;
+    //    }
+    //    catch (JsonException ex)
+    //    {
+    //        Console.WriteLine($"JSON parsing failed: {ex.Message}");
+    //        return false;
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        Console.WriteLine($"Unexpected error: {ex.Message}");
+    //        return false;
+    //    }
+    //}
 
     public static async Task<bool> CheckMostRecentReportDate(string urlForWorkforceJobs, string authToken)
     {
-        var todaysDate = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fff");
-
         try
         {
             using var client = new HttpClient();
-            client.DefaultRequestHeaders.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             if (!string.IsNullOrEmpty(authToken))
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
             }
+
             HttpResponseMessage response = await client.GetAsync(urlForWorkforceJobs);
             response.EnsureSuccessStatusCode();
 
             var responseBody = await response.Content.ReadAsStringAsync();
             using var jsonDocument = JsonDocument.Parse(responseBody);
-            var mostRecentReportArray = jsonDocument.RootElement.EnumerateArray().ToArray();
-            Console.WriteLine($"mostRecentReportArray contains {mostRecentReportArray.Length} report(s).");
 
-            // Optional: Inspect the first report
-            if (mostRecentReportArray.Length > 0)
+            // Check if the root element is an array
+            if (jsonDocument.RootElement.ValueKind != JsonValueKind.Array)
             {
-                var report = mostRecentReportArray[0];
-                var savedReportId = report.GetProperty("savedReportId").GetString();
-                var mostRecentEventDate = report.GetProperty("eventDate").GetString();
-
-                //Console.WriteLine($"First report ID: {savedReportId}");
-                Console.WriteLine($"Most Recent Event Date: {mostRecentEventDate}");
-
-                if (todaysDate.Substring(0, 10) == mostRecentEventDate.Substring(0, 10))
-                {
-                    Console.WriteLine("Match: The most recent report is from today.");
-                }
-
-                Console.WriteLine("Debug");
+                Console.WriteLine("Error: Response is not a JSON array.");
+                return false;
             }
 
-            Console.WriteLine("Debug");
-            return true;
+            var mostRecentReportArray = jsonDocument.RootElement.EnumerateArray().ToArray();
+            Console.WriteLine($"Found {mostRecentReportArray.Length} report(s).");
+
+            if (mostRecentReportArray.Length == 0)
+            {
+                Console.WriteLine("No reports found in the response.");
+                return false;
+            }
+
+            // Process the first report
+            var report = mostRecentReportArray[0];
+
+            // Validate required properties
+            if (!report.TryGetProperty("savedReportId", out var savedReportIdElement) || savedReportIdElement.ValueKind != JsonValueKind.String)
+            {
+                Console.WriteLine("Error: 'savedReportId' property is missing or invalid.");
+                return false;
+            }
+
+            if (!report.TryGetProperty("eventDate", out var eventDateElement) || eventDateElement.ValueKind != JsonValueKind.String)
+            {
+                Console.WriteLine("Error: 'eventDate' property is missing or invalid.");
+                return false;
+            }
+
+            if (!report.TryGetProperty("files", out var filesElement) || filesElement.ValueKind != JsonValueKind.Array)
+            {
+                Console.WriteLine("Error: 'files' property is missing or not an array.");
+                return false;
+            }
+
+            var savedReportId = savedReportIdElement.GetString();
+            var mostRecentEventDate = eventDateElement.GetString();
+            var filesArray = filesElement.EnumerateArray().ToArray();
+
+            Console.WriteLine($"Report ID: {savedReportId}");
+            Console.WriteLine($"Event Date: {mostRecentEventDate}");
+            Console.WriteLine($"Files Count: {filesArray.Length}");
+
+            // Validate files subarray
+            if (filesArray.Length == 0)
+            {
+                Console.WriteLine("Error: 'files' subarray is empty.");
+                return false; // Fail if no files are present
+            }
+
+            // Validate the first file and update WorkforceReportDownloadUri
+            var firstFile = filesArray[0];
+            if (!firstFile.TryGetProperty("fileId", out var fileIdElement) || fileIdElement.ValueKind != JsonValueKind.String ||
+                !firstFile.TryGetProperty("fileName", out var fileNameElement) || fileNameElement.ValueKind != JsonValueKind.String ||
+                !firstFile.TryGetProperty("fileUri", out var fileUriElement) || fileUriElement.ValueKind != JsonValueKind.String)
+            {
+                Console.WriteLine("Error: First file in 'files' subarray is missing required properties (fileId, fileName, or fileUri).");
+                return false;
+            }
+
+            // Update WorkforceReportDownloadUri with the fileUri
+            WorkforceReportDownloadUri = fileUriElement.GetString();
+            Console.WriteLine($"Updated WorkforceReportDownloadUri: {WorkforceReportDownloadUri}");
+            Console.WriteLine($"File: {fileNameElement.GetString()} (ID: {fileIdElement.GetString()})");
+
+            // Validate and parse eventDate
+            if (!DateTime.TryParse(mostRecentEventDate, out var eventDate))
+            {
+                Console.WriteLine($"Error: Invalid date format for eventDate: {mostRecentEventDate}");
+                return false;
+            }
+
+            // Compare dates in AWST (today is September 6, 2025, 09:41 PM AWST)
+            var today = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("W. Australia Standard Time")).Date;
+            if (eventDate.Date == today)
+            {
+                Console.WriteLine($"Match: The most recent report date ({eventDate:yyyy-MM-dd}) is today in AWST.");
+                return true;
+            }
+
+            Console.WriteLine($"No match: The most recent report date ({eventDate:yyyy-MM-dd}) is not today in AWST.");
+            return false;
         }
         catch (HttpRequestException ex)
         {
-            Console.WriteLine($"Request failed: {ex.Message}");
+            Console.WriteLine($"HTTP request failed: {ex.Message}");
+            return false;
+        }
+        catch (JsonException ex)
+        {
+            Console.WriteLine($"JSON parsing failed: {ex.Message}");
+            return false;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Unexpected error: {ex.Message}");
             return false;
         }
     }
-
-
-
-
-
-
-    // RETIRED
-
-
-    //public static string PrepareJsonMessageForPowerAutomate(string shiftType)
-    //{
-    //    var signedInRows = GetEm+
-    //    ployeeRows(App.EmployeeDict, shiftType);
-    //    var notSignedInRows = GetEmployeeRows(App.EmployeeDict, shiftType, false);
-
-    //    var message = new
-    //    {
-    //        signedIn = signedInRows,
-    //        notSignedIn = notSignedInRows
-    //    };
-
-    //    return System.Text.Json.JsonSerializer.Serialize(message, new JsonSerializerOptions
-    //    {
-    //        WriteIndented = true,
-    //        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    //    });
-    //    ;
-    //}
-
-
-    //public static string ExportShiftLog(Dictionary<int, Employee> employeeDict, string shiftType)
-    //{
-    //    var csvBuilder = new StringBuilder();
-    //    foreach (var employee in employeeDict.Values)
-    //    {
-    //        if (employee.ShiftType != shiftType)
-    //        {
-    //            continue;
-    //        }
-
-    //        var line = $"{employee.Name}, {employee.EmployeeNumber}, {employee.FormattedSignInTime}, {employee.FormattedSignOutTime}<br>";
-    //        csvBuilder.AppendLine(line);
-    //    }
-    //    return csvBuilder.ToString();
-    //}
-
-
-    //public static async Task<bool> ExportToWeb(string url, object payload)
-    //{
-    //    try
-    //    {
-    //        using var client = new HttpClient();
-    //        var json = JsonSerializer.Serialize(payload);
-    //        var content = new StringContent(json, Encoding.UTF8, "application/json");
-    //        var response = await client.PostAsync(url, content);
-    //        return response.IsSuccessStatusCode;
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        return false;
-    //    }
-    //}
-
-
-    //public static async Task<Dictionary<int, Employee>> LoadEmployeeDictionaryAsync(string filePath)
-    //{
-    //    try
-    //    {
-    //        var json = await File.ReadAllTextAsync(filePath);
-    //        var employeeDict = JsonSerializer.Deserialize<Dictionary<int, Employee>>(json);
-    //        Log.Information("Employee Dictionary Loaded: {FilePath}", filePath);
-    //        return employeeDict ?? new Dictionary<int, Employee>();
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        Log.Error(ex, "Employee Dictionary NOT Loaded {FilePath}", filePath);
-    //        return new Dictionary<int, Employee>();
-    //    }
-    //}
 }
