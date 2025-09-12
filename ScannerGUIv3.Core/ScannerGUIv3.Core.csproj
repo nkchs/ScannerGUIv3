@@ -2,9 +2,11 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>ScannerGUIv3.Core</RootNamespace>
-    <Platforms>AnyCPU;x64;x86</Platforms>
-    <Platforms>x86;x64;arm64;AnyCPU</Platforms>
+    <Platforms>x64</Platforms>
+    <Platforms>x64</Platforms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Contracts\Services\ISampleDataService.cs" />

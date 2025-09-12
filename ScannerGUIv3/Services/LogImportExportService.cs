@@ -25,6 +25,7 @@ public class LogImportExportService
     public const string bearerToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZWwucHJvZCIsImlhdCI6MTc1Njk3NTM4NSwiZXhwIjoxNzg4NTExMzg1LCJhdWQiOiJodHRwczovL3JlcG9ydGluZ3RlbC52aXhyZXNvdXJjZXMuY29tIiwiaXNzIjoiaW54c29mdHdhcmUuY29tIn0.b3laHNksViAmp_tsIcHfYevm4J501mtj1u_tLDZbgg4";
     public static string WorkforceReportDownloadUri = "";
 
+
     public static async Task<bool> GetRosterDate()
     {
         try
@@ -66,9 +67,78 @@ public class LogImportExportService
         }
     }
 
-    public static async Task<bool> DownloadExcelFileAsync(string filePath, string fileName)
+    // Static URL below, changed to dynamic URL.
+    //public static async Task<bool> DownloadExcelFileAsync(string filePath, string fileName)
+    //{
+    //    Log.Information("Attempting to download Excel file to {FilePath} with file name {FileName}", filePath, fileName);
+    //    try
+    //    {
+    //        // Validate inputs
+    //        if (string.IsNullOrWhiteSpace(filePath))
+    //        {
+    //            Log.Error("Validation failed: File path is null or empty.");
+    //            throw new ArgumentException(@"File path cannot be null or empty.", nameof(filePath));
+    //        }
+
+    //        if (string.IsNullOrWhiteSpace(fileName))
+    //        {
+    //            Log.Error("Validation failed: File name is null or empty.");
+    //            throw new ArgumentException(@"File name cannot be null or empty.", nameof(fileName));
+    //        }
+
+    //        // Ensure the directory exists
+    //        Log.Debug("Ensuring directory exists at path: {FilePath}", filePath);
+    //        Directory.CreateDirectory(filePath);
+
+    //        using var client = new HttpClient();
+
+    //        // Log request initiation
+    //        Log.Debug("Sending GET request to {DownloadRosterUrl} with HttpCompletionOption.ResponseContentRead", DownloadRosterUrl);
+
+    //        //using var response = await client.GetAsync(DownloadRosterUrl, HttpCompletionOption.ResponseContentRead);
+    //        using var response = await client.GetAsync(WorkforceReportDownloadUri, HttpCompletionOption.ResponseContentRead);
+
+    //        // Log response details
+    //        Log.Debug("Response received. Status Code: {StatusCode}", response.StatusCode);
+
+    //        response.EnsureSuccessStatusCode(); // Throws if not 200 OK
+
+    //        // Combine the path and filename
+    //        var fullFilePath = Path.Combine(filePath, fileName + ".xlsx");
+    //        Log.Debug("Full file path resolved to: {FullFilePath}", fullFilePath);
+
+    //        // Save the file content to disk
+    //        Log.Debug("Starting to copy content stream to disk.");
+    //        await using (var contentStream = await response.Content.ReadAsStreamAsync())
+    //        await using (var fileStream = new FileStream(fullFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+    //        {
+    //            await contentStream.CopyToAsync(fileStream);
+    //        }
+
+    //        Log.Information("Excel file successfully downloaded to {FullFilePath}", fullFilePath);
+    //        return true;
+    //    }
+    //    catch (HttpRequestException ex)
+    //    {
+    //        Log.Error(ex, "HTTP error occurred while downloading file: {Message}", ex.Message);
+    //        return false;
+    //    }
+    //    catch (IOException ex)
+    //    {
+    //        Log.Error(ex, "File I/O error occurred while saving the file: {Message}", ex.Message);
+    //        return false;
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        Log.Error(ex, "Unexpected error occurred: {Message}", ex.Message);
+    //        return false;
+    //    }
+    //}
+
+    // DynamicURL
+    public static async Task<bool> DownloadExcelFileAsync(string filePath, string fileName, string url)
     {
-        Log.Information("Attempting to download Excel file to {FilePath} with file name {FileName}", filePath, fileName);
+        Log.Information("Attempting to download Excel file from {Url} to {FilePath} with file name {FileName}", url, filePath, fileName);
         try
         {
             // Validate inputs
@@ -84,6 +154,12 @@ public class LogImportExportService
                 throw new ArgumentException(@"File name cannot be null or empty.", nameof(fileName));
             }
 
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                Log.Error("Validation failed: URL is null or empty.");
+                throw new ArgumentException(@"URL cannot be null or empty.", nameof(url));
+            }
+
             // Ensure the directory exists
             Log.Debug("Ensuring directory exists at path: {FilePath}", filePath);
             Directory.CreateDirectory(filePath);
@@ -91,9 +167,9 @@ public class LogImportExportService
             using var client = new HttpClient();
 
             // Log request initiation
-            Log.Debug("Sending GET request to {DownloadRosterUrl} with HttpCompletionOption.ResponseContentRead", DownloadRosterUrl);
+            Log.Debug("Sending GET request to {Url} with HttpCompletionOption.ResponseContentRead", url);
 
-            using var response = await client.GetAsync(DownloadRosterUrl, HttpCompletionOption.ResponseContentRead);
+            using var response = await client.GetAsync(url, HttpCompletionOption.ResponseContentRead);
 
             // Log response details
             Log.Debug("Response received. Status Code: {StatusCode}", response.StatusCode);
@@ -131,6 +207,7 @@ public class LogImportExportService
             return false;
         }
     }
+
 
     public static async Task SaveEmployeeDictionaryAsync(string filePath)
     {

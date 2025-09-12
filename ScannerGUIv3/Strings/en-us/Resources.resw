@@ -193,9 +193,9 @@
     <value>Export Address</value>
   </data>
   <data name="Settings_DefaultEmailAddress.Text" xml:space="preserve">
-    <value>nic.chase@greatland.com.au</value>
+    <value>jason.madden@greatland.com.au</value>
   </data>
   <data name="Settings_DefaultEmailAddressTextBox.PlaceholderText" xml:space="preserve">
-    <value>nic.chase@greatland.com.au</value>
+    <value>jason.madden@greatland.com.au</value>
   </data>
 </root>

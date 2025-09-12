@@ -73,9 +73,41 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         try
         {
             _ = await LogImportExportService.CheckMostRecentReportDate(LogImportExportService.WorkforceJobUrl, LogImportExportService.bearerToken);
-            
-            //LogImportExportService.GetRosterDate(); // This was the active line 05/09/25 | Everything else was commented out.
 
+            var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            Console.WriteLine(appDataPath);
+
+            //LogImportExportService.GetRosterDate(); // This was the active line 05/09/25 | Everything else was commented out.
+            try
+            {
+                // Get the Local AppData path (e.g., C:\Users\<Username>\AppData\Local)
+                string localAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+
+                // Create a subfolder for your app (e.g., YourApp or YourCompany\YourApp)
+                string appFolder = Path.Combine(localAppDataPath, "NCD", "Scanner");
+
+                // Create the directory if it doesn't exist
+                Directory.CreateDirectory(appFolder);
+
+                Console.WriteLine($"Folder created successfully at: {appFolder}");
+
+                // Optional: Test by creating a sample file in the folder
+                string testFilePath = Path.Combine(appFolder, "test.txt");
+                File.WriteAllText(testFilePath, "This is a test file.");
+                Console.WriteLine($"Test file created at: {testFilePath}");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Console.WriteLine($"Permission error: {ex.Message}");
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine($"IO error: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Unexpected error: {ex.Message}");
+            }
 
             // RETIRED RETIRED RETIRED
             //var success = await LogImportExportService.GetRosterDate();

@@ -31,6 +31,7 @@ public partial class App : Application
 
         // Variables
         AppState.ResourcesExcelFolderPath = @"C:\Users\Public\Documents\Scanner";
+        //Console.WriteLine(AppState.ResourcesExcelFolderPath);
 
         // Logger setup
         var customTheme = new AnsiConsoleTheme(
@@ -114,12 +115,12 @@ public partial class App : Application
 
     // Variable Declarations ==============================================================================================
     
-    private static readonly List<string> DebugEmployeeNumbers =
-    [
-        "20898", "24781", "22388", "24410", "24065", "11356", "27065", "5565", "15734", "3264", "23485", "22794", "4870",
-        "4092", "20304", "18062", "23650", "22280", "23672", "20136328", "22139", "5793", "24687", "22483", "3413", "27048",
-        "24719","90117936", "5478", "18680"
-    ];
+    //private static readonly List<string> DebugEmployeeNumbers =
+    //[
+    //    "20898", "24781", "22388", "24410", "24065", "11356", "27065", "5565", "15734", "3264", "23485", "22794", "4870",
+    //    "4092", "20304", "18062", "23650", "22280", "23672", "20136328", "22139", "5793", "24687", "22483", "3413", "27048",
+    //    "24719","90117936", "5478", "18680"
+    //];
 
     // Dictionaries Start =================================================================================================
     public static Dictionary<int, Employee> EmployeeDict { get; set; } = [];
@@ -138,15 +139,20 @@ public partial class App : Application
         AppState.EmployeeDictionaryTrimmed = false;
         AppState.EmployeeDictionaryRefreshed = false;
 
+        // Ensure this returns true.
+        //await Task.Run(LogImportExportService.CheckMostRecentReportDate(LogImportExportService.WorkforceJobUrl, LogImportExportService.bearerToken));
+        var result = await Task.Run(async () => await LogImportExportService.CheckMostRecentReportDate(LogImportExportService.WorkforceJobUrl, LogImportExportService.bearerToken));
+        // after returning true, download the roster.
+
         // Download the roster  
         await Task.Run(() =>
-            LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath, "Roster"));
+            LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath, "Roster", LogImportExportService.WorkforceReportDownloadUri));
         // Populate the dictionary  
         await Task.Run(() => ExcelService.PopulateEmployeeDictionaryUsingXml(AppState.ResourcesOnSiteExcelPath));
 
         AppState.StartUpFunctionsComplete = true;
 
-        SignInEmployees(DebugEmployeeNumbers);
+        //SignInEmployees(DebugEmployeeNumbers);
 
         Log.Warning("========== STARTUP FUNCTIONS END ==========");
     }

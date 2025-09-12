@@ -76,7 +76,7 @@
                 VerticalAlignment="Top"/>
 
        <!-- New row for debug buttons -->
-       <Button x:Name="DebugOneButton"
+       <!--<Button x:Name="DebugOneButton"
                Content="Debug One"
                Click="debugOneButton_Click"
                Background="LightSteelBlue"
@@ -101,9 +101,9 @@
                Grid.Row="6"
                Grid.Column="0"
                Margin="0,5,5,5"
-               Width="95"/>
+               Width="95"/>-->
 
-       <Button x:Name="Task2Button"
+       <!--<Button x:Name="Task2Button"
                Content="Task Two"
                Click="taskTwoButton_Click"
                Background="LightSteelBlue"
@@ -146,6 +146,6 @@
                Grid.Row="11"
                Grid.Column="0"
                Margin="0,5,5,5"
-               Width="95"/>
+               Width="95"/>-->
     </Grid>
 </Page>

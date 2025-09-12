@@ -24,7 +24,7 @@ public sealed partial class ExportPage : Page
     // ======================================== Buttons ========================================
     private async void testButton_Click(object sender, RoutedEventArgs e)
     {
-        var success = await LogImportExportService.DownloadExcelFileAsync("C:/Users/Public/Documents", "Roster");
+        var success = await LogImportExportService.DownloadExcelFileAsync("C:/Users/Public/Documents", "Roster", LogImportExportService.WorkforceReportDownloadUri);
         if (success)
         {
             await ShowMessage("Success", "Roster downloaded and saved successfully.");

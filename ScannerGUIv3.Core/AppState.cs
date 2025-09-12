@@ -42,8 +42,6 @@ public class AppState
         get; private set;
     }
 
-    //public static string RosterStateFilePath => StateFolder + "/" + ;
-    //public static string RosterFileName => $"Roster_{DateTime.Now:ddMM}.json";
     public static string RosterFileName => $"Roster_{DateTime.Now:ddMMHHmm}.json";
     public static string RosterStateFullPath => StateFolder + RosterFileName;
     public static string LogFolder
@@ -58,23 +56,6 @@ public class AppState
 
     // Bool flags
     public static bool StartUpFunctionsComplete = false;
-
-    //public static bool MaintenanceCodesLoaded
-    //{
-    //    get => _maintenanceCodesLoaded;
-    //    set
-    //    {
-    //        _maintenanceCodesLoaded = value;
-    //        if (!Logging)
-    //        {
-    //            return;
-    //        }
-    //        Console.ForegroundColor = ConsoleColor.Yellow;
-    //        Console.WriteLine($"MaintenanceCodesLoaded set to: {value}");
-    //        Console.ResetColor();
-    //    }
-    //}
-    //private static bool _maintenanceCodesLoaded;
 
     public static bool EmployeeDictionaryLoaded
     {
@@ -140,16 +121,3 @@ public class AppState
     {
     }
 }
-
-//public static string ResourcesExcelFolderPath
-//{
-//    get; set;
-//}
-//public static string ResourcesOnSiteExcelPath
-//{
-//    get; set;
-//}
-//public static string ResourcesMasterExcelPath
-//{
-//    get; set;
-//}

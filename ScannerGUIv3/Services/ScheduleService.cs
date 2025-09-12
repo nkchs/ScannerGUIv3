@@ -10,8 +10,6 @@ namespace ScannerGUIv3.Services
 {
     public class ScheduleService
     {
-        // Constructor to initialize the scheduleTimes array
-        //private readonly TimeSpan[] _scheduleTimes;
         private static TimeSpan[]? _scheduleTimes;
 
         // Timer to schedule tasks
@@ -161,7 +159,7 @@ namespace ScannerGUIv3.Services
                     attempt++;
                     downloadSuccess =
                         await LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath,
-                            "Roster");
+                            "Roster", LogImportExportService.WorkforceReportDownloadUri);
 
                     if (downloadSuccess)
                     {
