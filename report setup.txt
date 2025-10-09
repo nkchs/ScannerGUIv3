@@ -1,0 +1,32 @@
+Please find attached the Roster To Excel - MT - Roster Dataset SRF175 Roster to Excel Today_Plus_14days report.
+
+This is an automatically generated email.
+
+
+Regards
+
+
+ACTION: Report is used Admin and Leadership to manage manning
+
+
+
+OWNER: Nic Chase
+
+
+
+Last Reviewed: 09.06.25
+
+
+
+Parameters:
+/d1:{today} 
+/d2:{today+14} 
+/dids:1130,1174,1185,1134,1131,1140,1169,1163,1175,1119,1201,1187,1161,1143,1133,1164,1102,1109,1127,1146,1124,1200,1107,1203,1150,1104,1142,255,233,343,191,101,1027,1025,190,192,1043,253,1024,1144,1120 
+/iac 
+/itp 
+/htransoverlay 
+/of:SAMProfile.FirstName,SAMProfile.Surname,SAMProfile.ResNumber,SAMProfile.SAMNo 
+/title:"MT - Roster Dataset SRF175 Roster to Excel Today_Plus_14days" 
+/blurb:"ACTION: Report is used Admin and Leadership to manage manningOWNER: Nic ChaseLast Reviewed: 09.06.25" 
+/sendattachment
+

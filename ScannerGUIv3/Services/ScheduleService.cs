@@ -136,7 +136,10 @@ namespace ScannerGUIv3.Services
             _timer.Start();
         }
 
+
         // TASKS
+
+
         public static async Task Task1()
         {
             Console.WriteLine();
@@ -145,75 +148,147 @@ namespace ScannerGUIv3.Services
             // Remove the CURRENT night shift employees from the dictionary
             await Task.Run(ExcelService.GeneratePreviousNightShiftAsync);
 
-            // Check if the roster has been updated today
-            if (await LogImportExportService.GetRosterDate()) // True if the roster has been updated today
+            const int maxRetryAttempts = 3; // Maximum number of retry attempts
+            const int retryDelayMilliseconds = 5000; // Delay between retries (in milliseconds)
+            var attempt = 0;
+            var downloadSuccess = false;
+
+            // Retry mechanism
+            while (attempt < maxRetryAttempts && !downloadSuccess)
             {
-                const int maxRetryAttempts = 3; // Maximum number of retry attempts
-                const int retryDelayMilliseconds = 5000; // Delay between retries (in milliseconds)
-                var attempt = 0;
-                var downloadSuccess = false;
+                attempt++;
+                downloadSuccess =
+                    await LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath,
+                        "Roster", LogImportExportService.WorkforceReportDownloadUri);
 
-                // Retry mechanism
-                while (attempt < maxRetryAttempts && !downloadSuccess)
+                if (downloadSuccess)
                 {
-                    attempt++;
-                    downloadSuccess =
-                        await LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath,
-                            "Roster", LogImportExportService.WorkforceReportDownloadUri);
-
-                    if (downloadSuccess)
-                    {
-                        Log.Information($"Download succeeded on attempt {attempt}.");
-                    }
-                    else
-                    {
-                        Log.Warning(
-                            $"Download failed on attempt {attempt}. Retrying in {retryDelayMilliseconds / 1000} seconds...");
-                        await Task.Delay(retryDelayMilliseconds);
-                    }
-                }
-                if (downloadSuccess)    // Continue with the remaining tasks if the download was successful
-                {
-                    // Populate the employee dictionary
-                    await Task.Run(() =>
-                        ExcelService.PopulateEmployeeDictionaryUsingXml(AppState.ResourcesOnSiteExcelPath));
-
-                    // Remove the UPCOMING night shift employees from the dictionary
-                    await Task.Run(ExcelService.GenerateNextNightShiftAsync);
-                    // Insert the PREVIOUS night shift employees into the dictionary
-                    await Task.Run(ExcelService.InsertCurrentNightShiftAsync);
-
-                    Log.Information("Maintenance Codes & Dictionary & Trim & Next Night Shift");
+                    Log.Information($"Download succeeded on attempt {attempt}.");
                 }
                 else
                 {
-                    // Handle the case where all retry attempts fail
-                    Log.Error("Failed to download the roster after maximum retry attempts.");
-                    // Add fallback or recovery logic here (e.g., notifying the user, alternative actions, etc.)
-                    const int maxRecursiveAttempts = 5;
-                    const int delayMilliseconds = 300000; // 5 minutes
-
-                    if (AppState.TaskOneAttempt < maxRecursiveAttempts)
-                    {
-                        AppState.TaskOneAttempt++; // Increment the attempt counter
-                        Log.Information($"Waiting {delayMilliseconds / 60000} minutes before retry attempt {AppState.TaskOneAttempt} of {maxRecursiveAttempts}");
-                        await Task.Delay(delayMilliseconds); // Wait 5 minutes
-                        await Task1(); // Recursively call Task1
-                    }
-                    else
-                    {
-                        Log.Error($"Maximum retry attempts ({maxRecursiveAttempts}) reached");
-                        AppState.TaskOneAttempt = 0; // Reset the counter after max attempts
-                    }
+                    Log.Warning(
+                        $"Download failed on attempt {attempt}. Retrying in {retryDelayMilliseconds / 1000} seconds...");
+                    await Task.Delay(retryDelayMilliseconds);
                 }
+            }
+            if (downloadSuccess)    // Continue with the remaining tasks if the download was successful
+            {
+                // Populate the employee dictionary
+                await Task.Run(() =>
+                    ExcelService.PopulateEmployeeDictionaryUsingXml(AppState.ResourcesOnSiteExcelPath));
+
+                // Remove the UPCOMING night shift employees from the dictionary
+                await Task.Run(ExcelService.GenerateNextNightShiftAsync);
+                // Insert the PREVIOUS night shift employees into the dictionary
+                await Task.Run(ExcelService.InsertCurrentNightShiftAsync);
+
+                Log.Information("Maintenance Codes & Dictionary & Trim & Next Night Shift");
             }
             else
             {
-                Log.Error("Roster Has Not Been Updated");
+                // Handle the case where all retry attempts fail
+                Log.Error("Failed to download the roster after maximum retry attempts.");
+                // Add fallback or recovery logic here (e.g., notifying the user, alternative actions, etc.)
+                const int maxRecursiveAttempts = 5;
+                const int delayMilliseconds = 300000; // 5 minutes
+
+                if (AppState.TaskOneAttempt < maxRecursiveAttempts)
+                {
+                    AppState.TaskOneAttempt++; // Increment the attempt counter
+                    Log.Information($"Waiting {delayMilliseconds / 60000} minutes before retry attempt {AppState.TaskOneAttempt} of {maxRecursiveAttempts}");
+                    await Task.Delay(delayMilliseconds); // Wait 5 minutes
+                    await Task1(); // Recursively call Task1
+                }
+                else
+                {
+                    Log.Error($"Maximum retry attempts ({maxRecursiveAttempts}) reached");
+                    AppState.TaskOneAttempt = 0; // Reset the counter after max attempts
+                }
             }
             Log.Verbose(@"============= TASK 1 COMPLETED ============");
             Console.WriteLine();
         }
+
+
+        //public static async Task Task1()
+        //{
+        //    Console.WriteLine();
+        //    Log.Verbose(@"============= TASK 1 EXECUTED =============");
+
+        //    // Remove the CURRENT night shift employees from the dictionary
+        //    await Task.Run(ExcelService.GeneratePreviousNightShiftAsync);
+
+        //    // Check if the roster has been updated today
+        //    if (await LogImportExportService.GetRosterDate()) // True if the roster has been updated today
+        //    {
+        //        const int maxRetryAttempts = 3; // Maximum number of retry attempts
+        //        const int retryDelayMilliseconds = 5000; // Delay between retries (in milliseconds)
+        //        var attempt = 0;
+        //        var downloadSuccess = false;
+
+        //        // Retry mechanism
+        //        while (attempt < maxRetryAttempts && !downloadSuccess)
+        //        {
+        //            attempt++;
+        //            downloadSuccess =
+        //                await LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath,
+        //                    "Roster", LogImportExportService.WorkforceReportDownloadUri);
+
+        //            if (downloadSuccess)
+        //            {
+        //                Log.Information($"Download succeeded on attempt {attempt}.");
+        //            }
+        //            else
+        //            {
+        //                Log.Warning(
+        //                    $"Download failed on attempt {attempt}. Retrying in {retryDelayMilliseconds / 1000} seconds...");
+        //                await Task.Delay(retryDelayMilliseconds);
+        //            }
+        //        }
+        //        if (downloadSuccess)    // Continue with the remaining tasks if the download was successful
+        //        {
+        //            // Populate the employee dictionary
+        //            await Task.Run(() =>
+        //                ExcelService.PopulateEmployeeDictionaryUsingXml(AppState.ResourcesOnSiteExcelPath));
+
+        //            // Remove the UPCOMING night shift employees from the dictionary
+        //            await Task.Run(ExcelService.GenerateNextNightShiftAsync);
+        //            // Insert the PREVIOUS night shift employees into the dictionary
+        //            await Task.Run(ExcelService.InsertCurrentNightShiftAsync);
+
+        //            Log.Information("Maintenance Codes & Dictionary & Trim & Next Night Shift");
+        //        }
+        //        else
+        //        {
+        //            // Handle the case where all retry attempts fail
+        //            Log.Error("Failed to download the roster after maximum retry attempts.");
+        //            // Add fallback or recovery logic here (e.g., notifying the user, alternative actions, etc.)
+        //            const int maxRecursiveAttempts = 5;
+        //            const int delayMilliseconds = 300000; // 5 minutes
+
+        //            if (AppState.TaskOneAttempt < maxRecursiveAttempts)
+        //            {
+        //                AppState.TaskOneAttempt++; // Increment the attempt counter
+        //                Log.Information($"Waiting {delayMilliseconds / 60000} minutes before retry attempt {AppState.TaskOneAttempt} of {maxRecursiveAttempts}");
+        //                await Task.Delay(delayMilliseconds); // Wait 5 minutes
+        //                await Task1(); // Recursively call Task1
+        //            }
+        //            else
+        //            {
+        //                Log.Error($"Maximum retry attempts ({maxRecursiveAttempts}) reached");
+        //                AppState.TaskOneAttempt = 0; // Reset the counter after max attempts
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        Log.Error("Roster Has Not Been Updated");
+        //    }
+        //    Log.Verbose(@"============= TASK 1 COMPLETED ============");
+        //    Console.WriteLine();
+        //}
+
 
         // TODO Update these to email service.
         // UPDATE email service so that it returns success or not?
