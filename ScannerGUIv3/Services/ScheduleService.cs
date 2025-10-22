@@ -10,36 +10,24 @@ namespace ScannerGUIv3.Services
 {
     public class ScheduleService
     {
+        private bool _isExecuting = false;
+
         private static TimeSpan[]? _scheduleTimes;
 
         // Timer to schedule tasks
         private readonly Timer _timer;
         public ScheduleService()
         {
-            //var now = DateTime.Now;
             _scheduleTimes =
             [
-                new TimeSpan(5, 00, 0),
-                new TimeSpan(6, 30, 0),
-                new TimeSpan(7, 0, 0),
-                new TimeSpan(10, 30, 0), // New task at 10:30 AM
-                new TimeSpan(18, 10, 0),
-                new TimeSpan(19, 0, 0)
-                //new(DateTime.Now.Hour, DateTime.Now.Minute+1, DateTime.Now.Second),
+                new TimeSpan(4, 10, 0),  // Task1
+                new TimeSpan(6, 10, 0),  // Task2
+                new TimeSpan(7, 0, 0),   // Task3
+                new TimeSpan(10, 30, 0), // Task6
+                new TimeSpan(18, 10, 0), // Task4
+                new TimeSpan(19, 0, 0)   // Task5
             ];
-
-
-            // TURN ON FOR DEBUG
-            // Initialize the scheduleTimes array to execute 10 times, each 30 seconds apart
-            //scheduleTimes = new TimeSpan[10];
-            //var startTime = DateTime.Now.TimeOfDay;
-            //for (var i = 0; i < scheduleTimes.Length; i++)
-            //{
-            //    scheduleTimes[i] = startTime.Add(TimeSpan.FromSeconds(10 * i));
-            //}
-            // TURN ON FOR DEBUG
-
-
+            
             // Initialize the timer
             _timer = new Timer();
 
@@ -50,41 +38,55 @@ namespace ScannerGUIv3.Services
         // Method to perform the scheduled operation
         private void PerformScheduledOperation()
         {
-            var now = DateTime.Now.TimeOfDay;
-            foreach (var time in _scheduleTimes)
+            if (_isExecuting)
             {
-                if (now >= time && now < time.Add(TimeSpan.FromMinutes(5)))
+                return; // Prevent concurrent executions
+            }
+
+            _isExecuting = true;
+            try
+            {
+                var now = DateTime.Now.TimeOfDay;
+                foreach (var time in _scheduleTimes)
                 {
-                    if (time == new TimeSpan(4, 10, 0))
+                    if (now >= time && now < time.Add(TimeSpan.FromMinutes(5)))
                     {
-                        Task.Run(Task1);
+                        if (time == new TimeSpan(4, 10, 0))
+                        {
+                            Task.Run(Task1);
+                        }
+                        else if (time == new TimeSpan(6, 10, 0))
+                        {
+                            Task.Run(Task2);
+                        }
+                        else if (time == new TimeSpan(7, 0, 0))
+                        {
+                            Task.Run(Task3);
+                        }
+                        else if (time == new TimeSpan(10, 30, 0)) // New task at 10:30 AM
+                        {
+                            Task.Run(Task6);
+                        }
+                        else if (time == new TimeSpan(18, 10, 0))
+                        {
+                            Task.Run(Task4);
+                        }
+                        else if (time == new TimeSpan(19, 0, 0))
+                        {
+                            Task.Run(Task5);
+                        }
+                        else
+                        {
+                            Log.Verbose("Alternative Task");
+                        }
+
+                        break;
                     }
-                    else if (time == new TimeSpan(6, 10, 0))
-                    {
-                        Task.Run(Task2);
-                    }
-                    else if (time == new TimeSpan(7, 0, 0))
-                    {
-                        Task.Run(Task3);
-                    }
-                    else if (time == new TimeSpan(10, 30, 0)) // New task at 10:30 AM
-                    {
-                        Task.Run(Task6);
-                    }
-                    else if (time == new TimeSpan(18, 10, 0))
-                    {
-                        Task.Run(Task4);
-                    }
-                    else if (time == new TimeSpan(19, 0, 0))
-                    {
-                        Task.Run(Task5);
-                    }
-                    else
-                    {
-                        Log.Verbose("Alternative Task");
-                    }
-                    break;
                 }
+            }
+            finally
+            {
+                _isExecuting = false;
             }
         }
 
@@ -137,175 +139,198 @@ namespace ScannerGUIv3.Services
         }
 
 
-        // TASKS
-
-
+        // ==================== TASKS ============================================================================================================
         public static async Task Task1()
         {
-            Console.WriteLine();
-            Log.Verbose(@"============= TASK 1 EXECUTED =============");
+            Log.Information("Task 1: Starting roster processing at {Time}", DateTime.Now);
 
-            // Remove the CURRENT night shift employees from the dictionary
-            await Task.Run(ExcelService.GeneratePreviousNightShiftAsync);
-
-            const int maxRetryAttempts = 3; // Maximum number of retry attempts
-            const int retryDelayMilliseconds = 5000; // Delay between retries (in milliseconds)
-            var attempt = 0;
-            var downloadSuccess = false;
-
-            // Retry mechanism
-            while (attempt < maxRetryAttempts && !downloadSuccess)
+            try
             {
-                attempt++;
-                downloadSuccess =
-                    await LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath,
-                        "Roster", LogImportExportService.WorkforceReportDownloadUri);
+                //Log.Verbose("============= TASK 1 STARTED =============");
+
+                Log.Debug("Preparing previous night shift data");
+                await Task.Run(ExcelService.GeneratePreviousNightShiftAsync);
+                Log.Debug("Previous night shift data prepared");
+
+                const int maxRetryAttempts = 3;
+                const int retryDelayMilliseconds = 5000;
+                var attempt = 0;
+                var downloadSuccess = false;
+
+                Log.Debug("Attempting to download roster file");
+                while (attempt < maxRetryAttempts && !downloadSuccess)
+                {
+                    attempt++;
+                    downloadSuccess = await LogImportExportService.DownloadExcelFileAsync(
+                        AppState.ResourcesExcelFolderPath, "Roster", LogImportExportService.WorkforceReportDownloadUri);
+
+                    if (downloadSuccess)
+                    {
+                        Log.Information("Successfully downloaded roster file on attempt {Attempt}", attempt);
+                    }
+                    else
+                    {
+                        Log.Warning("Failed to download roster file on attempt {Attempt}. Retrying in {Delay} seconds",
+                            attempt, retryDelayMilliseconds / 1000);
+                        await Task.Delay(retryDelayMilliseconds);
+                    }
+                }
 
                 if (downloadSuccess)
                 {
-                    Log.Information($"Download succeeded on attempt {attempt}.");
+                    Log.Debug("Loading employee data into dictionary");
+                    await Task.Run(() => ExcelService.PopulateEmployeeDictionaryUsingXml(AppState.ResourcesOnSiteExcelPath));
+                    Log.Debug("Employee data loaded into dictionary");
+
+                    Log.Debug("Preparing next night shift data");
+                    await Task.Run(ExcelService.GenerateNextNightShiftAsync);
+                    Log.Debug("Next night shift data prepared");
+
+                    Log.Debug("Inserting current night shift data");
+                    await Task.Run(ExcelService.InsertCurrentNightShiftAsync);
+                    Log.Debug("Current night shift data inserted");
+
+                    Log.Information("Task 1: Completed successfully at {Time}", DateTime.Now);
                 }
                 else
                 {
-                    Log.Warning(
-                        $"Download failed on attempt {attempt}. Retrying in {retryDelayMilliseconds / 1000} seconds...");
-                    await Task.Delay(retryDelayMilliseconds);
+                    Log.Warning("Task 1: Roster download failed after {MaxAttempts} attempts", maxRetryAttempts);
+
+                    const int maxRecursiveAttempts = 5;
+                    const int delayMilliseconds = 300000;
+
+                    if (AppState.TaskOneAttempt < maxRecursiveAttempts)
+                    {
+                        AppState.TaskOneAttempt++;
+                        Log.Information("Initiating retry {Attempt} of {MaxAttempts} after {Delay} minutes",
+                            AppState.TaskOneAttempt, maxRecursiveAttempts, delayMilliseconds / 60000);
+                        await Task.Delay(delayMilliseconds);
+                        Log.Debug("Retrying Task 1");
+                        await Task1();
+                    }
+                    else
+                    {
+                        Log.Error("Task 1: Exhausted maximum retry attempts ({MaxAttempts})", maxRecursiveAttempts);
+                        AppState.TaskOneAttempt = 0;
+                    }
                 }
+
+                //Log.Verbose("============= TASK 1 FINISHED =============");
             }
-            if (downloadSuccess)    // Continue with the remaining tasks if the download was successful
+            catch (Exception ex)
             {
-                // Populate the employee dictionary
-                await Task.Run(() =>
-                    ExcelService.PopulateEmployeeDictionaryUsingXml(AppState.ResourcesOnSiteExcelPath));
-
-                // Remove the UPCOMING night shift employees from the dictionary
-                await Task.Run(ExcelService.GenerateNextNightShiftAsync);
-                // Insert the PREVIOUS night shift employees into the dictionary
-                await Task.Run(ExcelService.InsertCurrentNightShiftAsync);
-
-                Log.Information("Maintenance Codes & Dictionary & Trim & Next Night Shift");
+                Log.Error(ex, "Task 1: Critical error during roster processing");
+                throw;
             }
-            else
-            {
-                // Handle the case where all retry attempts fail
-                Log.Error("Failed to download the roster after maximum retry attempts.");
-                // Add fallback or recovery logic here (e.g., notifying the user, alternative actions, etc.)
-                const int maxRecursiveAttempts = 5;
-                const int delayMilliseconds = 300000; // 5 minutes
-
-                if (AppState.TaskOneAttempt < maxRecursiveAttempts)
-                {
-                    AppState.TaskOneAttempt++; // Increment the attempt counter
-                    Log.Information($"Waiting {delayMilliseconds / 60000} minutes before retry attempt {AppState.TaskOneAttempt} of {maxRecursiveAttempts}");
-                    await Task.Delay(delayMilliseconds); // Wait 5 minutes
-                    await Task1(); // Recursively call Task1
-                }
-                else
-                {
-                    Log.Error($"Maximum retry attempts ({maxRecursiveAttempts}) reached");
-                    AppState.TaskOneAttempt = 0; // Reset the counter after max attempts
-                }
-            }
-            Log.Verbose(@"============= TASK 1 COMPLETED ============");
-            Console.WriteLine();
         }
-
 
         //public static async Task Task1()
         //{
         //    Console.WriteLine();
-        //    Log.Verbose(@"============= TASK 1 EXECUTED =============");
+        //    //Log.Verbose(@"============= TASK 1 EXECUTED =============");
+        //    //Log.Information("Task 1: Starting night shift export process at {Time}", DateTime.Now);
 
         //    // Remove the CURRENT night shift employees from the dictionary
         //    await Task.Run(ExcelService.GeneratePreviousNightShiftAsync);
 
-        //    // Check if the roster has been updated today
-        //    if (await LogImportExportService.GetRosterDate()) // True if the roster has been updated today
+        //    const int maxRetryAttempts = 3; // Maximum number of retry attempts
+        //    const int retryDelayMilliseconds = 5000; // Delay between retries (in milliseconds)
+        //    var attempt = 0;
+        //    var downloadSuccess = false;
+
+        //    // Retry mechanism
+        //    while (attempt < maxRetryAttempts && !downloadSuccess)
         //    {
-        //        const int maxRetryAttempts = 3; // Maximum number of retry attempts
-        //        const int retryDelayMilliseconds = 5000; // Delay between retries (in milliseconds)
-        //        var attempt = 0;
-        //        var downloadSuccess = false;
+        //        attempt++;
+        //        downloadSuccess =
+        //            await LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath,
+        //                "Roster", LogImportExportService.WorkforceReportDownloadUri);
 
-        //        // Retry mechanism
-        //        while (attempt < maxRetryAttempts && !downloadSuccess)
+        //        if (downloadSuccess)
         //        {
-        //            attempt++;
-        //            downloadSuccess =
-        //                await LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath,
-        //                    "Roster", LogImportExportService.WorkforceReportDownloadUri);
-
-        //            if (downloadSuccess)
-        //            {
-        //                Log.Information($"Download succeeded on attempt {attempt}.");
-        //            }
-        //            else
-        //            {
-        //                Log.Warning(
-        //                    $"Download failed on attempt {attempt}. Retrying in {retryDelayMilliseconds / 1000} seconds...");
-        //                await Task.Delay(retryDelayMilliseconds);
-        //            }
-        //        }
-        //        if (downloadSuccess)    // Continue with the remaining tasks if the download was successful
-        //        {
-        //            // Populate the employee dictionary
-        //            await Task.Run(() =>
-        //                ExcelService.PopulateEmployeeDictionaryUsingXml(AppState.ResourcesOnSiteExcelPath));
-
-        //            // Remove the UPCOMING night shift employees from the dictionary
-        //            await Task.Run(ExcelService.GenerateNextNightShiftAsync);
-        //            // Insert the PREVIOUS night shift employees into the dictionary
-        //            await Task.Run(ExcelService.InsertCurrentNightShiftAsync);
-
-        //            Log.Information("Maintenance Codes & Dictionary & Trim & Next Night Shift");
+        //            Log.Information($"Download succeeded on attempt {attempt}.");
         //        }
         //        else
         //        {
-        //            // Handle the case where all retry attempts fail
-        //            Log.Error("Failed to download the roster after maximum retry attempts.");
-        //            // Add fallback or recovery logic here (e.g., notifying the user, alternative actions, etc.)
-        //            const int maxRecursiveAttempts = 5;
-        //            const int delayMilliseconds = 300000; // 5 minutes
-
-        //            if (AppState.TaskOneAttempt < maxRecursiveAttempts)
-        //            {
-        //                AppState.TaskOneAttempt++; // Increment the attempt counter
-        //                Log.Information($"Waiting {delayMilliseconds / 60000} minutes before retry attempt {AppState.TaskOneAttempt} of {maxRecursiveAttempts}");
-        //                await Task.Delay(delayMilliseconds); // Wait 5 minutes
-        //                await Task1(); // Recursively call Task1
-        //            }
-        //            else
-        //            {
-        //                Log.Error($"Maximum retry attempts ({maxRecursiveAttempts}) reached");
-        //                AppState.TaskOneAttempt = 0; // Reset the counter after max attempts
-        //            }
+        //            Log.Warning(
+        //                $"Download failed on attempt {attempt}. Retrying in {retryDelayMilliseconds / 1000} seconds...");
+        //            await Task.Delay(retryDelayMilliseconds);
         //        }
+        //    }
+        //    if (downloadSuccess)    // Continue with the remaining tasks if the download was successful
+        //    {
+        //        // Populate the employee dictionary
+        //        await Task.Run(() =>
+        //            ExcelService.PopulateEmployeeDictionaryUsingXml(AppState.ResourcesOnSiteExcelPath));
+
+        //        // Remove the UPCOMING night shift employees from the dictionary
+        //        await Task.Run(ExcelService.GenerateNextNightShiftAsync);
+        //        // Insert the PREVIOUS night shift employees into the dictionary
+        //        await Task.Run(ExcelService.InsertCurrentNightShiftAsync);
+
+        //        Log.Information("Maintenance Codes & Dictionary & Trim & Next Night Shift");
         //    }
         //    else
         //    {
-        //        Log.Error("Roster Has Not Been Updated");
+        //        // Handle the case where all retry attempts fail
+        //        Log.Error("Failed to download the roster after maximum retry attempts.");
+        //        // Add fallback or recovery logic here (e.g., notifying the user, alternative actions, etc.)
+        //        const int maxRecursiveAttempts = 5;
+        //        const int delayMilliseconds = 300000; // 5 minutes
+
+        //        if (AppState.TaskOneAttempt < maxRecursiveAttempts)
+        //        {
+        //            AppState.TaskOneAttempt++; // Increment the attempt counter
+        //            Log.Information($"Waiting {delayMilliseconds / 60000} minutes before retry attempt {AppState.TaskOneAttempt} of {maxRecursiveAttempts}");
+        //            await Task.Delay(delayMilliseconds); // Wait 5 minutes
+        //            await Task1(); // Recursively call Task1
+        //        }
+        //        else
+        //        {
+        //            Log.Error($"Maximum retry attempts ({maxRecursiveAttempts}) reached");
+        //            AppState.TaskOneAttempt = 0; // Reset the counter after max attempts
+        //        }
         //    }
         //    Log.Verbose(@"============= TASK 1 COMPLETED ============");
         //    Console.WriteLine();
         //}
 
 
-        // TODO Update these to email service.
-        // UPDATE email service so that it returns success or not?
         public static async Task Task2() // 6:10 AM Export the concluding night shift
         {
-            Log.Verbose(@"Task 2 Executed");
-            //var success = await LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "NS");
-            var success = await LogImportExportService.SendEmployeeDataAsync("nic.chase@greatland.com.au", "NS"); // This is the email export option.
-            if (success)
+            Log.Information("Task 2: Starting night shift export process at {Time}", DateTime.Now);
+
+            try
             {
-                // Remove the previous Night Shift
-                await Task.Run(ExcelService.RemovePreviousNightShiftAsync);
-                // Insert the next Night Shift
-                await Task.Run(ExcelService.InsertNextNightShiftAsync);
+                Log.Debug("Sending night shift employee data to {Email}", "nic.chase@greatland.com.au");
+                var success = await LogImportExportService.SendEmployeeDataAsync("nic.chase@greatland.com.au", "NS");
+
+                if (success)
+                {
+                    Log.Information("Night shift data exported successfully");
+
+                    Log.Debug("Removing previous night shift records");
+                    await Task.Run(ExcelService.RemovePreviousNightShiftAsync);
+                    Log.Debug("Previous night shift records removed");
+
+                    Log.Debug("Inserting next night shift records");
+                    await Task.Run(ExcelService.InsertNextNightShiftAsync);
+                    Log.Debug("Next night shift records inserted");
+
+                    Log.Information("Task 2: Completed successfully at {Time} - Night shift transition complete", DateTime.Now);
+                }
+                else
+                {
+                    Log.Warning("Task 2: Failed to export night shift data - Skipping shift transition");
+                }
             }
-            Log.Verbose(success ? @"Task 2 Completed" : @"Task 2 Failed");
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Task 2: Unexpected error during night shift export process");
+                throw;
+            }
         }
+
 
         public static async Task Task3() // 7:00 am Export the starting dayshift
         {
