@@ -10,14 +10,19 @@ namespace ScannerGUIv3.Services
 {
     public class ScheduleService
     {
-        private bool _isExecuting = false;
-
+        //private bool _isExecuting = false;
         private static TimeSpan[]? _scheduleTimes;
+
+        private static bool _isExecuting = false;
+        private static readonly object _executionLock = new();
 
         // Timer to schedule tasks
         private readonly Timer _timer;
+        private static int _executionCount = 0;
+
         public ScheduleService()
         {
+            Log.Information("ScheduleService instantiated");
             _scheduleTimes =
             [
                 new TimeSpan(4, 10, 0),  // Task1
@@ -35,21 +40,27 @@ namespace ScannerGUIv3.Services
             ScheduleNextTask();
         }
 
-        // Method to perform the scheduled operation
+
         private void PerformScheduledOperation()
         {
-            if (_isExecuting)
+            Log.Verbose("PerformScheduledOperation attempt #{0}", Interlocked.Increment(ref _executionCount));
+            lock (_executionLock)
             {
-                return; // Prevent concurrent executions
+                if (_isExecuting)
+                {
+                    Log.Verbose("Skipping task execution due to ongoing operation");
+                    return;
+                }
+                _isExecuting = true;
             }
 
-            _isExecuting = true;
             try
             {
+                Log.Verbose("Task Firing");
                 var now = DateTime.Now.TimeOfDay;
                 foreach (var time in _scheduleTimes)
                 {
-                    if (now >= time && now < time.Add(TimeSpan.FromMinutes(5)))
+                    if (now >= time && now < time.Add(TimeSpan.FromSeconds(30)))
                     {
                         if (time == new TimeSpan(4, 10, 0))
                         {
@@ -63,7 +74,7 @@ namespace ScannerGUIv3.Services
                         {
                             Task.Run(Task3);
                         }
-                        else if (time == new TimeSpan(10, 30, 0)) // New task at 10:30 AM
+                        else if (time == new TimeSpan(10, 30, 0))
                         {
                             Task.Run(Task6);
                         }
@@ -86,9 +97,13 @@ namespace ScannerGUIv3.Services
             }
             finally
             {
-                _isExecuting = false;
+                lock (_executionLock)
+                {
+                    _isExecuting = false;
+                }
             }
         }
+
 
         // Method to calculate the time until the next scheduled task
         private TimeSpan GetNextScheduledTime(DateTime now)
@@ -106,38 +121,43 @@ namespace ScannerGUIv3.Services
         }
 
 
-        // Method to schedule the next task based on the current time
         private void ScheduleNextTask()
         {
+            _timer.Stop(); // Ensure timer is stopped before rescheduling
+            
             var now = DateTime.Now;
             var timeUntilNextTask = GetNextScheduledTime(now);
-
-            // Initialize the timer with the calculated interval
+            
             _timer.Interval = timeUntilNextTask.TotalMilliseconds;
-            _timer.Elapsed += (sender, e) =>
-            {
-                // Stop the timer temporarily
-                _timer.Stop();
+            _timer.Elapsed -= OnTimerElapsed; // Remove previous handler to prevent duplicates
+            _timer.Elapsed += OnTimerElapsed;
+            _timer.Start();
 
-                // Check if DispatcherQueue is available
+            Log.Verbose("Scheduled next task in {0} milliseconds", timeUntilNextTask.TotalMilliseconds);
+        }
+
+
+        private void OnTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            _timer.Stop(); // Stop immediately to prevent re-firing
+            try
+            {
                 var dispatcherQueue = DispatcherQueue.GetForCurrentThread();
                 if (dispatcherQueue != null)
                 {
-                    // Enqueue the scheduled operation to run on the DispatcherQueue
                     dispatcherQueue.TryEnqueue(PerformScheduledOperation);
                 }
                 else
                 {
-                    // Perform the operation directly if no DispatcherQueue is available
                     PerformScheduledOperation();
                 }
-
-                // Reschedule the timer for the next time
-                ScheduleNextTask();
-            };
-            _timer.Start();
+            }
+            finally
+            {
+                ScheduleNextTask(); // Reschedule only after execution
+            }
         }
-
+        
 
         // ==================== TASKS ============================================================================================================
         public static async Task Task1()
@@ -147,7 +167,6 @@ namespace ScannerGUIv3.Services
             try
             {
                 //Log.Verbose("============= TASK 1 STARTED =============");
-
                 Log.Debug("Preparing previous night shift data");
                 await Task.Run(ExcelService.GeneratePreviousNightShiftAsync);
                 Log.Debug("Previous night shift data prepared");
@@ -223,77 +242,6 @@ namespace ScannerGUIv3.Services
                 throw;
             }
         }
-
-        //public static async Task Task1()
-        //{
-        //    Console.WriteLine();
-        //    //Log.Verbose(@"============= TASK 1 EXECUTED =============");
-        //    //Log.Information("Task 1: Starting night shift export process at {Time}", DateTime.Now);
-
-        //    // Remove the CURRENT night shift employees from the dictionary
-        //    await Task.Run(ExcelService.GeneratePreviousNightShiftAsync);
-
-        //    const int maxRetryAttempts = 3; // Maximum number of retry attempts
-        //    const int retryDelayMilliseconds = 5000; // Delay between retries (in milliseconds)
-        //    var attempt = 0;
-        //    var downloadSuccess = false;
-
-        //    // Retry mechanism
-        //    while (attempt < maxRetryAttempts && !downloadSuccess)
-        //    {
-        //        attempt++;
-        //        downloadSuccess =
-        //            await LogImportExportService.DownloadExcelFileAsync(AppState.ResourcesExcelFolderPath,
-        //                "Roster", LogImportExportService.WorkforceReportDownloadUri);
-
-        //        if (downloadSuccess)
-        //        {
-        //            Log.Information($"Download succeeded on attempt {attempt}.");
-        //        }
-        //        else
-        //        {
-        //            Log.Warning(
-        //                $"Download failed on attempt {attempt}. Retrying in {retryDelayMilliseconds / 1000} seconds...");
-        //            await Task.Delay(retryDelayMilliseconds);
-        //        }
-        //    }
-        //    if (downloadSuccess)    // Continue with the remaining tasks if the download was successful
-        //    {
-        //        // Populate the employee dictionary
-        //        await Task.Run(() =>
-        //            ExcelService.PopulateEmployeeDictionaryUsingXml(AppState.ResourcesOnSiteExcelPath));
-
-        //        // Remove the UPCOMING night shift employees from the dictionary
-        //        await Task.Run(ExcelService.GenerateNextNightShiftAsync);
-        //        // Insert the PREVIOUS night shift employees into the dictionary
-        //        await Task.Run(ExcelService.InsertCurrentNightShiftAsync);
-
-        //        Log.Information("Maintenance Codes & Dictionary & Trim & Next Night Shift");
-        //    }
-        //    else
-        //    {
-        //        // Handle the case where all retry attempts fail
-        //        Log.Error("Failed to download the roster after maximum retry attempts.");
-        //        // Add fallback or recovery logic here (e.g., notifying the user, alternative actions, etc.)
-        //        const int maxRecursiveAttempts = 5;
-        //        const int delayMilliseconds = 300000; // 5 minutes
-
-        //        if (AppState.TaskOneAttempt < maxRecursiveAttempts)
-        //        {
-        //            AppState.TaskOneAttempt++; // Increment the attempt counter
-        //            Log.Information($"Waiting {delayMilliseconds / 60000} minutes before retry attempt {AppState.TaskOneAttempt} of {maxRecursiveAttempts}");
-        //            await Task.Delay(delayMilliseconds); // Wait 5 minutes
-        //            await Task1(); // Recursively call Task1
-        //        }
-        //        else
-        //        {
-        //            Log.Error($"Maximum retry attempts ({maxRecursiveAttempts}) reached");
-        //            AppState.TaskOneAttempt = 0; // Reset the counter after max attempts
-        //        }
-        //    }
-        //    Log.Verbose(@"============= TASK 1 COMPLETED ============");
-        //    Console.WriteLine();
-        //}
 
 
         public static async Task Task2() // 6:10 AM Export the concluding night shift
@@ -388,7 +336,7 @@ namespace ScannerGUIv3.Services
 
         public static async Task Task5() // 7:00 PM
         {
-            Log.Verbose(@"Task 5 Executed");
+            //Log.Verbose(@"Task 5 Executed");
         }
     }
 }
