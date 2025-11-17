@@ -1,141 +1,55 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
-using Microsoft.MarkedNet;
-
-
-//using Newtonsoft.Json;
 using ScannerGUIv3.Definitions;
 using Serilog;
+
 namespace ScannerGUIv3.Services;
 
 public class LogImportExportService
 {
-    //private const string DownloadRosterUrl = "https://prod-29.australiasoutheast.logic.azure.com:443/workflows/293376f5258e440588acf2deed6bbe93/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dIh-XwF7tJQL-zKPEiqu8wY3HhuLg26zrLDHAjtFlC8";
-    private const string DownloadRosterUrl = "https://prod-31.australiaeast.logic.azure.com:443/workflows/632911e333f54280b5f23c1fdad9039b/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=PB6P68kCxrWk2PYPYqenD1hY2fHPiWQhUPKfJ0x6vbc";
-    public const string EmailUrl = "https://prod-02.australiasoutheast.logic.azure.com:443/workflows/94e6d29eed054a53b89b8448102a3ead/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ufoRVxP9dOGh8OP5VtuwYZAW3n25kYV8HN9_L8qnlGw";
-    //public const string TeamsUrl = "https://prod-03.australiaeast.logic.azure.com:443/workflows/dcd41880b0ab49b5a56f15e03fa3fbd7/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=PtCPW3Ch2ijFDjByU6dx1pUx_u1splgZFLQ2qwk1pjs";
+    private static readonly object _dictLock = new object(); // Shared with ExcelService
+    //private const string DownloadRosterUrl = "https://prod-31.australiaeast.logic.azure.com:443/workflows/632911e333f54280b5f23c1fdad9039b/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=PB6P68kCxrWk2PYPYqenD1hY2fHPiWQhUPKfJ0x6vbc";
+    //public const string EmailUrl = "https://prod-02.australiasoutheast.logic.azure.com:443/workflows/94e6d29eed054a53b89b8448102a3ead/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ufoRVxP9dOGh8OP5VtuwYZAW3n25kYV8HN9_L8qnlGw";
     private const string TeamsTableUrl = "https://prod-06.australiaeast.logic.azure.com:443/workflows/55864becb65844baa48749bf029985df/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9VFdB_qY9-fdrAcS-lbiBqYKNZjaRZqBe3oQxvOiZ40";
-    //private const string TeamsTableUrl = "https://prod-31.australiaeast.logic.azure.com:443/workflows/212c98481a9642aba8db911f9a4b230a/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Ct06peZb9klgAGg0pMNihNl9vhydcyVLbhZagdrUMLk";
-    private const string RosterDateUrl =
-        "https://prod-39.australiasoutheast.logic.azure.com:443/workflows/77439615022643799f39a62f6d6704b6/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=tBbbMYRU4lAzKJZsVILQnA1BT4WooIvvWekVziKEhNw";
+    //private const string RosterDateUrl = "https://prod-39.australiasoutheast.logic.azure.com:443/workflows/77439615022643799f39a62f6d6704b6/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=tBbbMYRU4lAzKJZsVILQnA1BT4WooIvvWekVziKEhNw";
     private const string EmailTableUrl = "https://prod-19.australiaeast.logic.azure.com:443/workflows/512e71742dcc42a18aadc445eaad070d/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=s5AoSnzv_rwQgYo-b5uucsmHcTdB-QlOoyIyRnu20LU";
     public const string WorkforceJobUrl = "https://reportingtel.vixresources.com/api/external/saved-reports/FPM%20Roster%20Dataset%20SRF175%20Roster%20to%20Excel%20Today_Plus_14days";
     public const string bearerToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZWwucHJvZCIsImlhdCI6MTc1Njk3NTM4NSwiZXhwIjoxNzg4NTExMzg1LCJhdWQiOiJodHRwczovL3JlcG9ydGluZ3RlbC52aXhyZXNvdXJjZXMuY29tIiwiaXNzIjoiaW54c29mdHdhcmUuY29tIn0.b3laHNksViAmp_tsIcHfYevm4J501mtj1u_tLDZbgg4";
     public static string WorkforceReportDownloadUri = "";
 
-
-    public static async Task<bool> GetRosterDate()
-    {
-        try
-        {
-            using var client = new HttpClient();
-            using var response = await client.GetAsync(RosterDateUrl, HttpCompletionOption.ResponseContentRead);
-
-            // Ensure the response is successful
-            response.EnsureSuccessStatusCode();
-            Log.Debug("Response received. Status Code: {StatusCode}", response.StatusCode);
-
-            // Read the response as a string
-            var responseBody = await response.Content.ReadAsStringAsync();
-
-            // Trim any extra whitespace or newline characters from the response
-            responseBody = responseBody.Trim();
-
-            // Parse the response into a DateTime object
-            if (DateTime.TryParse(responseBody, out var responseDateTime))
-            {
-                // Since response is already in WA time, get today's date in WA time
-                TimeZoneInfo waTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Australia/Perth");
-                var waToday = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, waTimeZone).Date;
-
-                // Compare dates (ignoring time)
-                if (responseDateTime.Date == waToday)
-                {
-                    Log.Debug($"Roster Has Been Updated @ {responseDateTime}");
-                    return true;
-                }
-            }
-            Log.Error("Roster Has NOT Been Updated");
-            return false;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-            return false;
-        }
-    }
-
-    // Static URL below, changed to dynamic URL.
-    //public static async Task<bool> DownloadExcelFileAsync(string filePath, string fileName)
+    //public static async Task<bool> GetRosterDate()
     //{
-    //    Log.Information("Attempting to download Excel file to {FilePath} with file name {FileName}", filePath, fileName);
     //    try
     //    {
-    //        // Validate inputs
-    //        if (string.IsNullOrWhiteSpace(filePath))
-    //        {
-    //            Log.Error("Validation failed: File path is null or empty.");
-    //            throw new ArgumentException(@"File path cannot be null or empty.", nameof(filePath));
-    //        }
-
-    //        if (string.IsNullOrWhiteSpace(fileName))
-    //        {
-    //            Log.Error("Validation failed: File name is null or empty.");
-    //            throw new ArgumentException(@"File name cannot be null or empty.", nameof(fileName));
-    //        }
-
-    //        // Ensure the directory exists
-    //        Log.Debug("Ensuring directory exists at path: {FilePath}", filePath);
-    //        Directory.CreateDirectory(filePath);
-
     //        using var client = new HttpClient();
+    //        using var response = await client.GetAsync(RosterDateUrl, HttpCompletionOption.ResponseContentRead);
+    //        response.EnsureSuccessStatusCode();
+    //        Log.Debug("Response received from RosterDateUrl. Status Code: {StatusCode}", response.StatusCode);
 
-    //        // Log request initiation
-    //        Log.Debug("Sending GET request to {DownloadRosterUrl} with HttpCompletionOption.ResponseContentRead", DownloadRosterUrl);
+    //        var responseBody = await response.Content.ReadAsStringAsync();
+    //        responseBody = responseBody.Trim();
 
-    //        //using var response = await client.GetAsync(DownloadRosterUrl, HttpCompletionOption.ResponseContentRead);
-    //        using var response = await client.GetAsync(WorkforceReportDownloadUri, HttpCompletionOption.ResponseContentRead);
-
-    //        // Log response details
-    //        Log.Debug("Response received. Status Code: {StatusCode}", response.StatusCode);
-
-    //        response.EnsureSuccessStatusCode(); // Throws if not 200 OK
-
-    //        // Combine the path and filename
-    //        var fullFilePath = Path.Combine(filePath, fileName + ".xlsx");
-    //        Log.Debug("Full file path resolved to: {FullFilePath}", fullFilePath);
-
-    //        // Save the file content to disk
-    //        Log.Debug("Starting to copy content stream to disk.");
-    //        await using (var contentStream = await response.Content.ReadAsStreamAsync())
-    //        await using (var fileStream = new FileStream(fullFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+    //        if (DateTime.TryParse(responseBody, out var responseDateTime))
     //        {
-    //            await contentStream.CopyToAsync(fileStream);
+    //            TimeZoneInfo waTimeZone = TimeZoneInfo.FindSystemTimeZoneById("W. Australia Standard Time");
+    //            var waToday = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, waTimeZone).Date;
+    //            if (responseDateTime.Date == waToday)
+    //            {
+    //                Log.Debug("Roster updated at {DateTime}", responseDateTime);
+    //                return true;
+    //            }
     //        }
-
-    //        Log.Information("Excel file successfully downloaded to {FullFilePath}", fullFilePath);
-    //        return true;
-    //    }
-    //    catch (HttpRequestException ex)
-    //    {
-    //        Log.Error(ex, "HTTP error occurred while downloading file: {Message}", ex.Message);
-    //        return false;
-    //    }
-    //    catch (IOException ex)
-    //    {
-    //        Log.Error(ex, "File I/O error occurred while saving the file: {Message}", ex.Message);
+    //        Log.Error("Roster not updated. Response: {ResponseBody}", responseBody);
     //        return false;
     //    }
     //    catch (Exception ex)
     //    {
-    //        Log.Error(ex, "Unexpected error occurred: {Message}", ex.Message);
+    //        Log.Error(ex, "Failed to get roster date");
     //        return false;
     //    }
     //}
 
-    // DynamicURL
     public static async Task<bool> DownloadExcelFileAsync(string filePath, string fileName, string url)
     {
         Log.Information("Attempting to download Excel file from {Url} to {FilePath} with file name {FileName}", url, filePath, fileName);
@@ -144,84 +58,97 @@ public class LogImportExportService
             // Validate inputs
             if (string.IsNullOrWhiteSpace(filePath))
             {
-                Log.Error("Validation failed: File path is null or empty.");
-                throw new ArgumentException(@"File path cannot be null or empty.", nameof(filePath));
+                throw new ArgumentException("File path cannot be null or empty.", nameof(filePath));
             }
 
             if (string.IsNullOrWhiteSpace(fileName))
-            {
-                Log.Error("Validation failed: File name is null or empty.");
-                throw new ArgumentException(@"File name cannot be null or empty.", nameof(fileName));
-            }
-
+                throw new ArgumentException("File name cannot be null or empty.", nameof(fileName));
             if (string.IsNullOrWhiteSpace(url))
-            {
-                Log.Error("Validation failed: URL is null or empty.");
-                throw new ArgumentException(@"URL cannot be null or empty.", nameof(url));
-            }
+                throw new ArgumentException("URL cannot be null or empty.", nameof(url));
 
-            // Ensure the directory exists
             Log.Debug("Ensuring directory exists at path: {FilePath}", filePath);
             Directory.CreateDirectory(filePath);
 
-            using var client = new HttpClient();
-
-            // Log request initiation
-            Log.Debug("Sending GET request to {Url} with HttpCompletionOption.ResponseContentRead", url);
-
-            using var response = await client.GetAsync(url, HttpCompletionOption.ResponseContentRead);
-
-            // Log response details
-            Log.Debug("Response received. Status Code: {StatusCode}", response.StatusCode);
-
-            response.EnsureSuccessStatusCode(); // Throws if not 200 OK
-
-            // Combine the path and filename
             var fullFilePath = Path.Combine(filePath, fileName + ".xlsx");
-            Log.Debug("Full file path resolved to: {FullFilePath}", fullFilePath);
+            var tempFilePath = Path.Combine(filePath, $"Roster_{Guid.NewGuid()}.xlsx");
 
-            // Save the file content to disk
-            Log.Debug("Starting to copy content stream to disk.");
-            await using (var contentStream = await response.Content.ReadAsStreamAsync())
-            await using (var fileStream = new FileStream(fullFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+            const int maxRetries = 3;
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
             {
-                await contentStream.CopyToAsync(fileStream);
-            }
+                try
+                {
+                    using var client = new HttpClient();
+                    Log.Debug("Sending GET request to {Url} with HttpCompletionOption.ResponseContentRead (Attempt {Attempt})", url, attempt);
+                    using var response = await client.GetAsync(url, HttpCompletionOption.ResponseContentRead);
+                    response.EnsureSuccessStatusCode();
+                    Log.Debug("Response received. Status Code: {StatusCode}", response.StatusCode);
 
-            Log.Information("Excel file successfully downloaded to {FullFilePath}", fullFilePath);
-            return true;
-        }
-        catch (HttpRequestException ex)
-        {
-            Log.Error(ex, "HTTP error occurred while downloading file: {Message}", ex.Message);
-            return false;
-        }
-        catch (IOException ex)
-        {
-            Log.Error(ex, "File I/O error occurred while saving the file: {Message}", ex.Message);
+                    Log.Debug("Saving to temporary file: {TempFilePath}", tempFilePath);
+                    await using (var contentStream = await response.Content.ReadAsStreamAsync())
+                    await using (var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        await contentStream.CopyToAsync(fileStream);
+                    }
+
+                    if (File.Exists(fullFilePath))
+                    {
+                        Log.Debug("Deleting existing file: {FullFilePath}", fullFilePath);
+                        File.Delete(fullFilePath);
+                    }
+                    File.Move(tempFilePath, fullFilePath);
+                    Log.Information("Excel file successfully downloaded to {FullFilePath}", fullFilePath);
+                    return true;
+                }
+                catch (IOException ex) when (attempt < maxRetries)
+                {
+                    Log.Warning(ex, "File access failed on attempt {Attempt} for {TempFilePath}. Retrying in 1 second.", attempt, tempFilePath);
+                    await Task.Delay(1000);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Failed to download Excel file to {FullFilePath}", fullFilePath);
+                    throw;
+                }
+                finally
+                {
+                    if (File.Exists(tempFilePath))
+                    {
+                        try { File.Delete(tempFilePath); } catch { }
+                    }
+                }
+            }
+            Log.Error("Failed to download Excel file after {MaxRetries} attempts", maxRetries);
             return false;
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Unexpected error occurred: {Message}", ex.Message);
+            Log.Error(ex, "Unexpected error downloading Excel file");
             return false;
         }
+        finally
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
     }
-
 
     public static async Task SaveEmployeeDictionaryAsync(string filePath)
     {
         try
         {
             var options = new JsonSerializerOptions { WriteIndented = true };
-            var json = JsonSerializer.Serialize(App.EmployeeDict, options);
+            string json;
+            lock (_dictLock)
+            {
+                Log.Debug("Serializing EmployeeDict to JSON");
+                json = JsonSerializer.Serialize(App.EmployeeDict, options);
+            }
             await File.WriteAllTextAsync(filePath, json);
             Log.Information("Employee Dictionary Saved: {FilePath}", filePath);
         }
         catch (Exception ex)
         {
-            //Log.Error(ex, "Employee Dictionary NOT Saved {FilePath}", filePath);
-            Log.Error(ex, "Employee Dictionary NOT Saved");
+            Log.Error(ex, "Employee Dictionary NOT Saved: {FilePath}", filePath);
         }
     }
 
@@ -234,35 +161,36 @@ public class LogImportExportService
         const string tabledivider = "+------------------------------+----------+-------------+-------------+";
 
         var csvBuilder = new StringBuilder();
-        csvBuilder.AppendLine(singleline);
-        csvBuilder.AppendLine(signedintitle);
-        csvBuilder.AppendLine(tabledivider);
-        csvBuilder.AppendLine(generaltitle);
-        csvBuilder.AppendLine(tabledivider);
-
-        // Employees with SignIn times
-        foreach (var employee in employeeDict.Values)
+        lock (_dictLock)
         {
-            if (employee.ShiftType == shiftType && employee.SignInTime.HasValue)
+            csvBuilder.AppendLine(singleline);
+            csvBuilder.AppendLine(signedintitle);
+            csvBuilder.AppendLine(tabledivider);
+            csvBuilder.AppendLine(generaltitle);
+            csvBuilder.AppendLine(tabledivider);
+
+            foreach (var employee in employeeDict.Values)
             {
-                csvBuilder.AppendLine(employee.ToAsciiTableRow());
+                if (employee.ShiftType == shiftType && employee.SignInTime.HasValue)
+                {
+                    csvBuilder.AppendLine(employee.ToAsciiTableRow());
+                }
             }
-        }
 
-        csvBuilder.AppendLine(tabledivider);
-        csvBuilder.AppendLine(notsignedintitle);
-        csvBuilder.AppendLine(tabledivider);
+            csvBuilder.AppendLine(tabledivider);
+            csvBuilder.AppendLine(notsignedintitle);
+            csvBuilder.AppendLine(tabledivider);
 
-        // Employees without SignIn times
-        foreach (var employee in employeeDict.Values)
-        {
-            if (employee.ShiftType == shiftType && !employee.SignInTime.HasValue)
+            foreach (var employee in employeeDict.Values)
             {
-                csvBuilder.AppendLine(employee.ToAsciiTableRow());
+                if (employee.ShiftType == shiftType && !employee.SignInTime.HasValue)
+                {
+                    csvBuilder.AppendLine(employee.ToAsciiTableRow());
+                }
             }
-        }
 
-        csvBuilder.AppendLine(tabledivider);
+            csvBuilder.AppendLine(tabledivider);
+        }
         return csvBuilder.ToString();
     }
 
@@ -275,146 +203,128 @@ public class LogImportExportService
                 type = "TableRow",
                 cells = new object[]
                 {
-                    new
-                    {
-                        type = "TableCell",
-                        items = new object[] { new { type = "TextBlock", weight = "Bolder", text = "Name" } }
-                    },
-                    new
-                    {
-                        type = "TableCell",
-                        items = new object[] { new { type = "TextBlock", weight = "Bolder", text = "ID" } }
-                    },
-                    new
-                    {
-                        type = "TableCell",
-                        items = new object[] { new { type = "TextBlock", weight = "Bolder", text = "Sign In" } }
-                    },
-                    new
-                    {
-                        type = "TableCell",
-                        items = new object[] { new { type = "TextBlock", weight = "Bolder", text = "Sign Out" } }
-                    }
+                    new { type = "TableCell", items = new object[] { new { type = "TextBlock", weight = "Bolder", text = "Name" } } },
+                    new { type = "TableCell", items = new object[] { new { type = "TextBlock", weight = "Bolder", text = "ID" } } },
+                    new { type = "TableCell", items = new object[] { new { type = "TextBlock", weight = "Bolder", text = "Sign In" } } },
+                    new { type = "TableCell", items = new object[] { new { type = "TextBlock", weight = "Bolder", text = "Sign Out" } } }
                 }
             }
         };
 
-        foreach (var employee in employeeDict.Values)
+        lock (_dictLock)
         {
-            if (employee.SignInTime.HasValue == signedIn && employee.ShiftType == shiftType)
+            foreach (var employee in employeeDict.Values)
             {
-                rows.Add(new
+                if (employee.SignInTime.HasValue == signedIn && employee.ShiftType == shiftType)
                 {
-                    type = "TableRow",
-                    cells = new object[]
+                    rows.Add(new
                     {
-                        new
+                        type = "TableRow",
+                        cells = new object[]
                         {
-                            type = "TableCell",
-                            items = new object[] { new { type = "TextBlock", text = employee.Name } }
-                        },
-                        new
-                        {
-                            type = "TableCell",
-                            items = new object[]
-                                { new { type = "TextBlock", text = employee.EmployeeNumber.ToString() } }
-                        },
-                        new
-                        {
-                            type = "TableCell",
-                            items = new object[] { new { type = "TextBlock", text = employee.FormattedSignInTime } }
-                        },
-                        new
-                        {
-                            type = "TableCell",
-                            items = new object[]
-                            {
-                                new { type = "TextBlock", text = employee.FormattedSignOutTime ?? "No Sign Out" }
-                            }
+                            new { type = "TableCell", items = new object[] { new { type = "TextBlock", text = employee.Name } } },
+                            new { type = "TableCell", items = new object[] { new { type = "TextBlock", text = employee.EmployeeNumber.ToString() } } },
+                            new { type = "TableCell", items = new object[] { new { type = "TextBlock", text = employee.FormattedSignInTime } } },
+                            new { type = "TableCell", items = new object[] { new { type = "TextBlock", text = employee.FormattedSignOutTime ?? "No Sign Out" } } }
                         }
-                    }
-                });
+                    });
+                }
             }
         }
-
         return rows.ToArray();
     }
 
     public static async Task<bool> SendEmployeeDataAsync(string email, string shiftType)
     {
-        // Prepare the JSON string
-        var jsonData = PrepareJsonForEmail(email, shiftType);
-
-        // Create HttpClient instance
-        using var client = new HttpClient();
-
-        // Create StringContent with JSON data
-        var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-
+        var requestId = Guid.NewGuid().ToString();
+        Log.Information("Sending employee data to {Email} for shift {ShiftType} [RequestId: {RequestId}]", email, shiftType, requestId);
         try
         {
-            // Send POST request to EmailTableUrl
-            var response = await client.PostAsync(EmailTableUrl, content);
+            var jsonData = PrepareJsonForEmail(email, shiftType, requestId);
+            using var client = new HttpClient();
+            var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
 
-            // Ensure the request was successful and return true
-            response.EnsureSuccessStatusCode();
-            return true;
+            const int maxRetries = 3;
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
+            {
+                try
+                {
+                    Log.Debug("Posting to {EmailTableUrl} (Attempt {Attempt}) [RequestId: {RequestId}]", EmailTableUrl, attempt, requestId);
+                    var response = await client.PostAsync(EmailTableUrl, content);
+                    response.EnsureSuccessStatusCode();
+                    Log.Information("Successfully sent employee data to {Email} for shift {ShiftType} [RequestId: {RequestId}]", email, shiftType, requestId);
+                    return true;
+                }
+                catch (HttpRequestException ex) when (attempt < maxRetries)
+                {
+                    Log.Warning(ex, "HTTP request failed on attempt {Attempt} [RequestId: {RequestId}]. Retrying in 1 second.", attempt, requestId);
+                    await Task.Delay(1000);
+                }
+            }
+            Log.Error("Failed to send employee data after {MaxRetries} attempts [RequestId: {RequestId}]", maxRetries, requestId);
+            return false;
         }
-        catch (HttpRequestException)
+        catch (Exception ex)
         {
-            // Return false on HTTP-related errors instead of throwing
+            Log.Error(ex, "Unexpected error sending employee data [RequestId: {RequestId}]", requestId);
             return false;
         }
     }
 
-    private static string PrepareJsonForEmail(string email, string shiftType)
+    private static string PrepareJsonForEmail(string email, string shiftType, string requestId)
     {
-        var signedInList = GetEmployeeDataForJson(shiftType, true);  // Changed "DS" to shiftType
-        var notSignedInList = GetEmployeeDataForJson(shiftType, false);
-
-        var message = new
+        lock (_dictLock)
         {
-            email = email,
-            signedIn = signedInList,    // Already an array, no need for ToArray()
-            notSignedIn = notSignedInList  // Already an array, no need for ToArray()
-        };
-        return JsonSerializer.Serialize(message);  // Assuming you want to return JSON string
+            var signedInList = GetEmployeeDataForJson(shiftType, true);
+            var notSignedInList = GetEmployeeDataForJson(shiftType, false);
+            var message = new
+            {
+                email,
+                signedIn = signedInList,
+                notSignedIn = notSignedInList,
+                requestId
+            };
+            return JsonSerializer.Serialize(message);
+        }
     }
 
     private static object[] GetEmployeeDataForJson(string shiftType, bool signedIn = true)
     {
         var employeeList = new List<object>();
-
-        foreach (var employee in App.EmployeeDict.Values.Where(employee => employee.SignInTime.HasValue == signedIn && employee.ShiftType == shiftType))
+        lock (_dictLock)
         {
-            employeeList.Add(new
+            foreach (var employee in App.EmployeeDict.Values.Where(employee => employee.SignInTime.HasValue == signedIn && employee.ShiftType == shiftType))
             {
-                employeeID = employee.EmployeeNumber.ToString(),
-                name = employee.Name,
-                signIn = employee.FormattedSignInTime,
-                signOut = employee.FormattedSignOutTime ?? "No Sign Out"
-            });
+                employeeList.Add(new
+                {
+                    employeeID = employee.EmployeeNumber.ToString(),
+                    name = employee.Name,
+                    signIn = employee.FormattedSignInTime,
+                    signOut = employee.FormattedSignOutTime ?? "No Sign Out"
+                });
+            }
         }
-
+        Log.Debug("Prepared {Count} {SignedIn} employees for shift {ShiftType}", employeeList.Count, signedIn ? "signed-in" : "not signed-in", shiftType);
         return employeeList.ToArray();
     }
 
     public static async Task<bool> ExportAdaptiveCardFromTemplateAsync(Dictionary<int, Employee> employeeDict, string shiftType, string message = "")
     {
+        var requestId = Guid.NewGuid().ToString();
+        Log.Information("Exporting adaptive card for shift {ShiftType} [RequestId: {RequestId}]", shiftType, requestId);
         try
         {
-            // Determine the shift title based on shiftType
             var shiftTitle = shiftType == "DS" ? "Day Shift" : shiftType == "NS" ? "Night Shift" : "Unknown Shift";
+            object teamsMessage;
 
-            // Log the start of the method
-            Log.Information("ExportAdaptiveCardFromTemplateAsync started with shiftType: {ShiftType}", shiftType);
-
-            // Define the JSON structure using anonymous objects with explicit array typing
-            var teamsMessage = new
+            // Synchronize only the critical section accessing employeeDict
+            lock (_dictLock)
             {
-                type = "message",
-                attachments = new object[]
+                teamsMessage = new
                 {
+                    type = "message",
+                    attachments = new object[]
+                    {
                     new
                     {
                         contentType = "application/vnd.microsoft.card.adaptive",
@@ -426,305 +336,129 @@ public class LogImportExportService
                             msteams = new { width = "Full" },
                             body = new object[]
                             {
-                                new
-                                {
-                                    type = "TextBlock",
-                                    size = "Medium",
-                                    weight = "Bolder",
-                                    text = $"Attendance Report - {shiftTitle}"
-                                },
-                                new
-                                {
-                                    type = "TextBlock",
-                                    text = "Signed In",
-                                    wrap = true
-                                },
-                                new
-                                {
-                                    type = "Table",
-                                    columns = new object[]
-                                    {
-                                        new { width = 2 },
-                                        new { width = 1 },
-                                        new { width = 1 },
-                                        new { width = 1 }
-                                    },
-                                    rows = GetEmployeeRows(employeeDict, shiftType)
-                                },
-                                new
-                                {
-                                    type = "TextBlock",
-                                    text = "Not Signed In",
-                                    wrap = true
-                                },
-                                new
-                                {
-                                    type = "Table",
-                                    columns = new object[]
-                                    {
-                                        new { width = 2 },
-                                        new { width = 1 },
-                                        new { width = 1 },
-                                        new { width = 1 }
-                                    },
-                                    rows = GetEmployeeRows(employeeDict, shiftType, false)
-                                }
+                                new { type = "TextBlock", size = "Medium", weight = "Bolder", text = $"Attendance Report - {shiftTitle} [RequestId: {requestId}]" },
+                                new { type = "TextBlock", text = "Signed In", wrap = true },
+                                new { type = "Table", columns = new object[] { new { width = 2 }, new { width = 1 }, new { width = 1 }, new { width = 1 } }, rows = GetEmployeeRows(employeeDict, shiftType) },
+                                new { type = "TextBlock", text = "Not Signed In", wrap = true },
+                                new { type = "Table", columns = new object[] { new { width = 2 }, new { width = 1 }, new { width = 1 }, new { width = 1 } }, rows = GetEmployeeRows(employeeDict, shiftType, false) }
                             }
                         }
                     }
-                }
-            };
+                    }
+                };
+            }
 
+            // Serialize and log outside the lock
             var firstAttachment = ((dynamic)teamsMessage).attachments[0];
-            //var firstItemInAttachment = firstAttachment.content.body[0];
-
-            // Calculate the number of bytes
-            string firstAttachmentJson = JsonSerializer.Serialize(firstAttachment, new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                PropertyNamingPolicy = null // Ensures property names match exactly as defined));
-            });
-
+            string firstAttachmentJson = JsonSerializer.Serialize(firstAttachment, new JsonSerializerOptions { WriteIndented = true });
             var byteCount = Encoding.UTF8.GetByteCount(firstAttachmentJson);
-            Log.Information("The JSON string is {ByteCount} bytes long.", byteCount);
-            //var kiloByteCount = byteCount / 1024.0; // Use 1024.0 to ensure floating-point division
-            //Log.Information("The JSON string is {KiloByteCount:F2} kB long.", kiloByteCount);
+            Log.Information("Adaptive card JSON is {ByteCount} bytes [RequestId: {RequestId}]", byteCount, requestId);
 
-            // Serialize to JSON using System.Text.Json
-            var json = JsonSerializer.Serialize(teamsMessage, new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                PropertyNamingPolicy = null // Ensures property names match exactly as defined
-            });
-
-            // Send to the URL
+            // Perform the async HTTP operation outside the lock
             using var client = new HttpClient();
+            var json = JsonSerializer.Serialize(teamsMessage, new JsonSerializerOptions { WriteIndented = true });
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await client.PostAsync(TeamsTableUrl, content);
 
-            response.EnsureSuccessStatusCode(); // Throws an exception if the status code is not successful
-
-            // Log the success of the operation
-            Log.Information("Successfully posted the adaptive card to Teams for shiftType: {ShiftType}", shiftType);
-            return true; // Operation succeeded
+            const int maxRetries = 3;
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
+            {
+                try
+                {
+                    Log.Debug("Posting to {TeamsTableUrl} (Attempt {Attempt}) [RequestId: {RequestId}]", TeamsTableUrl, attempt, requestId);
+                    var response = await client.PostAsync(TeamsTableUrl, content);
+                    response.EnsureSuccessStatusCode();
+                    Log.Information("Successfully posted adaptive card for shift {ShiftType} [RequestId: {RequestId}]", shiftType, requestId);
+                    return true;
+                }
+                catch (HttpRequestException ex) when (attempt < maxRetries)
+                {
+                    Log.Warning(ex, "HTTP request failed on attempt {Attempt} [RequestId: {RequestId}]. Retrying in 1 second.", attempt, requestId);
+                    await Task.Delay(1000);
+                }
+            }
+            Log.Error("Failed to post adaptive card after {MaxRetries} attempts [RequestId: {RequestId}]", maxRetries, requestId);
+            return false;
         }
         catch (Exception ex)
         {
-            // Log the exception
-            Log.Error(ex, "Error posting adaptive card to Teams for shiftType: {ShiftType}", shiftType);
-            return false; // Indicate failure
+            Log.Error(ex, "Error posting adaptive card for shift {ShiftType} [RequestId: {RequestId}]", shiftType, requestId);
+            return false;
         }
     }
 
-    //public static async Task<bool> CheckMostRecentReportDate(string urlForWorkforceJobs, string authToken)
+    //public static async Task<bool> ExportAdaptiveCardFromTemplateAsync(Dictionary<int, Employee> employeeDict, string shiftType, string message = "")
     //{
+    //    var requestId = Guid.NewGuid().ToString();
+    //    Log.Information("Exporting adaptive card for shift {ShiftType} [RequestId: {RequestId}]", shiftType, requestId);
     //    try
     //    {
-    //        using var client = new HttpClient();
-    //        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-    //        if (!string.IsNullOrEmpty(authToken))
+    //        var shiftTitle = shiftType == "DS" ? "Day Shift" : shiftType == "NS" ? "Night Shift" : "Unknown Shift";
+    //        lock (_dictLock)
     //        {
-    //            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
-    //        }
-
-    //        HttpResponseMessage response = await client.GetAsync(urlForWorkforceJobs);
-    //        response.EnsureSuccessStatusCode();
-
-    //        var responseBody = await response.Content.ReadAsStringAsync();
-    //        using var jsonDocument = JsonDocument.Parse(responseBody);
-
-    //        // Check if the root element is an array
-    //        if (jsonDocument.RootElement.ValueKind != JsonValueKind.Array)
-    //        {
-    //            Console.WriteLine("Error: Response is not a JSON array.");
-    //            return false;
-    //        }
-
-    //        var mostRecentReportArray = jsonDocument.RootElement.EnumerateArray().ToArray();
-    //        Console.WriteLine($"Found {mostRecentReportArray.Length} report(s).");
-
-    //        if (mostRecentReportArray.Length == 0)
-    //        {
-    //            Console.WriteLine("No reports found in the response.");
-    //            return false;
-    //        }
-
-    //        // Process the first report
-    //        var report = mostRecentReportArray[0];
-
-
-    //        if (!report.TryGetProperty("files", out var filesElement) || filesElement.ValueKind != JsonValueKind.Array)
-    //        {
-    //            Console.WriteLine("Error: 'files' property is missing or not an array.");
-    //            return false;
-    //        }
-
-    //        var filesArray = filesElement.EnumerateArray().ToArray();
-
-    //        // Safely check for required properties
-    //        if (!report.TryGetProperty("eventDate", out var eventDateElement) || eventDateElement.ValueKind != JsonValueKind.String)
-    //        {
-    //            Console.WriteLine("Error: 'eventDate' property is missing or invalid.");
-    //            return false;
-    //        }
-
-    //        var mostRecentEventDate = eventDateElement.GetString();
-    //        if (!DateTime.TryParse(mostRecentEventDate, out var eventDate))
-    //        {
-    //            Console.WriteLine($"Error: Invalid date format for eventDate: {mostRecentEventDate}");
-    //            return false;
-    //        }
-
-    //        var today = DateTime.Today;
-    //        if (eventDate.Date == today)
-    //        {
-    //            Console.WriteLine($"Match: The most recent report date ({eventDate:yyyy-MM-dd}) is today.");
-    //            return true;
-    //        }
-
-    //        Console.WriteLine($"No match: The most recent report date ({eventDate:yyyy-MM-dd}) is not today.");
-    //        return false;
-    //    }
-    //    catch (HttpRequestException ex)
-    //    {
-    //        Console.WriteLine($"HTTP request failed: {ex.Message}");
-    //        return false;
-    //    }
-    //    catch (JsonException ex)
-    //    {
-    //        Console.WriteLine($"JSON parsing failed: {ex.Message}");
-    //        return false;
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        Console.WriteLine($"Unexpected error: {ex.Message}");
-    //        return false;
-    //    }
-    //}
-
-
-    //public static async Task<bool> CheckMostRecentReportDate(string urlForWorkforceJobs, string authToken)
-    //{
-    //    try
-    //    {
-    //        using var client = new HttpClient();
-    //        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-    //        if (!string.IsNullOrEmpty(authToken))
-    //        {
-    //            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
-    //        }
-
-    //        HttpResponseMessage response = await client.GetAsync(urlForWorkforceJobs);
-    //        response.EnsureSuccessStatusCode();
-
-    //        var responseBody = await response.Content.ReadAsStringAsync();
-    //        using var jsonDocument = JsonDocument.Parse(responseBody);
-
-    //        // Check if the root element is an array
-    //        if (jsonDocument.RootElement.ValueKind != JsonValueKind.Array)
-    //        {
-    //            Console.WriteLine("Error: Response is not a JSON array.");
-    //            return false;
-    //        }
-
-    //        var mostRecentReportArray = jsonDocument.RootElement.EnumerateArray().ToArray();
-    //        Console.WriteLine($"Found {mostRecentReportArray.Length} report(s).");
-
-    //        if (mostRecentReportArray.Length == 0)
-    //        {
-    //            Console.WriteLine("No reports found in the response.");
-    //            return false;
-    //        }
-
-    //        // Process the first report
-    //        var report = mostRecentReportArray[0];
-
-    //        // Validate required properties
-    //        if (!report.TryGetProperty("savedReportId", out var savedReportIdElement) || savedReportIdElement.ValueKind != JsonValueKind.String)
-    //        {
-    //            Console.WriteLine("Error: 'savedReportId' property is missing or invalid.");
-    //            return false;
-    //        }
-
-    //        if (!report.TryGetProperty("eventDate", out var eventDateElement) || eventDateElement.ValueKind != JsonValueKind.String)
-    //        {
-    //            Console.WriteLine("Error: 'eventDate' property is missing or invalid.");
-    //            return false;
-    //        }
-
-    //        if (!report.TryGetProperty("files", out var filesElement) || filesElement.ValueKind != JsonValueKind.Array)
-    //        {
-    //            Console.WriteLine("Error: 'files' property is missing or not an array.");
-    //            return false;
-    //        }
-
-    //        var savedReportId = savedReportIdElement.GetString();
-    //        var mostRecentEventDate = eventDateElement.GetString();
-    //        var filesArray = filesElement.EnumerateArray().ToArray();
-
-    //        Console.WriteLine($"Report ID: {savedReportId}");
-    //        Console.WriteLine($"Event Date: {mostRecentEventDate}");
-    //        Console.WriteLine($"Files Count: {filesArray.Length}");
-
-    //        // Validate files subarray
-    //        if (filesArray.Length == 0)
-    //        {
-    //            Console.WriteLine("Warning: 'files' subarray is empty.");
-    //            // Optionally return false if empty files is a failure condition
-    //            // return false;
-    //        }
-
-    //        // Validate each file in the files subarray
-    //        foreach (var file in filesArray)
-    //        {
-    //            if (!file.TryGetProperty("fileId", out var fileIdElement) || fileIdElement.ValueKind != JsonValueKind.String ||
-    //                !file.TryGetProperty("fileName", out var fileNameElement) || fileNameElement.ValueKind != JsonValueKind.String ||
-    //                !file.TryGetProperty("fileUri", out var fileUriElement) || fileUriElement.ValueKind != JsonValueKind.String)
+    //            var teamsMessage = new
     //            {
-    //                Console.WriteLine("Error: A file in the 'files' subarray is missing required properties (fileId, fileName, or fileUri).");
-    //                return false;
+    //                type = "message",
+    //                attachments = new object[]
+    //                {
+    //                    new
+    //                    {
+    //                        contentType = "application/vnd.microsoft.card.adaptive",
+    //                        content = new
+    //                        {
+    //                            type = "AdaptiveCard",
+    //                            schema = "http://adaptivecards.io/schemas/adaptive-card.json",
+    //                            version = "1.6",
+    //                            msteams = new { width = "Full" },
+    //                            body = new object[]
+    //                            {
+    //                                new { type = "TextBlock", size = "Medium", weight = "Bolder", text = $"Attendance Report - {shiftTitle} [RequestId: {requestId}]" },
+    //                                new { type = "TextBlock", text = "Signed In", wrap = true },
+    //                                new { type = "Table", columns = new object[] { new { width = 2 }, new { width = 1 }, new { width = 1 }, new { width = 1 } }, rows = GetEmployeeRows(employeeDict, shiftType) },
+    //                                new { type = "TextBlock", text = "Not Signed In", wrap = true },
+    //                                new { type = "Table", columns = new object[] { new { width = 2 }, new { width = 1 }, new { width = 1 }, new { width = 1 } }, rows = GetEmployeeRows(employeeDict, shiftType, false) }
+    //                            }
+    //                        }
+    //                    }
+    //                }
+    //            };
+
+    //            var firstAttachment = ((dynamic)teamsMessage).attachments[0];
+    //            string firstAttachmentJson = JsonSerializer.Serialize(firstAttachment, new JsonSerializerOptions { WriteIndented = true });
+    //            var byteCount = Encoding.UTF8.GetByteCount(firstAttachmentJson);
+    //            Log.Information("Adaptive card JSON is {ByteCount} bytes [RequestId: {RequestId}]", byteCount, requestId);
+
+    //            using var client = new HttpClient();
+    //            var json = JsonSerializer.Serialize(teamsMessage, new JsonSerializerOptions { WriteIndented = true });
+    //            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+    //            const int maxRetries = 3;
+    //            for (int attempt = 1; attempt <= maxRetries; attempt++)
+    //            {
+    //                try
+    //                {
+    //                    Log.Debug("Posting to {TeamsTableUrl} (Attempt {Attempt}) [RequestId: {RequestId}]", TeamsTableUrl, attempt, requestId);
+    //                    var response = await client.PostAsync(TeamsTableUrl, content);
+    //                    response.EnsureSuccessStatusCode();
+    //                    Log.Information("Successfully posted adaptive card for shift {ShiftType} [RequestId: {RequestId}]", shiftType, requestId);
+    //                    return true;
+    //                }
+    //                catch (HttpRequestException ex) when (attempt < maxRetries)
+    //                {
+    //                    Log.Warning(ex, "HTTP request failed on attempt {Attempt} [RequestId: {RequestId}]. Retrying in 1 second.", attempt, requestId);
+    //                    await Task.Delay(1000);
+    //                }
     //            }
-
-    //            Console.WriteLine($"File: {fileNameElement.GetString()} (ID: {fileIdElement.GetString()})");
-    //        }
-
-    //        // Validate and parse eventDate
-    //        if (!DateTime.TryParse(mostRecentEventDate, out var eventDate))
-    //        {
-    //            Console.WriteLine($"Error: Invalid date format for eventDate: {mostRecentEventDate}");
+    //            Log.Error("Failed to post adaptive card after {MaxRetries} attempts [RequestId: {RequestId}]", maxRetries, requestId);
     //            return false;
     //        }
-
-    //        // Compare dates in AWST (today is September 6, 2025)
-    //        var today = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("W. Australia Standard Time")).Date;
-    //        if (eventDate.Date == today)
-    //        {
-    //            Console.WriteLine($"Match: The most recent report date ({eventDate:yyyy-MM-dd}) is today in AWST.");
-    //            WorkforceReportDownloadUri = "";
-    //            return true;
-    //        }
-
-    //        Console.WriteLine($"No match: The most recent report date ({eventDate:yyyy-MM-dd}) is not today in AWST.");
-    //        return false;
-    //    }
-    //    catch (HttpRequestException ex)
-    //    {
-    //        Console.WriteLine($"HTTP request failed: {ex.Message}");
-    //        return false;
-    //    }
-    //    catch (JsonException ex)
-    //    {
-    //        Console.WriteLine($"JSON parsing failed: {ex.Message}");
-    //        return false;
     //    }
     //    catch (Exception ex)
     //    {
-    //        Console.WriteLine($"Unexpected error: {ex.Message}");
+    //        Log.Error(ex, "Error posting adaptive card for shift {ShiftType} [RequestId: {RequestId}]", shiftType, requestId);
     //        return false;
     //    }
     //}
+
 
     public static async Task<bool> CheckMostRecentReportDate(string urlForWorkforceJobs, string authToken)
     {
@@ -732,53 +466,50 @@ public class LogImportExportService
         {
             using var client = new HttpClient();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
             if (!string.IsNullOrEmpty(authToken))
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
             }
 
-            HttpResponseMessage response = await client.GetAsync(urlForWorkforceJobs);
+            Log.Debug("Checking report date at {Url}", urlForWorkforceJobs);
+            var response = await client.GetAsync(urlForWorkforceJobs);
             response.EnsureSuccessStatusCode();
+            Log.Debug("Response received. Status Code: {StatusCode}", response.StatusCode);
 
             var responseBody = await response.Content.ReadAsStringAsync();
             using var jsonDocument = JsonDocument.Parse(responseBody);
 
-            // Check if the root element is an array
             if (jsonDocument.RootElement.ValueKind != JsonValueKind.Array)
             {
-                Console.WriteLine("Error: Response is not a JSON array.");
+                Log.Error("Response is not a JSON array.");
                 return false;
             }
 
             var mostRecentReportArray = jsonDocument.RootElement.EnumerateArray().ToArray();
-            Console.WriteLine($"Found {mostRecentReportArray.Length} report(s).");
+            Log.Information("Found {Count} report(s).", mostRecentReportArray.Length);
 
             if (mostRecentReportArray.Length == 0)
             {
-                Console.WriteLine("No reports found in the response.");
+                Log.Error("No reports found in the response.");
                 return false;
             }
 
-            // Process the first report
             var report = mostRecentReportArray[0];
-
-            // Validate required properties
             if (!report.TryGetProperty("savedReportId", out var savedReportIdElement) || savedReportIdElement.ValueKind != JsonValueKind.String)
             {
-                Console.WriteLine("Error: 'savedReportId' property is missing or invalid.");
+                Log.Error("Error: 'savedReportId' property is missing or invalid.");
                 return false;
             }
 
             if (!report.TryGetProperty("eventDate", out var eventDateElement) || eventDateElement.ValueKind != JsonValueKind.String)
             {
-                Console.WriteLine("Error: 'eventDate' property is missing or invalid.");
+                Log.Error("Error: 'eventDate' property is missing or invalid.");
                 return false;
             }
 
             if (!report.TryGetProperty("files", out var filesElement) || filesElement.ValueKind != JsonValueKind.Array)
             {
-                Console.WriteLine("Error: 'files' property is missing or not an array.");
+                Log.Error("Error: 'files' property is missing or not an array.");
                 return false;
             }
 
@@ -786,63 +517,45 @@ public class LogImportExportService
             var mostRecentEventDate = eventDateElement.GetString();
             var filesArray = filesElement.EnumerateArray().ToArray();
 
-            Console.WriteLine($"Report ID: {savedReportId}");
-            Console.WriteLine($"Event Date: {mostRecentEventDate}");
-            Console.WriteLine($"Files Count: {filesArray.Length}");
+            Log.Information("Report ID: {ReportId}, Event Date: {EventDate}, Files Count: {FilesCount}", savedReportId, mostRecentEventDate, filesArray.Length);
 
-            // Validate files subarray
             if (filesArray.Length == 0)
             {
-                Console.WriteLine("Error: 'files' subarray is empty.");
-                return false; // Fail if no files are present
+                Log.Error("Error: 'files' subarray is empty.");
+                return false;
             }
 
-            // Validate the first file and update WorkforceReportDownloadUri
             var firstFile = filesArray[0];
             if (!firstFile.TryGetProperty("fileId", out var fileIdElement) || fileIdElement.ValueKind != JsonValueKind.String ||
                 !firstFile.TryGetProperty("fileName", out var fileNameElement) || fileNameElement.ValueKind != JsonValueKind.String ||
                 !firstFile.TryGetProperty("fileUri", out var fileUriElement) || fileUriElement.ValueKind != JsonValueKind.String)
             {
-                Console.WriteLine("Error: First file in 'files' subarray is missing required properties (fileId, fileName, or fileUri).");
+                Log.Error("Error: First file in 'files' subarray is missing required properties (fileId, fileName, or fileUri).");
                 return false;
             }
 
-            // Update WorkforceReportDownloadUri with the fileUri
             WorkforceReportDownloadUri = fileUriElement.GetString();
-            Console.WriteLine($"Updated WorkforceReportDownloadUri: {WorkforceReportDownloadUri}");
-            Console.WriteLine($"File: {fileNameElement.GetString()} (ID: {fileIdElement.GetString()})");
+            Log.Information("Updated WorkforceReportDownloadUri: {Uri}, File: {FileName} (ID: {FileId})", WorkforceReportDownloadUri, fileNameElement.GetString(), fileIdElement.GetString());
 
-            // Validate and parse eventDate
             if (!DateTime.TryParse(mostRecentEventDate, out var eventDate))
             {
-                Console.WriteLine($"Error: Invalid date format for eventDate: {mostRecentEventDate}");
+                Log.Error("Invalid date format for eventDate: {EventDate}", mostRecentEventDate);
                 return false;
             }
 
-            // Compare dates in AWST (today is September 6, 2025, 09:41 PM AWST)
             var today = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("W. Australia Standard Time")).Date;
             if (eventDate.Date == today)
             {
-                Console.WriteLine($"Match: The most recent report date ({eventDate:yyyy-MM-dd}) is today in AWST.");
+                Log.Information("Match: The most recent report date ({EventDate}) is today in AWST.", eventDate.ToString("yyyy-MM-dd"));
                 return true;
             }
 
-            Console.WriteLine($"No match: The most recent report date ({eventDate:yyyy-MM-dd}) is not today in AWST.");
-            return false;
-        }
-        catch (HttpRequestException ex)
-        {
-            Console.WriteLine($"HTTP request failed: {ex.Message}");
-            return false;
-        }
-        catch (JsonException ex)
-        {
-            Console.WriteLine($"JSON parsing failed: {ex.Message}");
+            Log.Information("No match: The most recent report date ({EventDate}) is not today in AWST.", eventDate.ToString("yyyy-MM-dd"));
             return false;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Unexpected error: {ex.Message}");
+            Log.Error(ex, "Failed to check most recent report date");
             return false;
         }
     }

@@ -92,17 +92,18 @@
                Grid.Row="5"
                Grid.Column="1"
                Margin="5,5,0,5"
-               Width="95"/>
+               Width="95"/>-->
 
-       <Button x:Name="Task1Button"
+       <!--<Button x:Name="Task1Button"
                Content="Task One"
                Click="taskOneButton_Click"
                Background="LightSteelBlue"
                Grid.Row="6"
                Grid.Column="0"
                Margin="0,5,5,5"
-               Width="95"/>-->
-       <!--<Button x:Name="Task2Button"
+               Width="95"/>
+
+       <Button x:Name="Task2Button"
                Content="Task Two"
                Click="taskTwoButton_Click"
                Background="LightSteelBlue"

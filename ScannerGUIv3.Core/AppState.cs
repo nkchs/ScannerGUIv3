@@ -30,7 +30,8 @@ public class AppState
             ResourcesOnSiteExcelPath = _resourcesExcelFolderPath + @"/Roster.xlsx";
             ResourcesMasterExcelPath = _resourcesExcelFolderPath + @"/SRF195 Profile Master.xlsx";
             LogFolder = _resourcesExcelFolderPath; // + @"/Logs/";
-            StateFolder = _resourcesExcelFolderPath + @"/State/"; 
+            StateFolder = _resourcesExcelFolderPath + @"/State/";
+            PersonnelLogsPath = _resourcesExcelFolderPath + @"/Personnel Logs/";
         }
     }
     public static string ResourcesOnSiteExcelPath
@@ -38,6 +39,11 @@ public class AppState
         get; private set;
     }
     public static string ResourcesMasterExcelPath
+    {
+        get; private set;
+    }
+
+    public static string PersonnelLogsPath
     {
         get; private set;
     }

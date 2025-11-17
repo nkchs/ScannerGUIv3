@@ -5,14 +5,13 @@ using Windows.System;
 using ScannerGUIv3.Services;
 using ScannerGUIv3.Core;
 using Microsoft.UI.Xaml.Controls;
-using Serilog;
-using FileHandling = ScannerGUIv3.Services.FileHandling;
+//using Serilog;
+//using FileHandling = ScannerGUIv3.Services.FileHandling;
 
 namespace ScannerGUIv3.Views;
 
 public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
 {
-
     public MainViewModel ViewModel { get; }
 
     public MainPage()// 
@@ -48,7 +47,7 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         }
         else
         {
-            ConsoleService.WriteLine("Invalid Maintenance Code.");
+            ConsoleService.WriteLine("Personnel Code not recognized. Entry logged to file. Please continue.");
         }
         PersonnelNumberTextBox.Text = "";
     }
@@ -65,7 +64,7 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         }
         else
         {
-            ConsoleService.WriteLine("Invalid MaintenanceCode.");
+            ConsoleService.WriteLine("Personnel Code not recognized. Entry logged to file. Please continue.");
         }
         PersonnelNumberTextBox.Text = "";
     }
@@ -102,104 +101,105 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
     //    PersonnelNumberTextBox.Text = "";
     //}
 
-    private async void debugOneButton_Click(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            _ = await LogImportExportService.CheckMostRecentReportDate(LogImportExportService.WorkforceJobUrl, LogImportExportService.bearerToken);
+    //private async void debugOneButton_Click(object sender, RoutedEventArgs e)
+    //{
+    //    try
+    //    {
+    //        _ = await LogImportExportService.CheckMostRecentReportDate(LogImportExportService.WorkforceJobUrl, LogImportExportService.bearerToken);
 
-            var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            Console.WriteLine(appDataPath);
+    //        var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+    //        Console.WriteLine(appDataPath);
 
-            //LogImportExportService.GetRosterDate(); // This was the active line 05/09/25 | Everything else was commented out.
-            try
-            {
-                // Get the Local AppData path (e.g., C:\Users\<Username>\AppData\Local)
-                string localAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+    //        //LogImportExportService.GetRosterDate(); // This was the active line 05/09/25 | Everything else was commented out.
+    //        try
+    //        {
+    //            // Get the Local AppData path (e.g., C:\Users\<Username>\AppData\Local)
+    //            string localAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
-                // Create a subfolder for your app (e.g., YourApp or YourCompany\YourApp)
-                string appFolder = Path.Combine(localAppDataPath, "NCD", "Scanner");
+    //            // Create a subfolder for your app (e.g., YourApp or YourCompany\YourApp)
+    //            string appFolder = Path.Combine(localAppDataPath, "NCD", "Scanner");
 
-                // Create the directory if it doesn't exist
-                Directory.CreateDirectory(appFolder);
+    //            // Create the directory if it doesn't exist
+    //            Directory.CreateDirectory(appFolder);
 
-                Console.WriteLine($"Folder created successfully at: {appFolder}");
+    //            Console.WriteLine($"Folder created successfully at: {appFolder}");
 
-                // Optional: Test by creating a sample file in the folder
-                string testFilePath = Path.Combine(appFolder, "test.txt");
-                File.WriteAllText(testFilePath, "This is a test file.");
-                Console.WriteLine($"Test file created at: {testFilePath}");
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                Console.WriteLine($"Permission error: {ex.Message}");
-            }
-            catch (IOException ex)
-            {
-                Console.WriteLine($"IO error: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Unexpected error: {ex.Message}");
-            }
+    //            // Optional: Test by creating a sample file in the folder
+    //            string testFilePath = Path.Combine(appFolder, "test.txt");
+    //            File.WriteAllText(testFilePath, "This is a test file.");
+    //            Console.WriteLine($"Test file created at: {testFilePath}");
+    //        }
+    //        catch (UnauthorizedAccessException ex)
+    //        {
+    //            Console.WriteLine($"Permission error: {ex.Message}");
+    //        }
+    //        catch (IOException ex)
+    //        {
+    //            Console.WriteLine($"IO error: {ex.Message}");
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            Console.WriteLine($"Unexpected error: {ex.Message}");
+    //        }
 
-            // RETIRED RETIRED RETIRED
-            //var success = await LogImportExportService.GetRosterDate();
-            //Console.WriteLine(success);
-            //_ = ScheduleService.Task1();
-            //Console.WriteLine();
-            //var nightshifttable = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, "NS");
-            //Console.WriteLine(nightshifttable);
-            //await ExcelService.NightShiftCrossoverAsync();
-            //Console.ForegroundColor = ConsoleColor.Red;
-            //Console.WriteLine("\nDebug");
-            //Console.WriteLine(AppState.CurrentDate);
-            //Console.WriteLine(AppState.Today);
-            //Console.WriteLine(AppState.DayShiftStart);
-            //Console.WriteLine(AppState.DayShiftEnd);
-            //Console.WriteLine(AppState.NightShiftStart);
-            //Console.WriteLine(AppState.NightShiftEnd);
+    //        // RETIRED RETIRED RETIRED
+    //        //var success = await LogImportExportService.GetRosterDate();
+    //        //Console.WriteLine(success);
+    //        //_ = ScheduleService.Task1();
+    //        //Console.WriteLine();
+    //        //var nightshifttable = LogImportExportService.ExportShiftLogWithSignInStatus(App.EmployeeDict, "NS");
+    //        //Console.WriteLine(nightshifttable);
+    //        //await ExcelService.NightShiftCrossoverAsync();
+    //        //Console.ForegroundColor = ConsoleColor.Red;
+    //        //Console.WriteLine("\nDebug");
+    //        //Console.WriteLine(AppState.CurrentDate);
+    //        //Console.WriteLine(AppState.Today);
+    //        //Console.WriteLine(AppState.DayShiftStart);
+    //        //Console.WriteLine(AppState.DayShiftEnd);
+    //        //Console.WriteLine(AppState.NightShiftStart);
+    //        //Console.WriteLine(AppState.NightShiftEnd);
 
-            //Console.WriteLine();
-            //Console.ResetColor();
+    //        //Console.WriteLine();
+    //        //Console.ResetColor();
 
-            //Console.WriteLine(@"MaintenanceCodes Start");
-            //foreach (var code in App.MaintenanceCodes)
-            //{
-            //    Console.WriteLine(code);
-            //}
-            //Console.WriteLine(@"Maintenance Codes End");
-            //Console.WriteLine();
-        }
-        catch (Exception ex)
-        {
-            throw; // TODO handle exception
-        }
-    }
-    
-    private async void debugTwoButton_Click(object sender, RoutedEventArgs e)
-    {
-        Console.ForegroundColor = ConsoleColor.Blue;
-        Console.WriteLine();
-        //Console.WriteLine(@"Export Log Button");
-        
-        await LogImportExportService.SaveEmployeeDictionaryAsync(AppState.RosterStateFullPath);
+    //        //Console.WriteLine(@"MaintenanceCodes Start");
+    //        //foreach (var code in App.MaintenanceCodes)
+    //        //{
+    //        //    Console.WriteLine(code);
+    //        //}
+    //        //Console.WriteLine(@"Maintenance Codes End");
+    //        //Console.WriteLine();
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        throw; // TODO handle exception
+    //    }
+    //}
 
-        var files = FileHandling.GetFilesInFolder(AppState.StateFolder);
-        var mostRecentRoster = FileHandling.GetMostRecentValidRosterFile(files);
-        foreach (var file in files)
-        {
-            Console.WriteLine(file);
-        }
-        Console.WriteLine(mostRecentRoster);
-        //LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "DS");
-        //Console.WriteLine(dayShiftLog);
-        Console.ResetColor();
-        Console.WriteLine();
-    }
+    //private async void debugTwoButton_Click(object sender, RoutedEventArgs e)
+    //{
+    //    Console.ForegroundColor = ConsoleColor.Blue;
+    //    Console.WriteLine();
+    //    //Console.WriteLine(@"Export Log Button");
+
+    //    await LogImportExportService.SaveEmployeeDictionaryAsync(AppState.RosterStateFullPath);
+
+    //    var files = FileHandling.GetFilesInFolder(AppState.StateFolder);
+    //    var mostRecentRoster = FileHandling.GetMostRecentValidRosterFile(files);
+    //    foreach (var file in files)
+    //    {
+    //        Console.WriteLine(file);
+    //    }
+    //    Console.WriteLine(mostRecentRoster);
+    //    //LogImportExportService.ExportAdaptiveCardFromTemplateAsync(App.EmployeeDict, "DS");
+    //    //Console.WriteLine(dayShiftLog);
+    //    Console.ResetColor();
+    //    Console.WriteLine();
+    //}
+
 
     // ================================ TASK BUTTONS ================================
-   private async void taskOneButton_Click(object sender, RoutedEventArgs e)
+    private void taskOneButton_Click(object sender, RoutedEventArgs e)
     {
         Console.WriteLine(@"========== 5:00 AM ==========");
         try
@@ -237,7 +237,7 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
             throw; // TODO handle exception
         }
     }
-    
+
     private void taskFourButton_Click(object sender, RoutedEventArgs e)
     {
         Console.WriteLine(@"========== 6:10 PM ==========");
@@ -277,7 +277,6 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         }
     }
     // ================================ TASK BUTTONS ================================
-
     private async Task ShowMessage(string title, string message)
     {
         var dialog = new ContentDialog
@@ -298,7 +297,6 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
         await dialogTask;
         //PersonnelNumberTextBox.Focus(FocusState.Programmatic);
     }
-
 
     private void PersonnelNumberTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
     {
@@ -353,13 +351,13 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
                 }
                 else
                 {
-                    ConsoleService.WriteLine("Invalid Maintenance Number.");
+                    ConsoleService.WriteLine("Personnel Code not recognized. Entry logged to file. Please continue.");
                 }
             }
             else
             {
                 // Didn't get a valid int.
-                ConsoleService.WriteLine("Invalid Maintenance Number.");
+                ConsoleService.WriteLine("Personnel Code not recognized. Entry logged to file. Please continue.");
             }
 
             // Clear the input
@@ -369,7 +367,6 @@ public sealed partial class MainPage : Microsoft.UI.Xaml.Controls.Page
             e.Handled = true;
         }
     }
-
 
     //private void PersonnelNumberTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
     //{

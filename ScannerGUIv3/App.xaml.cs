@@ -7,7 +7,7 @@ using ScannerGUIv3.Activation;
 using ScannerGUIv3.Contracts.Services;
 using ScannerGUIv3.Core;
 using ScannerGUIv3.Core.Contracts.Services;
-using ScannerGUIv3.Core.Services;
+//using ScannerGUIv3.Core.Services;
 using ScannerGUIv3.Definitions;
 using ScannerGUIv3.Models;
 using ScannerGUIv3.Services;
@@ -32,6 +32,7 @@ public partial class App : Application
         // Variables
         AppState.ResourcesExcelFolderPath = @"C:\Users\Public\Documents\Scanner";
         //Console.WriteLine(AppState.ResourcesExcelFolderPath);
+
 
         // Logger setup
         var customTheme = new AnsiConsoleTheme(

@@ -59,7 +59,7 @@ public class Employee
     {
         if (SignInTime.HasValue)
         {
-            return "Already signed in. Sign out before signing in again.";
+            return "Employee has already signed in. Sign out before signing in again.";
         }
 
         SignInTime = DateTime.Now;
@@ -70,12 +70,12 @@ public class Employee
     {
         if (SignInTime == null)
         {
-            return "No Sign In";
+            return "Previous sign in record not found. Logged to file.";
         }
         else
         {
             SignOutTime = DateTime.Now;
-            return EmployeeNumber + " " + Name + " Signed Out @ " + FormattedSignInTime;
+            return EmployeeNumber + " " + Name + " Signed Out @ " + FormattedSignOutTime;
         }
     }
     
@@ -93,11 +93,10 @@ public class Employee
     // Property to get formatted SignInTime
     public string FormattedSignInTime => SignInTime?.ToString("HH:mm") ?? "No Sign In";
 
-    // Formerly .ToString("dd/MM/yyyy HH:mm")
-    // Property to get formatted SignOutTime
     public string FormattedSignOutTime => SignOutTime?.ToString("HH:mm") ?? "No Sign Out";
 
-    // Retired
+    // RETIRED
+    // RETIRED
     // Parameterized constructor
     //public Employee(int employeeNumber, string name, string shiftType, DateTime signInTime, DateTime signOutTime)
     //{

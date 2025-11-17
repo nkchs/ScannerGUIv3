@@ -165,7 +165,10 @@ namespace ScannerGUIv3.Services
             Log.Information("Task 1: Starting roster processing at {Time}", DateTime.Now);
 
             try
-            {
+            {   Log.Debug("Checking for up to date roster");
+                var result = await LogImportExportService.CheckMostRecentReportDate(LogImportExportService.WorkforceJobUrl, LogImportExportService.bearerToken);
+                Log.Debug("Identified up to date roster URL");
+
                 //Log.Verbose("============= TASK 1 STARTED =============");
                 Log.Debug("Preparing previous night shift data");
                 await Task.Run(ExcelService.GeneratePreviousNightShiftAsync);
